@@ -1,0 +1,3089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chauhan Tour & Travels - Booking Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'Noto Sans Devanagari', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @media print {
+      body * { visibility: hidden !important; }
+      #print-area, #print-area * { visibility: visible !important; }
+      #print-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; display: block !important; background: white !important; color: black !important; }
+      @page { size: auto; margin: 4mm; }
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    :root { --ct-ink: #101827; --ct-navy: #101c35; --ct-blue: #2457e6; --ct-orange: #ff9f1c; }
+    
+    body { 
+      background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
+                url('rajdhani_bus.jpg'),
+                url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed !important;
+      background-size: cover !important;
+      color: var(--ct-ink); 
+    }
+
+    header.no-print { background: linear-gradient(115deg, #0b1329 0%, #15294d 55%, #1e3a8a 100%) !important; box-shadow: 0 14px 30px rgba(15,23,42,.22) !important; border-bottom: 3px solid var(--ct-orange); }
+    .agency-tab { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px !important; padding: 8px 14px !important; white-space: nowrap; transition: all .2s ease !important; background: rgba(15, 23, 42, 0.45); cursor: pointer; }
+    .agency-tab:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12) !important; border-color: rgba(255, 159, 28, 0.5) !important; }
+    .agency-tab.active-tab { background: linear-gradient(135deg, #ff9f1c 0%, #f59e0b 100%) !important; color: #0f172a !important; border-color: #f59e0b !important; box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35) !important; }
+    .agency-tab.active-tab .tab-icon-box { background: rgba(15, 23, 42, 0.15) !important; color: #0f172a !important; }
+    .agency-tab.active-tab .tab-subtext { color: #334155 !important; font-weight: 700 !important; }
+    .ct-seat { position: relative; width: clamp(37px, 7vw, 48px) !important; height: clamp(45px, 8vw, 54px) !important; min-width: 35px; border-radius: 8px !important; font-size: 10px !important; font-weight: 800 !important; transition: transform .14s ease, box-shadow .14s ease, background .14s ease !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer; }
+    .ct-seat-available { background: #fff !important; border: 1px solid #aab8ca !important; border-bottom: 4px solid #9aa9bd !important; color: #24334a !important; }
+    .ct-seat-available:hover { background: #fff4e4 !important; border-color: #f59e0b !important; transform: translateY(-2px); }
+    .ct-seat-selected { background: linear-gradient(145deg, #ffbd59, #ff9815) !important; border: 1px solid #df7d00 !important; border-bottom: 4px solid #c96a00 !important; color: #172033 !important; transform: translateY(-2px); }
+    .ct-seat-booked { background: #fee8e8 !important; border: 1px solid #f5a0a0 !important; border-bottom: 4px solid #dc6262 !important; color: #a12626 !important; opacity: .95; cursor: not-allowed !important; }
+    .ct-seat-blocked { background: #e2e8f0 !important; border: 1px solid #94a3b8 !important; border-bottom: 4px solid #64748b !important; color: #64748b !important; cursor: not-allowed !important; opacity: 0.75; }
+  </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col">
+
+  <!-- Login Overlay -->
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
+      <div class="bg-brand-900 text-white p-6 text-center space-y-2">
+        <div class="w-14 h-14 rounded-full bg-amber-400 text-brand-900 font-bold text-2xl flex items-center justify-center mx-auto shadow-inner">
+          <i class="fa-solid fa-bus"></i>
+        </div>
+        <h2 class="text-lg font-extrabold tracking-wide">CHAUHAN TOUR & TRAVELS</h2>
+        <p class="text-xs text-blue-200">Counter Login & Agency Portal</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Login User <span class="text-red-500">*</span></label>
+          <select id="loginUserSelect" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-semibold text-slate-800 cursor-pointer focus:ring-2 focus:ring-blue-500"></select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">PIN Code <span class="text-red-500">*</span></label>
+          <input type="password" id="loginPasswordInput" placeholder="Enter PIN (Default: 1234)" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500">
+          <div class="text-[10px] text-slate-400 mt-1">Default PIN: <b>1234</b></div>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl shadow transition cursor-pointer mt-2">
+          <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Login to System
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-brand-900 text-white shadow-lg sticky top-0 z-40 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-md border border-amber-300">
+            <i class="fa-solid fa-bus-simple"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">CHAUHAN TOUR & TRAVELS</h1>
+              <span class="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded shadow-sm hidden md:inline">मुख्य बुकिंग काउण्टर</span>
+            </div>
+            <p class="text-xs text-blue-200">New Bus Stand, Bijapur (C.G.) • 📞 094079 96570, 093406 69984</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2.5">
+          <div class="hidden sm:flex flex-col items-end text-right">
+            <div class="flex items-center bg-slate-900/60 border border-slate-700/80 rounded-lg px-2.5 py-0.5 text-[11px] text-blue-200 shadow-inner">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+              Operator: <strong id="loggedInUserBadge" class="text-amber-300 ml-1">Admin (Admin)</strong>
+            </div>
+            <div id="liveClockDisplay" class="text-[11px] text-amber-300 font-mono font-semibold mt-0.5">Loading Date & Time...</div>
+          </div>
+
+          <div class="flex flex-col items-end">
+            <button type="button" onclick="handleManualHeaderBackup()" title="Download Backup JSON" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md transition cursor-pointer flex items-center gap-1.5 border border-emerald-500">
+              <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
+              <span>Backup Now</span>
+            </button>
+            <div id="lastBackupDisplay" class="text-[9px] text-emerald-300 font-mono font-semibold mt-0.5 tracking-tight">Last Backup: Never</div>
+          </div>
+
+          <button type="button" onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-md transition cursor-pointer flex items-center gap-1.5 border border-red-500">
+            <i class="fa-solid fa-power-off text-sm"></i>
+            <span class="hidden md:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="flex items-center space-x-2 overflow-x-auto border-t border-slate-700/60 py-2 custom-scrollbar">
+        <button type="button" onclick="switchTab('booking')" id="tab-booking" class="agency-tab active-tab flex items-center gap-2.5">
+          <div class="tab-icon-box w-7 h-7 rounded-lg bg-amber-400/20 flex items-center justify-center text-sm text-amber-300"><i class="fa-solid fa-ticket"></i></div>
+          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">New Booking</div><div class="tab-subtext text-[9px] text-blue-200 uppercase tracking-wider">सीट आरक्षण</div></div>
+        </button>
+
+        <button type="button" onclick="switchTab('register')" id="tab-register" class="agency-tab flex items-center gap-2.5 text-blue-200">
+          <div class="tab-icon-box w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center text-sm text-blue-300"><i class="fa-solid fa-table-list"></i></div>
+          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Live Register</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">दैनिक रजिस्टर</div></div>
+        </button>
+
+        <button type="button" onclick="switchTab('memo')" id="tab-memo" class="agency-tab flex items-center gap-2.5 text-blue-200">
+          <div class="tab-icon-box w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-sm text-emerald-300"><i class="fa-solid fa-file-invoice"></i></div>
+          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Counter Voucher</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">गाड़ी चालान / मेमो</div></div>
+        </button>
+
+        <button type="button" onclick="switchTab('financial')" id="tab-financial" class="agency-tab flex items-center gap-2.5 text-blue-200">
+          <div class="tab-icon-box w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center text-sm text-purple-300"><i class="fa-solid fa-chart-pie"></i></div>
+          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Financial & Ledger</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">गल्ला एवं हिसाब</div></div>
+        </button>
+
+        <button type="button" onclick="switchTab('admin')" id="tab-admin" class="agency-tab hidden items-center gap-2.5 text-amber-300">
+          <div class="tab-icon-box w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-sm text-amber-400"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Admin Portal</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">मास्टर सेटिंग्स</div></div>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full no-print">
+
+    <!-- TAB 1: BOOKING FORM -->
+    <div id="content-booking" class="tab-content block">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+          <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
+            <h2 id="formTitleText" class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-pen-to-square text-blue-600"></i> New Bus Reservation Form
+            </h2>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+              <span>Ticket No:</span>
+              <span id="displayTicketNo" class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">TKT-1001</span>
+            </div>
+          </div>
+
+          <form id="bookingForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Booking Date</label>
+                <input type="text" id="bookingDateInput" readonly class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Journey Date <span class="text-red-500">*</span></label>
+                <input type="date" id="journeyDateInput" onchange="updateDestinationsAndTimes()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Bus Operator <span class="text-red-500">*</span></label>
+                <select id="busNameInput" onchange="handleBusChange()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"></select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <div class="grid grid-cols-[1fr,auto,1fr] gap-1.5 items-end">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">From <span class="text-red-500">*</span></label>
+                    <select id="fromCityInput" onchange="onOriginChange()" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs"></select>
+                  </div>
+                  <div class="flex items-center justify-center pb-0.5">
+                    <button type="button" onclick="swapOriginDestination()" title="Swap Cities" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 text-xs font-bold border border-slate-300 flex items-center justify-center cursor-pointer transition">
+                      <i class="fa-solid fa-right-left"></i>
+                    </button>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">To <span class="text-red-500">*</span></label>
+                    <select id="toCityInput" onchange="updateDestinationsAndTimes()" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs"></select>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Bus Time <span class="text-red-500">*</span></label>
+                <select id="busTimeInput" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"></select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-slate-600">Seat Number(s) <span class="text-red-500">*</span></label>
+                  <button type="button" onclick="openSeatModal()" class="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-border-all"></i> Open Seat Map
+                  </button>
+                </div>
+                <input type="text" id="seatInput" oninput="calculateTotalFare()" placeholder="Click 'Open Seat Map'" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs uppercase font-bold text-slate-800">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Mobile Number (10 Digits) <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-400 font-medium">+91</span>
+                  <input type="tel" id="mobileInput" maxlength="10" minlength="10" pattern="[0-9]{10}" placeholder="9876543210" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoFillPassengerName();" class="w-full pl-10 border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Passenger Name <span class="text-red-500">*</span></label>
+                <input type="text" id="passengerNameInput" placeholder="Full Name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-800">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Per Seat Fare (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="perPassengerFareInput" min="0" value="517" oninput="calculateTotalFare()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-800">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Fare (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="fareInput" min="0" readonly required class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-xs font-black text-blue-700">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Payment Mode <span class="text-red-500">*</span></label>
+                <select id="paymentModeInput" onchange="handlePaymentModeChange()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer">
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI (QR Scan)</option>
+                  <option value="Split (Cash + UPI)">Split (Cash + UPI)</option>
+                  <option value="Credit">Credit (Pending)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Booked By</label>
+                <input type="text" id="bookedByInput" readonly class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-brand-900 cursor-not-allowed">
+              </div>
+            </div>
+
+            <div id="splitPaymentBox" class="grid grid-cols-2 gap-4 bg-amber-50 p-3 rounded-xl border border-amber-300 hidden">
+              <div>
+                <label class="block text-xs font-bold text-amber-950 mb-1">Cash Part (₹) <span class="text-red-500">*</span></label>
+                <input type="number" id="splitCashInput" min="0" value="0" oninput="syncSplitFromCash()" class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-bold bg-white text-slate-800">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-blue-900 mb-1">UPI Part (₹) (QR Scanner Amount) <span class="text-red-500">*</span></label>
+                <input type="number" id="splitUpiInput" min="0" value="0" oninput="syncSplitFromUpi()" class="w-full border border-blue-400 rounded-lg px-3 py-1.5 text-xs font-black bg-white text-blue-700">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Remark / Notes</label>
+              <input type="text" id="remarkInput" placeholder="Optional notes" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs">
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center gap-3">
+              <button type="submit" id="btnSaveBooking" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-lg shadow transition cursor-pointer flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">Save Reservation</span>
+              </button>
+              <button type="button" onclick="resetBookingForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-lg transition cursor-pointer">
+                Reset Form
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-gradient-to-br from-brand-900 to-blue-800 text-white rounded-xl shadow-lg p-5 border border-blue-700/50">
+            <h3 class="text-xs uppercase tracking-wider text-blue-200 font-semibold mb-2">Today's Quick Summary</h3>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div class="bg-white/10 rounded-lg p-2.5">
+                <div class="text-xs text-blue-200">Active Bookings</div>
+                <div id="quickTodayCount" class="text-lg font-bold">0</div>
+              </div>
+              <div class="bg-white/10 rounded-lg p-2.5">
+                <div class="text-xs text-blue-200">Total Collection</div>
+                <div id="quickTodayCollection" class="text-lg font-bold">₹0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: LIVE REGISTER -->
+    <div id="content-register" class="tab-content hidden space-y-4">
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Journey Date</label>
+            <input type="date" id="filterJourneyDate" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Bus Operator</label>
+            <select id="filterBusName" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Search (Name/Mobile/Tkt)</label>
+            <input type="text" id="filterSearch" oninput="renderBookingsTable()" placeholder="Search..." class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+          </div>
+          <div>
+            <button type="button" onclick="clearFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-lg transition cursor-pointer">Reset Filters</button>
+          </div>
+          <div>
+            <button type="button" onclick="exportBookingsToCSV()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-file-excel"></i> Export Excel (CSV)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-700 border-collapse">
+            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[11px]">
+              <tr>
+                <th class="py-3 px-3">Ticket No</th>
+                <th class="py-3 px-3">Journey Date</th>
+                <th class="py-3 px-3">Bus Service</th>
+                <th class="py-3 px-2">Time</th>
+                <th class="py-3 px-2">Seat</th>
+                <th class="py-3 px-3">Passenger</th>
+                <th class="py-3 px-3">Mobile</th>
+                <th class="py-3 px-3 text-right">Fare</th>
+                <th class="py-3 px-2 text-center">Payment</th>
+                <th class="py-3 px-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: COUNTER VOUCHER -->
+    <div id="content-memo" class="tab-content hidden space-y-4">
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-4 space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Journey Date</label>
+            <input type="date" id="memoDateInput" onchange="onMemoParamChange()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Bus Operator</label>
+            <select id="memoBusSelect" onchange="onMemoParamChange()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Route & Time</label>
+            <select id="memoRouteSelect" onchange="onRouteSelectionChange()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Commission (%)</label>
+            <input type="text" id="memoCommInput" oninput="renderChauhanMemo()" placeholder="e.g. 10%" value="10%" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-red-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">GST (%)</label>
+            <input type="text" id="memoGstInput" oninput="renderChauhanMemo()" placeholder="e.g. 5%" value="5%" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Driver Name (अनिवार्य) <span class="text-red-500">*</span></label>
+            <input type="text" id="voucherDriverInput" list="driverHistoryList" placeholder="Select or type driver name" required class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-amber-50/40">
+            <datalist id="driverHistoryList"></datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Vehicle No. / Gadi No. (अनिवार्य) <span class="text-red-500">*</span></label>
+            <input type="text" id="voucherVehicleInput" list="vehicleHistoryList" placeholder="Select or type CG 18 ..." required class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase bg-amber-50/40">
+            <datalist id="vehicleHistoryList"></datalist>
+          </div>
+        </div>
+
+        <div>
+          <button type="button" onclick="generateVoucherWithCreditCheck()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer shadow">
+            <i class="fa-solid fa-rotate"></i> Generate Counter Voucher Preview
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-amber-50/95 border-2 border-amber-300 rounded-xl p-6 max-w-lg mx-auto shadow-xl min-h-[300px]" id="memoContainer"></div>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button type="button" onclick="printCurrentMemo()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-print"></i> Print Voucher Slip (A5)
+        </button>
+        <button type="button" onclick="openSettlementModalFromVoucher()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Generate Settlement
+        </button>
+        <button type="button" onclick="shareMemoWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
+          <i class="fa-brands fa-whatsapp"></i> Send Professional WhatsApp to Driver
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 4: FINANCIAL & COMPLETE LEDGER -->
+    <div id="content-financial" class="tab-content hidden space-y-6">
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-blue-600"></i> Counter Financial Overview & Cash Drawer
+          </h2>
+          <div class="flex items-center gap-3">
+            <div id="summaryDateWrapper" class="flex items-center gap-2">
+              <label class="text-xs font-semibold text-slate-600">Date Filter:</label>
+              <input type="date" id="summaryDatePicker" onchange="renderCollectionStats()" class="border border-slate-300 rounded-lg px-3 py-1 text-xs font-semibold">
+            </div>
+            <button type="button" onclick="toggleShowAllPayments()" id="btnToggleAllPayments" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition cursor-pointer">
+              Show All Payments
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+            <div class="text-xs font-semibold text-emerald-800">Gross Cash Collected</div>
+            <div id="statCash" class="text-2xl font-black text-emerald-700 mt-2">₹0</div>
+          </div>
+          <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div class="text-xs font-semibold text-blue-800">UPI / QR Online</div>
+            <div id="statUPI" class="text-2xl font-black text-blue-700 mt-2">₹0</div>
+          </div>
+          <div class="bg-amber-50 rounded-xl p-4 border border-amber-200">
+            <div class="text-xs font-semibold text-amber-800">Credit / Due</div>
+            <div id="statCredit" class="text-2xl font-black text-amber-700 mt-2">₹0</div>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+            <div class="text-xs font-semibold text-purple-800">Total Bookings Gross</div>
+            <div id="statTotal" class="text-2xl font-black text-purple-700 mt-2">₹0</div>
+          </div>
+          <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-white shadow">
+            <div class="text-xs font-semibold text-amber-300">Net Cash in Drawer</div>
+            <div id="statNetDrawer" class="text-2xl font-black text-amber-400 mt-2">₹0</div>
+            <div class="text-[10px] text-slate-300 mt-1">(Cash In - Expenses - Paid to Bus)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEDICATED CREDIT LEDGER -->
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-amber-300 p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200 pb-2">
+          <h3 class="text-sm font-bold text-amber-950 flex items-center gap-2">
+            <i class="fa-solid fa-hand-holding-dollar text-red-600"></i> Credit Passengers (उधार / बकाया लिस्ट)
+          </h3>
+          <span class="text-[11px] bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded-full border border-red-300">
+            Kul Baaki: <span id="totalCreditDueBadge">₹0</span>
+          </span>
+        </div>
+        <div class="overflow-x-auto max-h-64 custom-scrollbar">
+          <table class="w-full text-left text-xs text-slate-700 border-collapse">
+            <thead class="bg-amber-100/70 text-amber-950 font-bold uppercase text-[10px] sticky top-0 border-b border-amber-300">
+              <tr>
+                <th class="p-2.5">Ticket No</th>
+                <th class="p-2.5">Journey Date</th>
+                <th class="p-2.5">Passenger Name</th>
+                <th class="p-2.5">Mobile</th>
+                <th class="p-2.5">Bus & Route</th>
+                <th class="p-2.5 text-center">Seat</th>
+                <th class="p-2.5 text-right text-red-700 font-black">Due Amount (₹)</th>
+                <th class="p-2.5 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="creditDueTableBody" class="divide-y divide-amber-100 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- OPERATOR-WISE TOTAL SEAT & REVENUE BREAKDOWN TABLE -->
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
+        <h3 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b border-slate-200 pb-2">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-bus text-blue-600"></i> Operator-Wise Seat & Revenue Matrix</span>
+          <span class="text-[11px] text-slate-500 font-semibold" id="opBreakdownPeriodLabel">Active Filter Period</span>
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-700 border-collapse">
+            <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">Bus Operator</th>
+                <th class="p-2.5 text-center">Confirmed Bookings</th>
+                <th class="p-2.5 text-center">Total Confirmed Seats</th>
+                <th class="p-2.5 text-right">Gross Booking Amount (₹)</th>
+                <th class="p-2.5 text-right text-red-600">Credit / Due (₹)</th>
+                <th class="p-2.5 text-right">Counter Commission (10%)</th>
+                <th class="p-2.5 text-right">Net Payable to Bus (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="operatorBreakdownBody" class="divide-y divide-slate-100 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- UPCOMING JOURNEYS TRACKER TABLE -->
+      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-calendar-days text-emerald-600"></i> Upcoming Journeys & Advance Passenger Schedule
+            </h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">Selected date ke baad sabhi operators ki upcoming trips auto-aggregated show hongi.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <label class="font-semibold text-slate-600">From Date:</label>
+            <input type="date" id="filterUpcomingDate" onchange="renderOperatorBreakdownAndUpcoming()" class="border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-semibold">
+            <button type="button" onclick="resetUpcomingFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg cursor-pointer">Today Onwards</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto max-h-80 custom-scrollbar">
+          <table class="w-full text-left text-xs text-slate-700 border-collapse">
+            <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200 sticky top-0">
+              <tr>
+                <th class="p-2.5">Journey Date</th>
+                <th class="p-2.5">Bus Service</th>
+                <th class="p-2.5">Time</th>
+                <th class="p-2.5">Route</th>
+                <th class="p-2.5 text-center">Booked Seats</th>
+                <th class="p-2.5">Passenger Summary</th>
+                <th class="p-2.5 text-right">Advance Revenue (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="upcomingJourneysBody" class="divide-y divide-slate-100 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EXPENSES & SETTLEMENTS GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-receipt text-red-500"></i> Counter Expenses (खर्च)</h3>
+            <button type="button" onclick="openExpenseModal()" class="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 transition cursor-pointer">+ Add Expense</button>
+          </div>
+          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs">
+            <div class="flex items-center gap-2">
+              <label class="font-semibold text-slate-600">Date:</label>
+              <input type="date" id="filterExpenseDate" onchange="renderExpensesTable()" class="border border-slate-300 rounded px-2 py-0.5 text-xs font-medium">
+            </div>
+            <button type="button" id="btnToggleAllExpenses" onclick="toggleAllExpenses()" class="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer">Show All</button>
+          </div>
+          <div class="overflow-x-auto max-h-60 custom-scrollbar">
+            <table class="w-full text-left text-xs text-slate-700 border-collapse">
+              <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                <tr><th class="p-2">Date</th><th class="p-2">Category / Title</th><th class="p-2 text-right">Amount (₹)</th><th class="p-2 text-center">Action</th></tr>
+              </thead>
+              <tbody id="expenseTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg text-xs font-bold text-slate-800">
+            <span>Filtered Expenses:</span><span id="totalExpenseDisplay" class="text-red-600 font-black">₹0</span>
+          </div>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i> Bus Operator Settlements (भुगतान)</h3>
+            <button type="button" onclick="openSettlementModalFromVoucher()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer">+ Record Payment</button>
+          </div>
+          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs">
+            <div class="flex items-center gap-2">
+              <label class="font-semibold text-slate-600">Date:</label>
+              <input type="date" id="filterSettlementDate" onchange="renderSettlementsTable()" class="border border-slate-300 rounded px-2 py-0.5 text-xs font-medium">
+            </div>
+            <button type="button" id="btnToggleAllSettlements" onclick="toggleAllSettlements()" class="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer">Show All</button>
+          </div>
+          <div class="overflow-x-auto max-h-60 custom-scrollbar">
+            <table class="w-full text-left text-xs text-slate-700 border-collapse">
+              <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                <tr><th class="p-2">Date</th><th class="p-2">Operator / Driver</th><th class="p-2 text-right">Cash Paid</th><th class="p-2 text-right">UPI Paid</th><th class="p-2 text-center">Action</th></tr>
+              </thead>
+              <tbody id="settlementTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg text-xs font-bold text-slate-800">
+            <span>Filtered Paid to Buses:</span><span id="totalSettlementDisplay" class="text-emerald-700 font-black">₹0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: ADMIN CONTROL CENTER -->
+    <div id="content-admin" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-users-gear text-amber-600"></i> Staff PIN & Role Management</span>
+            <button type="button" onclick="resetStaffForm()" class="text-[11px] text-blue-600 hover:underline cursor-pointer">+ New Staff</button>
+          </h2>
+          <form id="addUserForm" onsubmit="handleAddNewStaff(event)" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Select Staff to Edit / Delete</label>
+              <div class="flex gap-2">
+                <select id="adminSelectStaff" onchange="onAdminSelectStaffChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold cursor-pointer">
+                  <option value="">-- Add New Staff --</option>
+                </select>
+                <button type="button" id="btnDeleteStaff" onclick="handleDeleteStaff()" class="hidden bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg font-bold transition cursor-pointer" title="Delete Selected Staff">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Staff Name <span class="text-red-500">*</span></label>
+              <input type="text" id="newStaffName" placeholder="e.g. Rahul" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Role</label>
+                <select id="newStaffRole" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+                  <option value="Staff">Staff</option><option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">PIN Code (4-Digits) <span class="text-red-500">*</span></label>
+                <input type="password" id="newStaffPin" placeholder="PIN e.g. 1234" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+              </div>
+            </div>
+            <button type="submit" id="btnSaveStaff" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">Save Staff</button>
+          </form>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-qrcode text-purple-600"></i> Counter UPI QR Configuration</h2>
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Active Agency UPI ID <span class="text-red-500">*</span></label>
+              <input type="text" id="agencyUpiInput" placeholder="e.g. nikki934066@ptyes" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold font-mono text-purple-700">
+              <p class="text-[10px] text-slate-400 mt-1">Yeh UPI ID QR Code scan payments me auto-apply hogi.</p>
+            </div>
+            <button type="button" onclick="handleSaveAgencyUpi()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">Save UPI ID</button>
+          </div>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-city text-emerald-600"></i> City & Station Master</h2>
+          <div class="space-y-3 text-xs">
+            <div class="flex gap-2">
+              <input type="text" id="newCityInput" placeholder="Add new station (e.g. Kondagaon, Kanker)" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+              <button type="button" onclick="handleAddCity()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg shadow transition cursor-pointer whitespace-nowrap">+ Add City</button>
+            </div>
+            <div id="adminCityTagsContainer" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg max-h-36 overflow-y-auto custom-scrollbar"></div>
+          </div>
+        </div>
+
+        <!-- 4. BUS OPERATOR & ROUTES WITH RETURN TIME, RETURN SERVICE NAME & EDIT -->
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-bus-simple text-blue-600"></i> Bus Operator & Routes</span>
+            <button type="button" onclick="resetRouteForm()" class="text-[11px] text-blue-600 hover:underline cursor-pointer">+ New Route</button>
+          </h2>
+          <div class="space-y-3 text-xs">
+            <div class="flex gap-2">
+              <input type="text" id="newOperatorInput" placeholder="New Operator Name" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+              <button type="button" onclick="handleAddOperator()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-lg shadow transition cursor-pointer whitespace-nowrap">+ Add Bus</button>
+            </div>
+            <div id="adminOperatorTagsContainer" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg max-h-28 overflow-y-auto custom-scrollbar"></div>
+            
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-700" id="routeFormHeading">Add / Edit Trip Route</div>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Bus Operator</label>
+                  <select id="routeOperatorSelect" class="w-full border border-slate-300 rounded-lg px-2 py-1.5 font-semibold"></select>
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Departure Time</label>
+                  <input type="text" id="routeTimeInput" placeholder="e.g. 08:30 PM" class="w-full border border-slate-300 rounded-lg px-2 py-1.5 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Return Time</label>
+                  <input type="text" id="routeReturnTimeInput" placeholder="e.g. 06:00 AM" class="w-full border border-slate-300 rounded-lg px-2 py-1.5 font-medium">
+                </div>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Service Name</label>
+                  <input type="text" id="routeServiceNameInput" placeholder="e.g. Royal AC Sleeper" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Return Service Name</label>
+                  <input type="text" id="routeReturnServiceNameInput" placeholder="e.g. Return Service" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Clean Route Title</label>
+                  <input type="text" id="routeCleanRouteInput" placeholder="e.g. BIJAPUR TO RAIPUR" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium uppercase">
+                </div>
+              </div>
+              <button type="button" id="btnSaveMasterRoute" onclick="handleAddMasterRoute()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">
+                Save Route & Schedule
+              </button>
+            </div>
+            
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Active Routes (Click ✏️ to edit, ❌ to remove)</label>
+              <div id="adminRoutesListContainer" class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. TRIP-WISE SEAT LAYOUT CREATOR -->
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-couch text-purple-600"></i> Trip-Wise Seat Layout Creator</span>
+          </h2>
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Select Specific Trip (Operator + Departure Time)</label>
+              <select id="layoutTripSelect" onchange="onLayoutTripChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold cursor-pointer"></select>
+            </div>
+            
+            <!-- CHECKBOX: Same layout for return trip -->
+            <div class="flex items-center gap-2 bg-purple-50 p-2.5 rounded-lg border border-purple-200">
+              <input type="checkbox" id="applyToReturnTripCheckbox" checked class="w-4 h-4 text-purple-600 rounded cursor-pointer">
+              <label for="applyToReturnTripCheckbox" class="font-bold text-purple-950 cursor-pointer text-xs">
+                ☑️ Ishi layout ko is bus ki return trip par bhi apply karein (Auto Sync)
+              </label>
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block font-semibold text-slate-600">Row Configuration (Manual)</label>
+                <div class="flex gap-1.5">
+                  <button type="button" onclick="loadPresetLayout('2+1')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded font-bold text-slate-700 cursor-pointer">Preset 2+1</button>
+                  <button type="button" onclick="loadPresetLayout('2+2')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded font-bold text-slate-700 cursor-pointer">Preset 2+2</button>
+                </div>
+              </div>
+              <textarea id="customLayoutTextarea" rows="3" placeholder="6, 5 | 1, 2W, 3, 4W&#10;7, 8 | 9, 10W, 11, 12W" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-[11px]"></textarea>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Or Upload Seating Chart Image (.png / .jpg)</label>
+              <input type="file" id="layoutImageInput" accept="image/*" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 cursor-pointer">
+            </div>
+
+            <button type="button" onclick="handleSaveCustomLayout()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">
+              Save Trip Seat Layout
+            </button>
+          </div>
+        </div>
+
+        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-database text-blue-600"></i> Counter Data Backup & Restore</h2>
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <button type="button" onclick="exportJSONBackup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-download"></i> Download Backup
+              </button>
+              <label class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-1.5 text-center">
+                <i class="fa-solid fa-upload"></i> Restore JSON
+                <input type="file" id="restoreFilePin" accept=".json" onchange="importJSONBackup(event)" class="hidden">
+              </label>
+            </div>
+          </div>
+
+          <div class="bg-red-50/95 backdrop-blur-md rounded-xl shadow-lg border border-red-200 p-5 space-y-3">
+            <h2 class="text-sm font-bold text-red-700 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation"></i> Factory Reset (PIN: 324657)</h2>
+            <p class="text-xs text-red-600">Admin poore system data ko clear kar sakte hain.</p>
+            <button type="button" onclick="handleClearAllDatabase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-2">
+              <i class="fa-solid fa-trash-can"></i> Clear All Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Ticket Print & WhatsApp Modal -->
+  <div id="ticketModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border flex flex-col">
+      <div class="bg-brand-900 text-white p-4 flex items-center justify-between font-bold">
+        <h3 class="flex items-center gap-2"><i class="fa-solid fa-ticket text-amber-400"></i> Ticket Actions & WhatsApp</h3>
+        <button type="button" onclick="closeTicketModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-xs">
+        <div id="ticketModalContent" class="bg-slate-50 border rounded-xl p-4 font-mono text-[11px] space-y-1"></div>
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button type="button" onclick="executePrintTicketOnly()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2">
+            <i class="fa-solid fa-print"></i> Print Ticket
+          </button>
+          <button type="button" onclick="sendPassengerWelcomeWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp"></i> Send WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credit Alert Modal -->
+  <div id="creditAlertModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-amber-300 flex flex-col">
+      <div class="bg-amber-500 text-amber-950 p-4 flex items-center justify-between font-bold">
+        <h3 class="text-sm flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-lg"></i> Credit Sawari Warning! (उधार बाकी)</h3>
+        <button type="button" onclick="closeCreditAlertModal()" class="text-amber-950 hover:text-black text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-3 text-xs">
+        <p class="text-slate-700 font-semibold">Is bus voucher me <span id="creditPassengerCount" class="text-red-600 font-bold">0</span> sawari <b>Credit (Pending)</b> payment wali hai:</p>
+        <div class="max-h-40 overflow-y-auto custom-scrollbar border border-amber-200 rounded-lg p-2 bg-amber-50/50 space-y-1.5" id="creditPassengerList"></div>
+        <div class="flex justify-between items-center bg-red-50 border border-red-200 p-2.5 rounded-lg font-bold text-red-700">
+          <span>Kul Baaki Rashi (Total Due):</span><span id="creditTotalDueAmount" class="text-sm font-black">₹0</span>
+        </div>
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="closeCreditAlertModal()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-lg transition cursor-pointer">Rokein</button>
+          <button type="button" onclick="proceedPrintAfterCreditWarning()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg shadow transition cursor-pointer">Fir Bhi Print Karein</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credit Payment Clear Modal with Split UPI Rules -->
+  <div id="creditClearModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
+      <div class="bg-emerald-800 text-white p-4 flex items-center justify-between font-bold">
+        <h3 class="flex items-center gap-1.5 text-sm"><i class="fa-solid fa-hand-holding-dollar text-amber-300"></i> Clear Credit Payment</h3>
+        <button type="button" onclick="closeCreditClearModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-3.5">
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
+          <div>Ticket: <strong id="ccTicketNo" class="text-slate-900 font-bold"></strong></div>
+          <div>Passenger: <strong id="ccPassengerName" class="text-slate-900"></strong></div>
+          <div>Total Due Amount: <strong id="ccDueFare" class="text-red-600 font-black text-sm">₹0</strong></div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700">Select Received Payment Mode *</label>
+          <select id="ccPaymentMode" onchange="onCcPaymentModeChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-800 cursor-pointer">
+            <option value="Cash">Cash</option>
+            <option value="UPI">UPI (Online Scan)</option>
+            <option value="Split (Cash + UPI)">Split (Cash + UPI)</option>
+          </select>
+        </div>
+        <div id="ccSplitBox" class="grid grid-cols-2 gap-3 bg-amber-50 p-2.5 rounded-lg border border-amber-300 hidden">
+          <div>
+            <label class="block text-[11px] font-bold text-amber-950 mb-0.5">Cash (₹)</label>
+            <input type="number" id="ccSplitCash" min="0" value="0" oninput="syncCcSplitCash()" class="w-full border border-amber-300 rounded p-1.5 font-bold bg-white text-slate-800">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-blue-900 mb-0.5">UPI (₹)</label>
+            <input type="number" id="ccSplitUpi" min="0" value="0" oninput="syncCcSplitUpi()" class="w-full border border-blue-400 rounded p-1.5 font-black bg-white text-blue-700">
+          </div>
+        </div>
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeCreditClearModal()" class="w-1/2 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg cursor-pointer">Cancel</button>
+          <button type="button" onclick="submitCreditClearPayment()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Receive & Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancellation Modal -->
+  <div id="cancelModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 flex flex-col">
+      <div class="bg-red-800 text-white p-4 flex items-center justify-between font-bold">
+        <h3 class="text-sm flex items-center gap-2"><i class="fa-solid fa-ban"></i> Seat Cancellation & Refund Rule</h3>
+        <button type="button" onclick="closeCancelModal()" class="text-red-200 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-xs">
+        <div class="bg-slate-50 border rounded-lg p-3 space-y-1.5 font-medium text-slate-700">
+          <div class="flex justify-between"><span>Ticket: <strong id="cancelTktNo"></strong></span><span>Journey: <strong id="cancelJDate"></strong></span></div>
+          <div>Passenger: <strong id="cancelPName"></strong> (Seat: <span id="cancelSeatNo" class="text-blue-700 font-bold"></span>)</div>
+          <div>Total Fare: <strong id="cancelTotalFare" class="text-emerald-700 font-bold text-sm">₹0</strong></div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Select Cancellation Time Slot</label>
+          <select id="cancelRuleSelect" onchange="recalculateRefund()" class="w-full border rounded-lg px-3 py-2 font-semibold text-slate-800 cursor-pointer">
+            <option value="10">24+ Hours Before Departure (10% Charge, 90% Refund)</option>
+            <option value="25">12 to 24 Hours Before (25% Charge, 75% Refund)</option>
+            <option value="50">06 to 12 Hours Before (50% Charge, 50% Refund)</option>
+            <option value="75">04 to 06 Hours Before (75% Charge, 25% Refund)</option>
+            <option value="100">Within 4 Hours / No-Show (100% Charge, 0% Refund)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-xl border border-amber-200 font-bold text-slate-800">
+          <div><div class="text-[10px] text-slate-500 uppercase">Cancellation Charge</div><div id="cancelDeductionDisplay" class="text-lg font-black text-red-600">₹0</div></div>
+          <div><div class="text-[10px] text-slate-500 uppercase">Refund To Return</div><div id="cancelRefundDisplay" class="text-lg font-black text-emerald-700">₹0</div></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="cancelDeductFromCash" checked class="rounded text-blue-600 cursor-pointer">
+          <label for="cancelDeductFromCash" class="text-[11px] font-medium text-slate-600 cursor-pointer">Refund ko Cash Drawer se ghatayein</label>
+        </div>
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeCancelModal()" class="w-1/2 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg cursor-pointer">Close</button>
+          <button type="button" onclick="confirmCancelWithRefund()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Confirm Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seat Map Modal -->
+  <div id="seatModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[95vh]">
+      <div class="bg-brand-900 text-white p-4 flex items-center justify-between">
+        <div>
+          <h3 id="seatModalTitle" class="font-bold text-sm tracking-wide flex items-center gap-2"><i class="fa-solid fa-couch text-amber-400"></i> Bus Seat Selection Map</h3>
+          <p id="seatModalSubtext" class="text-xs text-blue-200 mt-1"></p>
+        </div>
+        <button type="button" onclick="closeSeatModal()" class="text-blue-200 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar bg-slate-50/50">
+        <div id="dynamicSeatMapContainer" class="flex flex-col items-center gap-2.5"></div>
+      </div>
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>Selected: <span id="modalSelectedSeatsCount" class="font-bold text-blue-700">None</span></div>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeSeatModal()" class="px-4 py-2 bg-slate-200 font-bold rounded-lg cursor-pointer">Cancel</button>
+          <button type="button" onclick="confirmSeatSelection()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow cursor-pointer">Apply Seat(s)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPI Modal -->
+  <div id="upiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full text-center p-6 space-y-3 text-xs">
+      <h3 class="font-bold text-sm text-slate-800">Scan & Pay via UPI</h3>
+      <div id="upiModalAmount" class="text-2xl font-black text-slate-800">₹0</div>
+      <div class="flex justify-center">
+        <img id="upiQRImage" src="" alt="UPI QR" class="w-44 h-44 object-contain border p-2 rounded-xl bg-white shadow-sm">
+      </div>
+      <div id="upiRemarkText" class="text-[10px] font-mono bg-slate-100 p-2 rounded text-slate-600 break-all text-left"></div>
+      <button type="button" onclick="confirmUPIPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2.5 rounded-xl cursor-pointer">
+        Payment Received / Confirm
+      </button>
+    </div>
+  </div>
+
+  <!-- Expense Modal -->
+  <div id="expenseModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
+      <div class="bg-red-800 text-white p-4 flex items-center justify-between font-bold">
+        <h3><i class="fa-solid fa-receipt mr-1.5"></i> Add Counter Expense</h3>
+        <button type="button" onclick="closeExpenseModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="expenseForm" onsubmit="handleExpenseSubmit(event)" class="p-6 space-y-4">
+        <div><label class="block font-semibold mb-1">Expense Date</label><input type="date" id="expenseDateInput" required class="w-full border rounded-lg px-3 py-2"></div>
+        <div><label class="block font-semibold mb-1">Category / Purpose</label><input type="text" id="expenseTitleInput" placeholder="Chai, Diesel, Stationery..." required class="w-full border rounded-lg px-3 py-2"></div>
+        <div><label class="block font-semibold mb-1">Amount (₹)</label><input type="number" id="expenseAmountInput" min="1" placeholder="₹ Amount" required class="w-full border rounded-lg px-3 py-2 font-bold text-red-600"></div>
+        <div class="pt-2 flex gap-3">
+          <button type="button" onclick="closeExpenseModal()" class="w-1/2 bg-slate-200 font-bold py-2.5 rounded-lg cursor-pointer">Cancel</button>
+          <button type="submit" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settlement Modal -->
+  <div id="settlementModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border flex flex-col text-xs">
+      <div class="bg-brand-900 text-white p-4 flex items-center justify-between font-bold">
+        <h3 class="flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Record Operator Settlement</h3>
+        <button type="button" onclick="closeSettlementModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="settlementForm" onsubmit="handleSettlementSubmit(event); return false;" class="p-6 space-y-4">
+        <div><label class="block font-semibold mb-1">Bus Operator</label><select id="settleOperatorSelect" required class="w-full border rounded-lg px-3 py-2 font-semibold cursor-pointer"></select></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold mb-1">Route</label><input type="text" id="settleRouteInput" class="w-full border rounded-lg px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Vehicle No.</label><input type="text" id="settleVehicleInput" class="w-full border rounded-lg px-3 py-2 uppercase"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold mb-1">Driver Name</label><input type="text" id="settleDriverInput" required class="w-full border rounded-lg px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Date</label><input type="date" id="settleDateInput" required class="w-full border rounded-lg px-3 py-2"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold mb-1">Cash Paid (₹)</label><input type="number" id="settleCashInput" min="0" value="0" class="w-full border rounded-lg px-3 py-2 font-bold text-emerald-700"></div>
+          <div><label class="block font-semibold mb-1">UPI Paid (₹)</label><input type="number" id="settleUpiInput" min="0" value="0" class="w-full border rounded-lg px-3 py-2 font-bold text-blue-700"></div>
+        </div>
+        <div class="pt-2 flex gap-3">
+          <button type="button" onclick="closeSettlementModal()" class="w-1/2 bg-slate-200 font-bold py-2.5 rounded-lg cursor-pointer">Cancel</button>
+          <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Save Settlement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="print-area" style="display: none;"></div>
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoK7Eao0-pdoCHj10-8RQZwlePFx1cl6w",
+      authDomain: "chauhan-travels-db.firebaseapp.com",
+      databaseURL: "https://chauhan-travels-db-default-rtdb.firebaseio.com",
+      projectId: "chauhan-travels-db",
+      storageBucket: "chauhan-travels-db.firebasestorage.app",
+      messagingSenderId: "353902467855",
+      appId: "1:353902467855:web:1f4f9bd3929ca38be9fc7a",
+      measurementId: "G-RYBDQB65J0"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const cloudDbRef = firebase.database().ref('chauhan_counter_database');
+    let isCloudSyncing = false;
+    let hasShownCloudSyncError = false;
+
+    cloudDbRef.on('value', (snapshot) => {
+      const serverData = snapshot.val();
+      if (serverData && !isCloudSyncing) {
+        if (serverData.bookings) bookings = serverData.bookings;
+        if (serverData.expenses) expenses = serverData.expenses;
+        if (Array.isArray(serverData.settlements)) settlements = serverData.settlements;
+        if (serverData.agencyUpiId) {
+          agencyUpiId = serverData.agencyUpiId;
+          localStorage.setItem(UPI_ID_STORAGE_KEY, agencyUpiId);
+        }
+        if (Array.isArray(serverData.staffList)) { staffList = serverData.staffList; localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staffList)); }
+        if (Array.isArray(serverData.busOperators)) { busOperators = serverData.busOperators; localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators)); }
+        if (Array.isArray(serverData.MASTER_CITIES)) { MASTER_CITIES = serverData.MASTER_CITIES; localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES)); }
+        if (serverData.BUS_MASTER_ROUTES && typeof serverData.BUS_MASTER_ROUTES === 'object') { BUS_MASTER_ROUTES = serverData.BUS_MASTER_ROUTES; localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES)); }
+        if (serverData.customLayouts && typeof serverData.customLayouts === 'object') { customLayouts = serverData.customLayouts; localStorage.setItem(CUSTOM_LAYOUT_KEY, JSON.stringify(customLayouts)); }
+        if (serverData.tripDriverHistory && typeof serverData.tripDriverHistory === 'object') { tripDriverHistory = serverData.tripDriverHistory; localStorage.setItem(TRIP_HISTORY_KEY, JSON.stringify(tripDriverHistory)); }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+        localStorage.setItem(EXPENSE_STORAGE_KEY, JSON.stringify(expenses));
+        localStorage.setItem(SETTLEMENT_STORAGE_KEY, JSON.stringify(settlements));
+
+        if (typeof renderBookingsTable === 'function') renderBookingsTable();
+        if (typeof renderCollectionStats === 'function') renderCollectionStats();
+        if (typeof renderExpensesTable === 'function') renderExpensesTable();
+        if (typeof renderSettlementsTable === 'function') renderSettlementsTable();
+        if (typeof updateMemoRoutes === 'function') updateMemoRoutes();
+      }
+    }, (error) => {
+      console.warn("Firebase sync status:", error);
+    });
+
+    function saveToCloudDatabase() {
+      isCloudSyncing = true;
+      cloudDbRef.set({
+        agencyUpiId: agencyUpiId,
+        bookings: bookings,
+        expenses: expenses,
+        settlements: settlements,
+        staffList: staffList,
+        busOperators: busOperators,
+        MASTER_CITIES: MASTER_CITIES,
+        BUS_MASTER_ROUTES: BUS_MASTER_ROUTES,
+        customLayouts: customLayouts,
+        tripDriverHistory: tripDriverHistory,
+        lastUpdated: new Date().toISOString()
+      }).then(() => { isCloudSyncing = false; hasShownCloudSyncError = false; }).catch((err) => {
+        isCloudSyncing = false;
+        console.error('Cloud sync failed:', err);
+        if (!hasShownCloudSyncError) {
+          hasShownCloudSyncError = true;
+          showToast('Cloud sync failed. Data is saved locally; check Firebase connection.', 'error');
+        }
+      });
+    }
+
+    const CITY_STORAGE_KEY = "chauhan_cities_v1";
+    const ROUTE_STORAGE_KEY = "chauhan_master_routes_v1";
+    const CUSTOM_LAYOUT_KEY = "chauhan_custom_layouts_v1";
+    const STORAGE_KEY = "chauhan_bus_reservations_v65";
+    const EXPENSE_STORAGE_KEY = "chauhan_counter_expenses_v2";
+    const SETTLEMENT_STORAGE_KEY = "chauhan_operator_settlements_v35";
+    const STAFF_STORAGE_KEY = "chauhan_counter_staff_v6";
+    const BUS_OPERATORS_KEY = "chauhan_bus_operators_v3";
+    const TRIP_HISTORY_KEY = "chauhan_trip_driver_history_v1";
+    const UPI_ID_STORAGE_KEY = "chauhan_agency_upi_v1";
+    const LAST_BACKUP_KEY = "chauhan_last_backup_time_v1";
+
+    let agencyUpiId = localStorage.getItem(UPI_ID_STORAGE_KEY) || "nikki934066@ptyes";
+
+    let MASTER_CITIES = [];
+    try {
+      const storedC = localStorage.getItem(CITY_STORAGE_KEY);
+      MASTER_CITIES = storedC ? JSON.parse(storedC) : [
+        "Bijapur", "Raipur", "Durg", "Bilaspur", "Baloda Bazar",
+        "Bhilai", "Dhamtari", "Kanker", "Jagdalpur", "Geedam",
+        "Bhairamgarh", "Madded", "Patnam", "Bhopalpatnam", "Hyderabad", "Kondagaon"
+      ];
+    } catch(e) {
+      MASTER_CITIES = ["Bijapur", "Raipur", "Durg", "Bilaspur", "Jagdalpur", "Hyderabad"];
+    }
+
+    let busOperators = [];
+    try {
+      const storedB = localStorage.getItem(BUS_OPERATORS_KEY);
+      busOperators = storedB ? JSON.parse(storedB) : ["Manish Travels", "Rajdhani Travels", "Bastar Travels", "Harsh Travels"];
+    } catch(e) {
+      busOperators = ["Manish Travels", "Rajdhani Travels", "Bastar Travels", "Harsh Travels"];
+    }
+
+    let staffList = [];
+    try {
+      const storedS = localStorage.getItem(STAFF_STORAGE_KEY);
+      staffList = storedS ? JSON.parse(storedS) : [
+        { name: "Admin", pin: "1234", role: "Admin" },
+        { name: "Nikki", pin: "1234", role: "Staff" },
+        { name: "Asif", pin: "1234", role: "Staff" }
+      ];
+    } catch(e) {
+      staffList = [{ name: "Admin", pin: "1234", role: "Admin" }];
+    }
+
+    let customLayouts = {};
+    try {
+      const storedL = localStorage.getItem(CUSTOM_LAYOUT_KEY);
+      customLayouts = storedL ? JSON.parse(storedL) : {};
+    } catch(e) { customLayouts = {}; }
+
+    let BUS_MASTER_ROUTES = {};
+    try {
+      const storedR = localStorage.getItem(ROUTE_STORAGE_KEY);
+      BUS_MASTER_ROUTES = storedR ? JSON.parse(storedR) : {
+        "Manish Travels_04:05 AM": { serviceName: "Manish Morning Express", fullRouteDisplay: "BIJAPUR TO RAIPUR / DURG", returnTime: "08:25 AM", returnServiceName: "Manish Morning Return" },
+        "Manish Travels_07:05 PM": { serviceName: "Manish Ramrath", fullRouteDisplay: "BIJAPUR TO RAIPUR / BILASPUR", returnTime: "06:45 PM", returnServiceName: "Manish Ramrath Return" },
+        "Manish Travels_07:55 PM": { serviceName: "Manish Ramrath", fullRouteDisplay: "BIJAPUR TO RAIPUR / DURG", returnTime: "09:30 PM", returnServiceName: "Manish Ramrath Return" },
+        "Manish Travels_09:10 PM": { serviceName: "Manish Elite", fullRouteDisplay: "BIJAPUR TO RAIPUR / BHILAI / DURG", returnTime: "10:25 PM", returnServiceName: "Manish Elite Return" },
+        "Manish Travels_08:25 AM": { serviceName: "Manish Morning Express", fullRouteDisplay: "RAIPUR / DURG TO BIJAPUR", returnTime: "04:05 AM", returnServiceName: "Manish Morning Express" },
+        "Manish Travels_06:45 PM": { serviceName: "Manish Ramrath", fullRouteDisplay: "DURG / RAIPUR TO BIJAPUR", returnTime: "07:05 PM", returnServiceName: "Manish Ramrath" },
+        "Manish Travels_09:30 PM": { serviceName: "Manish Elite", fullRouteDisplay: "DURG / RAIPUR TO BIJAPUR", returnTime: "07:55 PM", returnServiceName: "Manish Ramrath" },
+        "Manish Travels_10:25 PM": { serviceName: "Manish Ramrath", fullRouteDisplay: "BILASPUR / RAIPUR TO BIJAPUR", returnTime: "09:10 PM", returnServiceName: "Manish Elite" },
+        "Rajdhani Travels_05:30 PM": { serviceName: "Rajdhani (RG Bijapur-Bilaspur)", fullRouteDisplay: "BIJAPUR TO RAIPUR / BILASPUR", returnTime: "05:00 PM", returnServiceName: "RG Bilaspur-Bhopalpatnam" },
+        "Rajdhani Travels_06:25 PM": { serviceName: "RG Bhopalpatnam-Bilaspur", fullRouteDisplay: "BIJAPUR TO RAIPUR / BILASPUR", returnTime: "06:30 PM", returnServiceName: "Rajdhani Bilaspur-Bijapur" },
+        "Rajdhani Travels_05:00 PM": { serviceName: "RG Bilaspur-Bhopalpatnam", fullRouteDisplay: "BILASPUR / RAIPUR TO BHOPALPATNAM", returnTime: "05:30 PM", returnServiceName: "Rajdhani Bijapur-Bilaspur" },
+        "Rajdhani Travels_06:30 PM": { serviceName: "Rajdhani (RG Bilaspur-Bijapur)", fullRouteDisplay: "BILASPUR / RAIPUR TO BIJAPUR", returnTime: "06:25 PM", returnServiceName: "RG Bhopalpatnam-Bilaspur" },
+        "Bastar Travels_11:30 PM": { serviceName: "Bastar Travels", fullRouteDisplay: "BIJAPUR TO HYDERABAD", returnTime: "08:30 PM", returnServiceName: "Bastar Travels" },
+        "Bastar Travels_08:30 PM": { serviceName: "Bastar Travels", fullRouteDisplay: "HYDERABAD TO KONDAGAON", returnTime: "11:30 PM", returnServiceName: "Bastar Travels" },
+        "Harsh Travels_08:45 PM": { serviceName: "Harsh Travels", fullRouteDisplay: "BIJAPUR TO RAIPUR", returnTime: "08:10 PM", returnServiceName: "Harsh Travels" },
+        "Harsh Travels_08:10 PM": { serviceName: "Harsh Travels", fullRouteDisplay: "RAIPUR TO BHOPALPATNAM", returnTime: "08:45 PM", returnServiceName: "Harsh Travels" }
+      };
+    } catch(e) { BUS_MASTER_ROUTES = {}; }
+
+    let tripDriverHistory = {};
+    try {
+      const storedH = localStorage.getItem(TRIP_HISTORY_KEY);
+      tripDriverHistory = storedH ? JSON.parse(storedH) : {};
+    } catch(e) { tripDriverHistory = {}; }
+
+    let bookings = [];
+    let expenses = [];
+    let settlements = [];
+
+    let pendingUPIBooking = null;
+    let tempSelectedSeats = [];
+    let editingTicketNo = null;
+    let editingRouteKey = null;
+    let isShowAllPaymentsActive = false;
+    let isShowAllExpenses = false;
+    let isShowAllSettlements = false;
+    let currentLoggedInStaff = "Admin";
+    let currentUserRole = "Admin";
+    let cancellingTicket = null;
+    let activeClearingCreditTicket = null;
+    let activePrintingTicket = null;
+
+    const PERMANENT_BLOCKED_SEATS_0405 = ["1A", "1B", "5A", "5B", "8A", "8B", "11A", "11B", "14A", "14B"];
+
+    const LAYOUT_MANISH_EARLY = {
+      name: "Manish Morning Express",
+      rows: [
+        { left: ["3F", "3E", "17", "16"], right: ["1A", "1B", "2D", "2C"] },
+        { left: ["4F", "4E", "18", "19"], right: ["5A", "5B", "6D", "6C"] },
+        { left: ["", "", "21", "20"], right: ["", "", "", ""] },
+        { left: ["9F", "9E", "22", "23"], right: ["8A", "8B", "7D", "7C"] },
+        { left: ["", "", "25", "24"], right: ["", "", "", ""] },
+        { left: ["10F", "10E", "26", "27"], right: ["11A", "11B", "12D", "12C"] },
+        { left: ["", "", "29", "28"], right: ["", "", "", ""] },
+        { left: ["15F", "15E", "30", "31"], right: ["14A", "14B", "13D", "13C"] },
+        { left: ["", "", "32", "33"], right: ["34", "", "", ""] }
+      ]
+    };
+
+    const LAYOUT_MANISH_GENERAL = {
+      name: "Manish Travels (Ramrath / Elite)",
+      rows: [
+        { left: ["6", "5"], right: ["1", "2W", "3", "4W"] },
+        { left: ["7", "8"], right: ["9", "10W", "11", "12W"] },
+        { left: ["18", "17"], right: ["13", "14W", "15", "16W"] },
+        { left: ["19", "20"], right: ["21", "22W", "23", "24W"] },
+        { left: ["29", "30"], right: ["25", "26W", "27", "28W"] },
+        { left: ["31", "32"], right: ["33", "34W", "35", "36W"] }
+      ]
+    };
+
+    const LAYOUT_RAJDHANI = {
+      name: "Rajdhani Travels",
+      rows: [
+        { left: ["6", "5"], right: ["4", "3", "2", "1"] },
+        { left: ["7", "8"], right: ["9", "10", "11", "12"] },
+        { left: ["13", "14"], right: ["15", "16", "17", "18"] },
+        { left: ["19", "20"], right: ["21", "22", "23", "24"] },
+        { left: ["25", "26"], right: ["27", "28", "29", "30"] },
+        { left: ["31", "32"], right: ["33", "34", "35", "36"] }
+      ]
+    };
+
+    const LAYOUT_BASTAR = {
+      name: "Bastar Travels",
+      rows: [
+        { left: ["4", "3"], right: ["1", "2", "5", "6"] },
+        { left: ["10", "9"], right: ["8", "7", "11", "12"] },
+        { left: ["16", "15"], right: ["14", "13", "17", "18"] },
+        { left: ["22", "21"], right: ["20", "19", "23", "24"] },
+        { left: ["28", "27"], right: ["26", "25", "29", "30"] },
+        { left: ["34", "33"], right: ["32", "31", "35", "36"] }
+      ]
+    };
+
+    const LAYOUT_HARSH = {
+      name: "Harsh Travels",
+      rows: [
+        { left: ["4U", "3L"], right: ["2L", "1L", "5U", "6U"] },
+        { left: ["10U", "9L"], right: ["8L", "7L", "11U", "12U"] },
+        { left: ["16U", "15L"], right: ["14L", "13L", "17U", "18U"] },
+        { left: ["22U", "21L"], right: ["20L", "19L", "23U", "24U"] },
+        { left: ["28U", "27"], right: ["26L", "25L", "29U", "30U"] }
+      ]
+    };
+
+    function normalizeDate(dStr) {
+      if (!dStr) return "";
+      const s = String(dStr).trim();
+      if (s.includes("-") && s.split("-")[0].length === 4) return s;
+      if (s.includes("/")) {
+        const p = s.split("/");
+        if (p.length === 3) {
+          if (p[0].length === 4) return `${p[0]}-${String(p[1]).padStart(2,'0')}-${String(p[2]).padStart(2,'0')}`;
+          return `${p[2]}-${String(p[1]).padStart(2,'0')}-${String(p[0]).padStart(2,'0')}`;
+        }
+      }
+      if (s.includes("-")) {
+        const p = s.split("-");
+        if (p.length === 3 && p[2].length === 4) {
+          return `${p[2]}-${String(p[1]).padStart(2,'0')}-${String(p[0]).padStart(2,'0')}`;
+        }
+      }
+      return s;
+    }
+
+    function updateLastBackupTimeDisplay(timeStr) {
+      const displayEl = document.getElementById("lastBackupDisplay");
+      if (!displayEl) return;
+      if (timeStr) {
+        localStorage.setItem(LAST_BACKUP_KEY, timeStr);
+        displayEl.innerText = `Last Backup: ${timeStr}`;
+      } else {
+        const savedTime = localStorage.getItem(LAST_BACKUP_KEY);
+        displayEl.innerText = savedTime ? `Last Backup: ${savedTime}` : "Last Backup: Never";
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const bg = type === 'error' ? 'bg-red-600' : type === 'info' ? 'bg-blue-600' : 'bg-emerald-600';
+      toast.className = `${bg} text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function autoFillPassengerName() {
+      const mobInput = document.getElementById("mobileInput");
+      const nameInput = document.getElementById("passengerNameInput");
+      if (!mobInput || !nameInput) return;
+
+      const typedMob = mobInput.value.trim();
+      if (typedMob.length === 10) {
+        const found = bookings.slice().reverse().find(b => b.mobile === typedMob && b.passengerName);
+        if (found && found.passengerName) {
+          nameInput.value = found.passengerName;
+          showToast(`Purana record mila: ${found.passengerName}`, "success");
+        }
+      }
+    }
+
+    function populateRouteDriverAndVehicleHistory() {
+      const busName = document.getElementById("memoBusSelect")?.value.trim();
+      const routeSelect = document.getElementById("memoRouteSelect");
+      const selectedTime = routeSelect ? routeSelect.value.trim() : "";
+      const historyKey = `${busName}_${selectedTime}`;
+
+      const driverList = document.getElementById("driverHistoryList");
+      const vehicleList = document.getElementById("vehicleHistoryList");
+      const driverInput = document.getElementById("voucherDriverInput");
+      const vehicleInput = document.getElementById("voucherVehicleInput");
+
+      if (!driverList || !vehicleList) return;
+
+      driverList.innerHTML = "";
+      vehicleList.innerHTML = "";
+
+      const driversSet = new Set();
+      const vehiclesSet = new Set();
+
+      if (tripDriverHistory[historyKey]) {
+        const item = tripDriverHistory[historyKey];
+        if (item.driver) driversSet.add(item.driver);
+        if (item.vehicle) vehiclesSet.add(item.vehicle);
+        if (Array.isArray(item.pastDrivers)) item.pastDrivers.forEach(d => driversSet.add(d));
+        if (Array.isArray(item.pastVehicles)) item.pastVehicles.forEach(v => vehiclesSet.add(v));
+
+        if (driverInput && !driverInput.value) driverInput.value = item.driver || "";
+        if (vehicleInput && !vehicleInput.value) vehicleInput.value = item.vehicle || "";
+      }
+
+      if (Array.isArray(settlements)) {
+        settlements.forEach(s => {
+          if (s.operator && s.operator.toLowerCase() === busName.toLowerCase()) {
+            if (s.driver) driversSet.add(s.driver);
+            if (s.vehicle) vehiclesSet.add(s.vehicle);
+          }
+        });
+      }
+
+      driversSet.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        driverList.appendChild(opt);
+      });
+
+      vehiclesSet.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        vehicleList.appendChild(opt);
+      });
+    }
+
+    function onRouteSelectionChange() {
+      const driverInput = document.getElementById("voucherDriverInput");
+      const vehicleInput = document.getElementById("voucherVehicleInput");
+      if (driverInput) driverInput.value = "";
+      if (vehicleInput) vehicleInput.value = "";
+
+      populateRouteDriverAndVehicleHistory();
+      renderChauhanMemo();
+    }
+
+    function generateVoucherWithCreditCheck() {
+      const driverName = document.getElementById("voucherDriverInput").value.trim();
+      const vehicleNo = document.getElementById("voucherVehicleInput").value.trim().toUpperCase();
+
+      if (!driverName) {
+        alert("CRITICAL: Driver Name likhna anivarya hai!");
+        document.getElementById("voucherDriverInput").focus();
+        return;
+      }
+
+      if (!vehicleNo) {
+        alert("CRITICAL: Vehicle No. / Gadi No. likhna anivarya hai!");
+        document.getElementById("voucherVehicleInput").focus();
+        return;
+      }
+
+      const busName = document.getElementById("memoBusSelect").value.trim();
+      const routeSelect = document.getElementById("memoRouteSelect");
+      const selectedTime = routeSelect ? routeSelect.value.trim() : "";
+      const historyKey = `${busName}_${selectedTime}`;
+
+      const prevData = tripDriverHistory[historyKey] || {};
+      const pastDrivers = new Set(prevData.pastDrivers || []);
+      const pastVehicles = new Set(prevData.pastVehicles || []);
+
+      pastDrivers.add(driverName);
+      pastVehicles.add(vehicleNo);
+
+      tripDriverHistory[historyKey] = {
+        driver: driverName,
+        vehicle: vehicleNo,
+        pastDrivers: Array.from(pastDrivers),
+        pastVehicles: Array.from(pastVehicles),
+        lastUpdated: new Date().toISOString()
+      };
+
+      localStorage.setItem(TRIP_HISTORY_KEY, JSON.stringify(tripDriverHistory));
+      populateRouteDriverAndVehicleHistory();
+      renderChauhanMemo();
+      saveToCloudDatabase();
+      showToast("Voucher generated! Driver aur Gadi details save ho gayi.", "success");
+    }
+
+    function applyUserPermissions() {
+      const adminTab = document.getElementById("tab-admin");
+      if (!adminTab) return;
+      if (currentUserRole === 'Admin') {
+        adminTab.classList.remove('hidden');
+        adminTab.classList.add('flex');
+      } else {
+        adminTab.classList.add('hidden');
+        adminTab.classList.remove('flex');
+      }
+    }
+
+    async function handleManualHeaderBackup() {
+      exportJSONBackup();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadBusOperators();
+      loadStaff();
+      loadBookings();
+      loadExpenses();
+      loadSettlements();
+      populateCities();
+      setDefaults();
+      renderBookingsTable();
+      renderCollectionStats();
+      renderExpensesTable();
+      renderSettlementsTable();
+      updateMemoRoutes();
+      startLiveClock();
+      renderAdminCityTags();
+      populateAdminOperatorSelects();
+      populateLayoutTripSelect();
+      updateLastBackupTimeDisplay();
+
+      const upiInput = document.getElementById("agencyUpiInput");
+      if (upiInput) upiInput.value = agencyUpiId;
+      applyUserPermissions();
+    });
+
+    function handleSaveAgencyUpi() {
+      const val = document.getElementById("agencyUpiInput").value.trim();
+      if (!val) { alert("UPI ID khali nahi ho sakti!"); return; }
+      agencyUpiId = val;
+      localStorage.setItem(UPI_ID_STORAGE_KEY, agencyUpiId);
+      saveToCloudDatabase();
+      showToast(`UPI ID updated: ${agencyUpiId}!`, "success");
+    }
+
+    function getActiveLayout(busName, busTime) {
+      const bName = (busName || "").trim();
+      const bTime = (busTime || "").trim();
+      const tripKey = `${bName}_${bTime}`;
+      
+      if (customLayouts[tripKey]) return customLayouts[tripKey];
+      if (customLayouts[bName]) return customLayouts[bName];
+
+      for (const [mKey, mVal] of Object.entries(BUS_MASTER_ROUTES)) {
+        if (mKey.startsWith(bName + "_") && mVal.returnTime === bTime && mVal.syncReturnLayout) {
+          if (customLayouts[mKey]) return customLayouts[mKey];
+        }
+      }
+
+      const bNameLower = bName.toLowerCase();
+      if (bNameLower.includes("manish")) {
+        if (bTime === "04:05 AM" || bTime === "08:25 AM") return LAYOUT_MANISH_EARLY;
+        return LAYOUT_MANISH_GENERAL;
+      }
+      if (bNameLower.includes("rajdhani")) return LAYOUT_RAJDHANI;
+      if (bNameLower.includes("harsh")) return LAYOUT_HARSH;
+      if (bNameLower.includes("bastar")) return LAYOUT_BASTAR;
+      return LAYOUT_BASTAR;
+    }
+
+    function exportJSONBackup() {
+      const now = new Date();
+      const timeString = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString('en-US');
+      updateLastBackupTimeDisplay(timeString);
+
+      const backupData = {
+        version: "v65",
+        exportDate: now.toISOString(),
+        agencyUpiId, bookings, expenses, settlements, staffList, busOperators, MASTER_CITIES, BUS_MASTER_ROUTES, customLayouts, tripDriverHistory
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "Chauhan_Travels_Backup_" + now.toISOString().split('T')[0] + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Backup JSON downloaded!", "success");
+    }
+
+    function importJSONBackup(event) {
+      if (currentUserRole !== 'Admin') { alert("Access Denied! Only Admin can restore."); return; }
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) { bookings = imported; }
+          else if (typeof imported === 'object' && imported !== null) {
+            bookings = imported.bookings || bookings;
+            expenses = imported.expenses || expenses;
+            settlements = imported.settlements || settlements;
+            if (imported.agencyUpiId) agencyUpiId = imported.agencyUpiId;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+          localStorage.setItem(EXPENSE_STORAGE_KEY, JSON.stringify(expenses));
+          localStorage.setItem(SETTLEMENT_STORAGE_KEY, JSON.stringify(settlements));
+          location.reload();
+        } catch (err) { alert("Invalid backup JSON file!"); }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function loadBusOperators() {
+      const busSelect = document.getElementById("busNameInput");
+      const filterBus = document.getElementById("filterBusName");
+      const memoBus = document.getElementById("memoBusSelect");
+      const settleBus = document.getElementById("settleOperatorSelect");
+      [busSelect, filterBus, memoBus, settleBus].forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = "";
+        if (sel === filterBus) sel.innerHTML = `<option value="ALL">All Buses</option>`;
+        busOperators.forEach(op => {
+          const opt = document.createElement("option"); opt.value = op; opt.textContent = op; sel.appendChild(opt);
+        });
+      });
+    }
+
+    function loadStaff() {
+      const select = document.getElementById("loginUserSelect");
+      const adminStaffSelect = document.getElementById("adminSelectStaff");
+      if (select) {
+        select.innerHTML = "";
+        staffList.forEach(st => {
+          const opt = document.createElement("option"); opt.value = st.name; opt.textContent = `${st.name} (${st.role})`; select.appendChild(opt);
+        });
+      }
+      if (adminStaffSelect) {
+        adminStaffSelect.innerHTML = `<option value="">-- Add New Staff --</option>`;
+        staffList.forEach(st => {
+          const opt = document.createElement("option"); opt.value = st.name; opt.textContent = `${st.name} (${st.role})`; adminStaffSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const staffName = document.getElementById("loginUserSelect").value;
+      const pass = document.getElementById("loginPasswordInput").value.trim();
+      const found = staffList.find(s => s.name === staffName);
+      if (!found || found.pin !== pass) { alert("Incorrect PIN! Default: 1234"); return; }
+      currentLoggedInStaff = found.name;
+      currentUserRole = found.role;
+      document.getElementById("loggedInUserBadge").innerText = `${currentLoggedInStaff} (${currentUserRole})`;
+      document.getElementById("bookedByInput").value = currentLoggedInStaff;
+      document.getElementById("loginOverlay").classList.add("hidden");
+      applyUserPermissions();
+      showToast(`Welcome back, ${currentLoggedInStaff}!`, "success");
+    }
+
+    function handleLogout() {
+      if (confirm("Logout karna chahte hain?")) {
+        document.getElementById("loginPasswordInput").value = "";
+        document.getElementById("loginOverlay").classList.remove("hidden");
+        switchTab('booking');
+      }
+    }
+
+    function onAdminSelectStaffChange() {
+      const selectedName = document.getElementById("adminSelectStaff").value;
+      const nameInput = document.getElementById("newStaffName");
+      const roleInput = document.getElementById("newStaffRole");
+      const pinInput = document.getElementById("newStaffPin");
+      const btnDelete = document.getElementById("btnDeleteStaff");
+      const btnSave = document.getElementById("btnSaveStaff");
+      if (!selectedName) { resetStaffForm(); return; }
+      const st = staffList.find(s => s.name === selectedName);
+      if (st) {
+        nameInput.value = st.name; roleInput.value = st.role; pinInput.value = st.pin; btnSave.innerText = "Update Staff";
+        if (st.name !== "Admin") btnDelete.classList.remove("hidden"); else btnDelete.classList.add("hidden");
+      }
+    }
+
+    function resetStaffForm() {
+      document.getElementById("adminSelectStaff").value = "";
+      document.getElementById("newStaffName").value = "";
+      document.getElementById("newStaffRole").value = "Staff";
+      document.getElementById("newStaffPin").value = "";
+      document.getElementById("btnSaveStaff").innerText = "Save Staff";
+      document.getElementById("btnDeleteStaff").classList.add("hidden");
+    }
+
+    function handleAddNewStaff(e) {
+      e.preventDefault();
+      const name = document.getElementById("newStaffName").value.trim();
+      const role = document.getElementById("newStaffRole").value.trim() || "Staff";
+      const pin = document.getElementById("newStaffPin").value.trim();
+      const selectedExisting = document.getElementById("adminSelectStaff").value;
+      if (!name || !pin) return;
+      if (selectedExisting) {
+        const found = staffList.find(s => s.name === selectedExisting);
+        if (found) { found.name = name; found.role = role; found.pin = pin; }
+      } else {
+        staffList.push({ name, pin, role });
+      }
+      localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staffList));
+      loadStaff();
+      resetStaffForm();
+      showToast(`Staff ${name} saved!`, "success");
+    }
+
+    function handleDeleteStaff() {
+      const selectedName = document.getElementById("adminSelectStaff").value;
+      if (!selectedName || selectedName === "Admin") { alert("Main Admin cannot be deleted!"); return; }
+      if (confirm(`Staff "${selectedName}" ko delete karein?`)) {
+        staffList = staffList.filter(s => s.name !== selectedName);
+        localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staffList));
+        loadStaff();
+        resetStaffForm();
+        showToast("Staff deleted!", "info");
+      }
+    }
+
+    function renderAdminCityTags() {
+      const container = document.getElementById("adminCityTagsContainer");
+      if (!container) return;
+      container.innerHTML = "";
+      MASTER_CITIES.forEach((city, index) => {
+        const tag = document.createElement("span");
+        tag.className = "inline-flex items-center gap-1.5 px-2 py-1 rounded bg-white border text-xs font-semibold shadow-sm";
+        tag.innerHTML = `<span>${city}</span><button type="button" onclick="handleDeleteCity(${index})" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>`;
+        container.appendChild(tag);
+      });
+    }
+
+    function handleAddCity() {
+      const val = document.getElementById("newCityInput").value.trim();
+      if (!val || MASTER_CITIES.some(c => c.toLowerCase() === val.toLowerCase())) return;
+      MASTER_CITIES.push(val);
+      localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES));
+      document.getElementById("newCityInput").value = "";
+      renderAdminCityTags(); populateCities();
+    }
+
+    function handleDeleteCity(index) {
+      if (MASTER_CITIES.length <= 2) { alert("Min 2 cities required!"); return; }
+      MASTER_CITIES.splice(index, 1);
+      localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES));
+      renderAdminCityTags(); populateCities();
+    }
+
+    function renderAdminOperatorTags() {
+      const container = document.getElementById("adminOperatorTagsContainer");
+      if (!container) return;
+      container.innerHTML = "";
+      busOperators.forEach((op, index) => {
+        const tag = document.createElement("span");
+        tag.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border text-xs font-bold shadow-sm";
+        tag.innerHTML = `<span><i class="fa-solid fa-bus text-blue-600 mr-1"></i>${op}</span><button type="button" onclick="handleDeleteOperator(${index})" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>`;
+        container.appendChild(tag);
+      });
+    }
+
+    function handleAddOperator() {
+      const opName = document.getElementById("newOperatorInput").value.trim();
+      if (!opName || busOperators.some(op => op.toLowerCase() === opName.toLowerCase())) return;
+      busOperators.push(opName);
+      localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
+      document.getElementById("newOperatorInput").value = "";
+      loadBusOperators(); populateAdminOperatorSelects();
+    }
+
+    function handleDeleteOperator(index) {
+      if (busOperators.length <= 1) { alert("Min 1 operator required!"); return; }
+      const opName = busOperators[index];
+      if (confirm(`Operator "${opName}" delete karein?`)) {
+        busOperators.splice(index, 1);
+        localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
+        loadBusOperators(); populateAdminOperatorSelects();
+      }
+    }
+
+    function resetRouteForm() {
+      editingRouteKey = null;
+      document.getElementById("routeFormHeading").innerText = "Add / Edit Trip Route";
+      document.getElementById("btnSaveMasterRoute").innerText = "Save Route & Schedule";
+      document.getElementById("routeTimeInput").value = "";
+      document.getElementById("routeReturnTimeInput").value = "";
+      document.getElementById("routeServiceNameInput").value = "";
+      document.getElementById("routeReturnServiceNameInput").value = "";
+      document.getElementById("routeCleanRouteInput").value = "";
+    }
+
+    function editMasterRoute(key) {
+      const item = BUS_MASTER_ROUTES[key];
+      if (!item) return;
+      editingRouteKey = key;
+      const parts = key.split("_");
+      const operator = parts[0];
+      const time = parts[1] || "";
+
+      document.getElementById("routeOperatorSelect").value = operator;
+      document.getElementById("routeTimeInput").value = time;
+      document.getElementById("routeReturnTimeInput").value = item.returnTime || "";
+      document.getElementById("routeServiceNameInput").value = item.serviceName || "";
+      document.getElementById("routeReturnServiceNameInput").value = item.returnServiceName || "";
+      document.getElementById("routeCleanRouteInput").value = item.fullRouteDisplay || "";
+
+      document.getElementById("routeFormHeading").innerText = `Editing Trip: ${operator} (${time})`;
+      document.getElementById("btnSaveMasterRoute").innerText = "Update Route & Schedule";
+      showToast(`Trip ${key} details loaded for editing!`, "info");
+    }
+
+    function handleAddMasterRoute() {
+      const operator = document.getElementById("routeOperatorSelect").value;
+      const time = document.getElementById("routeTimeInput").value.trim();
+      const returnTime = document.getElementById("routeReturnTimeInput").value.trim();
+      const serviceName = document.getElementById("routeServiceNameInput").value.trim() || operator;
+      const returnServiceName = document.getElementById("routeReturnServiceNameInput").value.trim() || serviceName;
+      const cleanRoute = document.getElementById("routeCleanRouteInput").value.trim().toUpperCase();
+
+      if (!operator || !time || !cleanRoute) {
+        alert("Operator, Departure Time aur Route Title bharna anivarya hai!");
+        return;
+      }
+
+      const newKey = `${operator}_${time}`;
+      if (editingRouteKey && editingRouteKey !== newKey) {
+        delete BUS_MASTER_ROUTES[editingRouteKey];
+      }
+
+      BUS_MASTER_ROUTES[newKey] = {
+        serviceName,
+        returnServiceName,
+        fullRouteDisplay: cleanRoute,
+        returnTime: returnTime || "N/A"
+      };
+
+      localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES));
+      resetRouteForm();
+      renderAdminRoutesList();
+      populateLayoutTripSelect();
+      updateDestinationsAndTimes();
+      updateMemoRoutes();
+      saveToCloudDatabase();
+      showToast(`Route successfully saved for ${newKey}!`, "success");
+    }
+
+    function renderAdminRoutesList() {
+      const container = document.getElementById("adminRoutesListContainer");
+      if (!container) return;
+      container.innerHTML = "";
+      const keys = Object.keys(BUS_MASTER_ROUTES);
+      if (!keys.length) {
+        container.innerHTML = `<div class="text-slate-400 italic text-[11px] p-2">No routes configured yet.</div>`;
+        return;
+      }
+      keys.forEach(key => {
+        const item = BUS_MASTER_ROUTES[key];
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between p-2 bg-slate-50 border rounded text-[11px]";
+        row.innerHTML = `
+          <div>
+            <b>${key.replace('_', ' • ')}</b> (${item.serviceName})
+            <div class="text-blue-700">${item.fullRouteDisplay}</div>
+            <div class="text-slate-500 text-[10px]">Return: <b class="text-emerald-700">${item.returnTime || 'N/A'}</b> (${item.returnServiceName || '-'})</div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="editMasterRoute('${key}')" title="Edit" class="p-1 text-amber-600 hover:text-amber-800 cursor-pointer"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" onclick="delete BUS_MASTER_ROUTES['${key}']; localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES)); renderAdminRoutesList(); populateLayoutTripSelect();" title="Delete" class="p-1 text-red-500 hover:text-red-700 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function populateAdminOperatorSelects() {
+      const rSelect = document.getElementById("routeOperatorSelect");
+      if (rSelect) {
+        rSelect.innerHTML = "";
+        busOperators.forEach(op => { const opt = document.createElement("option"); opt.value = op; opt.textContent = op; rSelect.appendChild(opt); });
+      }
+      renderAdminOperatorTags();
+      renderAdminRoutesList();
+      populateLayoutTripSelect();
+    }
+
+    function populateLayoutTripSelect() {
+      const lSelect = document.getElementById("layoutTripSelect");
+      if (!lSelect) return;
+      lSelect.innerHTML = "";
+      const keys = Object.keys(BUS_MASTER_ROUTES);
+      if (keys.length === 0) {
+        lSelect.innerHTML = `<option value="">No routes available</option>`;
+        return;
+      }
+      keys.forEach(k => {
+        const item = BUS_MASTER_ROUTES[k];
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = `${k.replace('_', ' - ')} [${item.fullRouteDisplay}]`;
+        lSelect.appendChild(opt);
+      });
+      onLayoutTripChange();
+    }
+
+    function onLayoutTripChange() {
+      const tripKey = document.getElementById("layoutTripSelect")?.value;
+      const textarea = document.getElementById("customLayoutTextarea");
+      const checkbox = document.getElementById("applyToReturnTripCheckbox");
+      if (!textarea || !tripKey) return;
+
+      if (customLayouts[tripKey]) {
+        const lines = customLayouts[tripKey].rows.map(r => `${r.left.join(", ")} | ${r.right.join(", ")}`);
+        textarea.value = lines.join("\n");
+      } else {
+        textarea.value = "";
+      }
+
+      if (checkbox && BUS_MASTER_ROUTES[tripKey]) {
+        checkbox.checked = !!BUS_MASTER_ROUTES[tripKey].syncReturnLayout;
+      }
+    }
+
+    function loadPresetLayout(type) {
+      const textarea = document.getElementById("customLayoutTextarea");
+      if (!textarea) return;
+      if (type === '2+1') {
+        textarea.value = `6, 5 | 1, 2W, 3, 4W\n7, 8 | 9, 10W, 11, 12W\n18, 17 | 13, 14W, 15, 16W\n19, 20 | 21, 22W, 23, 24W\n29, 30 | 25, 26W, 27, 28W\n31, 32 | 33, 34W, 35, 36W`;
+      } else if (type === '2+2') {
+        textarea.value = `4, 3 | 1, 2, 5, 6\n10, 9 | 8, 7, 11, 12\n16, 15 | 14, 13, 17, 18\n22, 21 | 20, 19, 23, 24\n28, 27 | 26, 25, 29, 30\n34, 33 | 32, 31, 35, 36`;
+      }
+      showToast(`${type} preset loaded!`, "info");
+    }
+
+    function handleSaveCustomLayout() {
+      const tripKey = document.getElementById("layoutTripSelect").value;
+      const textareaVal = document.getElementById("customLayoutTextarea").value.trim();
+      const imageInput = document.getElementById("layoutImageInput");
+      const syncCheckbox = document.getElementById("applyToReturnTripCheckbox");
+
+      if (!tripKey) { alert("Trip select karein!"); return; }
+
+      if (BUS_MASTER_ROUTES[tripKey]) {
+        BUS_MASTER_ROUTES[tripKey].syncReturnLayout = syncCheckbox ? syncCheckbox.checked : true;
+        localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES));
+      }
+
+      if (imageInput && imageInput.files && imageInput.files[0]) {
+        const file = imageInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          customLayouts[tripKey] = {
+            name: `${tripKey} Image Layout`,
+            imageUri: e.target.result,
+            rows: []
+          };
+          localStorage.setItem(CUSTOM_LAYOUT_KEY, JSON.stringify(customLayouts));
+          showToast(`Seat layout image saved for ${tripKey}!`, "success");
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      if (!textareaVal) {
+        alert("Kripya row configuration text likhein ya image upload karein!");
+        return;
+      }
+
+      const lines = textareaVal.split("\n");
+      const rows = [];
+      lines.forEach(line => {
+        const parts = line.split("|");
+        if (parts.length >= 2) {
+          const left = parts[0].split(",").map(s => s.trim()).filter(Boolean);
+          const right = parts[1].split(",").map(s => s.trim()).filter(Boolean);
+          rows.push({ left, right });
+        }
+      });
+
+      if (rows.length === 0) {
+        alert("Galat format! Format: 'Left seats | Right seats'");
+        return;
+      }
+
+      customLayouts[tripKey] = {
+        name: `${tripKey} Custom Text Layout`,
+        rows: rows
+      };
+
+      localStorage.setItem(CUSTOM_LAYOUT_KEY, JSON.stringify(customLayouts));
+      saveToCloudDatabase();
+      showToast(`Manual seat layout saved for ${tripKey}!`, "success");
+    }
+
+    function handleClearAllDatabase() {
+      if (currentUserRole !== 'Admin') { alert("Sirf Admin kar sakta hai!"); return; }
+      const enteredCode = prompt("Master Code enter karein (PIN: 324657):");
+      if (enteredCode && enteredCode.trim() === "324657") {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(EXPENSE_STORAGE_KEY);
+        localStorage.removeItem(SETTLEMENT_STORAGE_KEY);
+        bookings = []; expenses = []; settlements = [];
+        saveBookings(); location.reload();
+      }
+    }
+
+    function startLiveClock() {
+      const clockEl = document.getElementById("liveClockDisplay");
+      setInterval(() => {
+        if (!clockEl) return;
+        const now = new Date();
+        clockEl.textContent = now.toLocaleDateString('en-GB') + " | " + now.toLocaleTimeString('en-US');
+      }, 1000);
+    }
+
+    function setDefaults() {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+      document.getElementById("bookingDateInput").value = `${dd}-${mm}-${yyyy}`;
+      const jDateInput = document.getElementById("journeyDateInput");
+      jDateInput.value = todayStr;
+      jDateInput.min = todayStr; // Prevent Back-Date Booking
+      document.getElementById("filterJourneyDate").value = todayStr;
+      document.getElementById("memoDateInput").value = todayStr;
+      document.getElementById("summaryDatePicker").value = todayStr;
+      if (document.getElementById("filterUpcomingDate")) document.getElementById("filterUpcomingDate").value = todayStr;
+      if (document.getElementById("filterExpenseDate")) document.getElementById("filterExpenseDate").value = todayStr;
+      if (document.getElementById("filterSettlementDate")) document.getElementById("filterSettlementDate").value = todayStr;
+      document.getElementById("bookedByInput").value = currentLoggedInStaff;
+      document.getElementById("displayTicketNo").innerText = getNextTicketNumber();
+    }
+
+    function populateCities() {
+      const fromSelect = document.getElementById("fromCityInput");
+      const toSelect = document.getElementById("toCityInput");
+      fromSelect.innerHTML = ""; toSelect.innerHTML = "";
+      MASTER_CITIES.forEach(city => {
+        const opt1 = document.createElement("option"); opt1.value = city; opt1.textContent = city; if (city === "Bijapur") opt1.selected = true; fromSelect.appendChild(opt1);
+        const opt2 = document.createElement("option"); opt2.value = city; opt2.textContent = city; if (city === "Raipur") opt2.selected = true; toSelect.appendChild(opt2);
+      });
+      onOriginChange();
+    }
+
+    function handleBusChange() { updateDestinationsAndTimes(); }
+
+    function onOriginChange() {
+      const fromCity = document.getElementById("fromCityInput").value;
+      const toSelect = document.getElementById("toCityInput");
+      const currentDest = toSelect.value;
+      toSelect.innerHTML = "";
+      MASTER_CITIES.forEach(city => {
+        if (city.toLowerCase() !== fromCity.toLowerCase()) {
+          const opt = document.createElement("option"); opt.value = city; opt.textContent = city; toSelect.appendChild(opt);
+        }
+      });
+      if (currentDest && currentDest.toLowerCase() !== fromCity.toLowerCase()) toSelect.value = currentDest;
+      updateDestinationsAndTimes();
+    }
+
+    function swapOriginDestination() {
+      const fromSelect = document.getElementById("fromCityInput");
+      const toSelect = document.getElementById("toCityInput");
+      const oldFrom = fromSelect.value;
+      const oldTo = toSelect.value;
+
+      toSelect.innerHTML = "";
+      MASTER_CITIES.forEach(city => {
+        if (city.toLowerCase() !== oldTo.toLowerCase()) {
+          const opt = document.createElement("option");
+          opt.value = city;
+          opt.textContent = city;
+          toSelect.appendChild(opt);
+        }
+      });
+
+      fromSelect.value = oldTo;
+      toSelect.value = oldFrom;
+
+      updateDestinationsAndTimes();
+      showToast(`Swapped: ${fromSelect.value} to ${toSelect.value}`, "info");
+    }
+
+    function updateDestinationsAndTimes() {
+      const busName = document.getElementById("busNameInput")?.value || "";
+      const fromCity = (document.getElementById("fromCityInput")?.value || "").toLowerCase().trim();
+      const timeSelect = document.getElementById("busTimeInput");
+      if (!timeSelect) return;
+      timeSelect.innerHTML = "";
+
+      const localOrigins = ["bijapur", "bhairamgarh", "bhopalpatnam", "geedam", "jagdalpur", "madded", "patnam"];
+      const isOutbound = localOrigins.includes(fromCity);
+
+      let times = [];
+      const matchedRoutes = [];
+      
+      Object.keys(BUS_MASTER_ROUTES).forEach(k => {
+        if (k.startsWith(busName + "_")) {
+          const depTime = k.replace(busName + "_", "").trim();
+          const routeObj = BUS_MASTER_ROUTES[k];
+          const retTime = (routeObj.returnTime || "").trim();
+
+          if (isOutbound) {
+            if (depTime && depTime !== "N/A") matchedRoutes.push(depTime);
+          } else {
+            if (retTime && retTime !== "N/A") matchedRoutes.push(retTime);
+            else if (depTime) matchedRoutes.push(depTime);
+          }
+        }
+      });
+
+      if (matchedRoutes.length > 0) {
+        times = [...new Set(matchedRoutes)];
+      } else {
+        if (busName === "Manish Travels") {
+          times = isOutbound ? ["04:05 AM", "07:05 PM", "07:55 PM", "09:10 PM"] : ["08:25 AM", "06:45 PM", "09:30 PM", "10:25 PM"];
+        } else if (busName === "Rajdhani Travels") {
+          times = isOutbound ? ["05:30 PM", "06:25 PM"] : ["05:00 PM", "06:30 PM"];
+        } else if (busName === "Bastar Travels") {
+          times = isOutbound ? ["11:30 PM"] : ["08:30 PM"];
+        } else if (busName === "Harsh Travels") {
+          times = isOutbound ? ["08:45 PM"] : ["08:10 PM"];
+        } else {
+          times = ["08:00 PM"];
+        }
+      }
+
+      times.forEach(t => { 
+        const opt = document.createElement("option"); 
+        opt.value = t; 
+        opt.textContent = t; 
+        timeSelect.appendChild(opt); 
+      });
+    }
+
+    function calculateTotalFare() {
+      const rawSeat = document.getElementById("seatInput").value.trim();
+      const perSeatFare = parseFloat(document.getElementById("perPassengerFareInput").value) || 0;
+      const seatCount = splitSeats(rawSeat).length || 1;
+      const total = seatCount * perSeatFare;
+      document.getElementById("fareInput").value = total;
+      const mode = document.getElementById("paymentModeInput").value;
+      if (mode === "Split (Cash + UPI)") {
+        const half = Math.round(total / 2);
+        document.getElementById("splitCashInput").value = half;
+        document.getElementById("splitUpiInput").value = total - half;
+      }
+    }
+
+    function handlePaymentModeChange() {
+      const mode = document.getElementById("paymentModeInput").value;
+      const splitBox = document.getElementById("splitPaymentBox");
+      if (mode === "Split (Cash + UPI)") { splitBox.classList.remove("hidden"); calculateTotalFare(); }
+      else { splitBox.classList.add("hidden"); }
+    }
+
+    function syncSplitFromCash() {
+      const total = parseFloat(document.getElementById("fareInput").value) || 0;
+      const cash = parseFloat(document.getElementById("splitCashInput").value) || 0;
+      document.getElementById("splitUpiInput").value = Math.max(0, total - cash);
+    }
+
+    function syncSplitFromUpi() {
+      const total = parseFloat(document.getElementById("fareInput").value) || 0;
+      const upi = parseFloat(document.getElementById("splitUpiInput").value) || 0;
+      document.getElementById("splitCashInput").value = Math.max(0, total - upi);
+    }
+
+    function updateMemoRoutes() {
+      const memoDateInput = document.getElementById("memoDateInput");
+      const memoBusSelect = document.getElementById("memoBusSelect");
+      const routeSelect = document.getElementById("memoRouteSelect");
+      if (!routeSelect || !memoDateInput || !memoBusSelect) return;
+      const memoDate = normalizeDate(memoDateInput.value);
+      const busName = memoBusSelect.value.trim();
+      routeSelect.innerHTML = "";
+      const matched = bookings.filter(b => b.status === "CONFIRMED" && normalizeDate(b.journeyDate) === memoDate && b.busName.toLowerCase().trim() === busName.toLowerCase());
+      if (matched.length === 0) {
+        const opt = document.createElement("option"); opt.value = ""; opt.textContent = "Is date par koi booking nahi hai"; routeSelect.appendChild(opt);
+        renderChauhanMemo(); return;
+      }
+      const departureTimes = [...new Set(matched.map(b => b.busTime.trim()))];
+      departureTimes.forEach(time => {
+        const key = `${busName}_${time}`;
+        const info = BUS_MASTER_ROUTES[key] || { serviceName: `${busName} Service`, fullRouteDisplay: "BIJAPUR TO DESTINATION" };
+        const opt = document.createElement("option"); opt.value = time; opt.textContent = `${info.serviceName} (${time}) - ${info.fullRouteDisplay}`; routeSelect.appendChild(opt);
+      });
+      onRouteSelectionChange();
+    }
+
+    function onMemoParamChange() { updateMemoRoutes(); }
+
+    function loadBookings() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) { try { bookings = JSON.parse(data); } catch (e) { bookings = []; } }
+    }
+
+    function loadExpenses() {
+      const data = localStorage.getItem(EXPENSE_STORAGE_KEY);
+      if (data) { try { expenses = JSON.parse(data); } catch (e) { expenses = []; } }
+    }
+
+    function saveExpenses() {
+      localStorage.setItem(EXPENSE_STORAGE_KEY, JSON.stringify(expenses));
+      renderExpensesTable(); renderCollectionStats(); saveToCloudDatabase();
+    }
+
+    function loadSettlements() {
+      const data = localStorage.getItem(SETTLEMENT_STORAGE_KEY);
+      if (data) { try { settlements = JSON.parse(data); } catch (e) { settlements = []; } }
+    }
+
+    function saveSettlements() {
+      localStorage.setItem(SETTLEMENT_STORAGE_KEY, JSON.stringify(settlements));
+      renderSettlementsTable(); renderCollectionStats(); saveToCloudDatabase();
+    }
+
+    function renderChauhanMemo() {
+      const container = document.getElementById("memoContainer");
+      if (!container) return;
+      const memoDate = normalizeDate(document.getElementById("memoDateInput").value);
+      const busName = document.getElementById("memoBusSelect").value.trim();
+      const selectedTime = document.getElementById("memoRouteSelect")?.value.trim() || "";
+      const commInput = document.getElementById("memoCommInput")?.value.trim() || "10%";
+      const gstInput = document.getElementById("memoGstInput")?.value.trim() || "5%";
+      const driverName = document.getElementById("voucherDriverInput")?.value.trim() || "________________";
+      const vehicleNo = document.getElementById("voucherVehicleInput")?.value.trim().toUpperCase() || "________________";
+
+      const tripBookings = bookings.filter(b => b.status === "CONFIRMED" && b.busName.toLowerCase().trim() === busName.toLowerCase() && normalizeDate(b.journeyDate) === memoDate && (!selectedTime || b.busTime.trim() === selectedTime));
+      
+      const masterKey = `${busName}_${selectedTime}`;
+      let detectedRoute = "";
+      if (BUS_MASTER_ROUTES[masterKey] && BUS_MASTER_ROUTES[masterKey].fullRouteDisplay) {
+        detectedRoute = BUS_MASTER_ROUTES[masterKey].fullRouteDisplay;
+      } else if (tripBookings.length > 0) {
+        detectedRoute = `${tripBookings[0].fromCity.toUpperCase()} TO ${tripBookings[0].toCity.toUpperCase()}`;
+      } else {
+        detectedRoute = "BIJAPUR TO RAIPUR / DESTINATION";
+      }
+
+      let totalGrossFare = 0, totalSeatCount = 0, rowsHtml = "";
+      if (!tripBookings.length) {
+        rowsHtml = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-semibold">Koi booking nahi mili.</td></tr>`;
+      } else {
+        tripBookings.forEach(b => {
+          const count = splitSeats(b.seatNo).length || 1;
+          totalSeatCount += count; totalGrossFare += Number(b.fare) || 0;
+          rowsHtml += `<tr class="border-b border-amber-200 text-xs"><td class="p-2 font-bold">${b.fromCity.toUpperCase()} TO ${b.toCity.toUpperCase()}<div class="text-[10px] text-slate-500 font-normal">${b.passengerName} (Tkt: ${b.ticketNo})</div></td><td class="p-2 text-center font-bold">${count}</td><td class="p-2 font-bold text-blue-900">${b.seatNo}</td><td class="p-2 text-right">₹${Math.round(b.fare/count)}</td><td class="p-2 text-right font-bold">₹${b.fare}</td></tr>`;
+        });
+      }
+
+      const commPercent = parseFloat(commInput) || 0;
+      const gstPercent = parseFloat(gstInput) || 0;
+
+      const commAmount = Math.round((totalGrossFare * commPercent) / 100);
+      const gstAmount = Math.round((totalGrossFare * gstPercent) / 100);
+      const netPayable = Math.max(0, totalGrossFare - commAmount + gstAmount);
+
+      container.innerHTML = `
+        <div class="text-center border-b border-amber-300 pb-2 mb-2 font-serif">
+          <h2 class="text-lg font-black text-amber-950">चौहान बुकिंग काउण्टर (VOUCHER)</h2>
+          <div class="text-[10px] text-amber-900 font-sans">न्यू बस स्टैण्ड, बीजापुर (छ.ग.) • 9340669984</div>
+        </div>
+        <div class="text-xs mb-2 font-semibold">
+          <div>बस सेवा: <span class="font-bold underline text-amber-950">${busName}</span> (${selectedTime || 'General'})</div>
+          <div>मुख्य रूट: <span class="font-bold text-blue-900">${detectedRoute}</span></div>
+          <div class="flex justify-between mt-1">
+            <span>वाहन क्र.: <b>${vehicleNo}</b></span>
+            <span>चालक: <b>${driverName}</b></span>
+            <span>दिनांक: <b>${document.getElementById("memoDateInput").value}</b></span>
+          </div>
+        </div>
+        <table class="w-full text-left text-xs border border-amber-300 mb-2 bg-white/70">
+          <thead class="bg-amber-200/80">
+            <tr>
+              <th class="p-1.5">रूट</th>
+              <th class="p-1.5 text-center">सीट</th>
+              <th class="p-1.5">सीट नं.</th>
+              <th class="p-1.5 text-right">दर</th>
+              <th class="p-1.5 text-right">किराया</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot>
+            <tr class="bg-amber-100/60 font-bold">
+              <td class="p-1.5">योग</td>
+              <td class="p-1.5 text-center text-blue-900">${totalSeatCount}</td>
+              <td colspan="2"></td>
+              <td class="p-1.5 text-right">₹${totalGrossFare}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="text-xs font-bold border-t border-amber-400 pt-1.5 space-y-1">
+          <div class="flex justify-between">
+            <span>कुल किराया (Gross Total):</span>
+            <span>₹${totalGrossFare}</span>
+          </div>
+          ${commPercent > 0 ? `
+            <div class="flex justify-between text-red-700">
+              <span>घटाइये: कमीशन (${commPercent}%):</span>
+              <span>- ₹${commAmount}</span>
+            </div>
+          ` : ''}
+          ${gstPercent > 0 ? `
+            <div class="flex justify-between text-blue-800">
+              <span>जोड़िये: GST (${gstPercent}%):</span>
+              <span>+ ₹${gstAmount}</span>
+            </div>
+          ` : ''}
+          <div class="flex justify-between text-sm bg-amber-200 p-1.5 rounded font-black">
+            <span>शुद्ध देय राशि (NET PAYABLE TO BUS):</span>
+            <span>₹${netPayable}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function printCurrentMemo() {
+      const d = document.getElementById("voucherDriverInput").value.trim();
+      const v = document.getElementById("voucherVehicleInput").value.trim();
+      if (!d || !v) { alert("Driver Name aur Vehicle No. bharna anivarya hai!"); return; }
+      const tripBookings = bookings.filter(b => b.status === "CONFIRMED" && b.paymentMode === "Credit");
+      if (tripBookings.length > 0) { openCreditAlertModal(tripBookings); return; }
+      executePrintAction();
+    }
+
+    function openCreditAlertModal(creditList) {
+      document.getElementById("creditPassengerCount").innerText = creditList.length;
+      const listContainer = document.getElementById("creditPassengerList");
+      listContainer.innerHTML = "";
+      let totalDue = 0;
+      creditList.forEach(b => {
+        totalDue += (Number(b.fare) || 0);
+        listContainer.innerHTML += `<div class="flex justify-between p-1.5 bg-white rounded border text-xs"><div><b>${b.passengerName}</b> (${b.seatNo})</div><div class="font-bold text-red-600">₹${b.fare}</div></div>`;
+      });
+      document.getElementById("creditTotalDueAmount").innerText = `₹${totalDue}`;
+      document.getElementById("creditAlertModal").classList.remove("hidden");
+    }
+
+    function closeCreditAlertModal() { document.getElementById("creditAlertModal").classList.add("hidden"); }
+    function proceedPrintAfterCreditWarning() { closeCreditAlertModal(); executePrintAction(); }
+
+    function executePrintAction() {
+      const memoContainer = document.getElementById("memoContainer");
+      if (!memoContainer || !memoContainer.innerHTML.trim()) { alert("Pehle voucher preview generate karein!"); return; }
+      document.getElementById("print-area").innerHTML = `<div style="max-width: 148mm; margin: 0 auto; padding: 12px;">${memoContainer.innerHTML}</div>`;
+      setTimeout(() => { window.print(); }, 150);
+    }
+
+    function shareMemoWhatsApp() {
+      const memoDate = document.getElementById("memoDateInput").value;
+      const busName = document.getElementById("memoBusSelect").value;
+      const selectedTime = document.getElementById("memoRouteSelect")?.value.trim() || "";
+      const commInput = document.getElementById("memoCommInput")?.value.trim() || "10%";
+      const gstInput = document.getElementById("memoGstInput")?.value.trim() || "5%";
+      const driverName = document.getElementById("voucherDriverInput").value.trim() || "N/A";
+      const vehicleNo = document.getElementById("voucherVehicleInput").value.trim().toUpperCase() || "N/A";
+
+      const tripBookings = bookings.filter(b => 
+        b.status === "CONFIRMED" &&
+        b.busName.toLowerCase().trim() === busName.toLowerCase().trim() && 
+        normalizeDate(b.journeyDate) === normalizeDate(memoDate) &&
+        (!selectedTime || b.busTime.trim() === selectedTime)
+      );
+
+      if (!tripBookings.length) { alert("No active bookings found for this trip!"); return; }
+
+      const totalGross = tripBookings.reduce((sum, b) => sum + Number(b.fare), 0);
+      const totalSeats = tripBookings.reduce((sum, b) => sum + splitSeats(b.seatNo).length, 0);
+      const commAmount = Math.round((totalGross * (parseFloat(commInput) || 0)) / 100);
+      const gstAmount = Math.round((totalGross * (parseFloat(gstInput) || 0)) / 100);
+      const net = Math.max(0, totalGross - commAmount + gstAmount);
+
+      let pList = `🚌 *CHAUHAN TOUR & TRAVELS* 🚌\n`;
+      pList += `📍 *New Bus Stand, Bijapur (C.G.)*\n`;
+      pList += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      pList += `📋 *TRIP VOUCHER & SUMMARY*\n`;
+      pList += `• *Bus Operator:* ${busName} (${selectedTime})\n`;
+      pList += `• *Journey Date:* ${memoDate}\n`;
+      pList += `• *Vehicle No:* ${vehicleNo}\n`;
+      pList += `• *Driver Name:* ${driverName}\n`;
+      pList += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      pList += `💺 *BOOKINGS DETAIL (${totalSeats} Seats)*:\n`;
+      
+      tripBookings.forEach((b, idx) => {
+        pList += `${idx + 1}. [${b.seatNo}] ${b.passengerName} (${b.mobile}) - ₹${b.fare} (${b.paymentMode})\n`;
+      });
+
+      pList += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      pList += `💰 *FINANCIAL SETTLEMENT*:\n`;
+      pList += `• Gross Total Fare: ₹${totalGross}\n`;
+      pList += `• Commission (${commInput}): -₹${commAmount}\n`;
+      pList += `• GST (${gstInput}): +₹${gstAmount}\n`;
+      pList += `👉 *NET PAYABLE TO BUS:* *₹${net}*\n`;
+      pList += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      pList += `📞 *Counter Helpline:* 094079 96570, 093406 69984`;
+
+      const mob = prompt("Driver ka WhatsApp Number dalein:");
+      if (mob) {
+        window.open(`https://wa.me/91${mob.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(pList)}`, '_blank');
+      }
+    }
+
+    function openSettlementModalFromVoucher() {
+      const commInput = document.getElementById("memoCommInput")?.value.trim() || "10%";
+      const gstInput = document.getElementById("memoGstInput")?.value.trim() || "5%";
+      const memoDate = document.getElementById("memoDateInput").value;
+      const busName = document.getElementById("memoBusSelect").value;
+      const selectedTime = document.getElementById("memoRouteSelect")?.value.trim() || "";
+
+      const tripBookings = bookings.filter(b => 
+        b.status === "CONFIRMED" &&
+        b.busName.toLowerCase().trim() === busName.toLowerCase().trim() && 
+        normalizeDate(b.journeyDate) === normalizeDate(memoDate) &&
+        (!selectedTime || b.busTime.trim() === selectedTime)
+      );
+
+      const totalGross = tripBookings.reduce((sum, b) => sum + Number(b.fare), 0);
+      const commAmount = Math.round((totalGross * (parseFloat(commInput) || 0)) / 100);
+      const gstAmount = Math.round((totalGross * (parseFloat(gstInput) || 0)) / 100);
+      const net = Math.max(0, totalGross - commAmount + gstAmount);
+
+      document.getElementById("settleOperatorSelect").value = busName;
+      document.getElementById("settleDateInput").value = memoDate;
+      document.getElementById("settleDriverInput").value = document.getElementById("voucherDriverInput").value.trim();
+      document.getElementById("settleVehicleInput").value = document.getElementById("voucherVehicleInput").value.trim().toUpperCase();
+      document.getElementById("settleCashInput").value = net;
+      document.getElementById("settleUpiInput").value = 0;
+      document.getElementById("settlementModal").classList.remove("hidden");
+    }
+
+    function closeSettlementModal() { document.getElementById("settlementModal").classList.add("hidden"); }
+
+    function handleSettlementSubmit(e) {
+      if (e) e.preventDefault();
+      settlements.push({
+        id: 'SET-' + Date.now(),
+        operator: document.getElementById("settleOperatorSelect").value,
+        driver: document.getElementById("settleDriverInput").value.trim(),
+        date: document.getElementById("settleDateInput").value,
+        cashPaid: parseFloat(document.getElementById("settleCashInput").value) || 0,
+        upiPaid: parseFloat(document.getElementById("settleUpiInput").value) || 0
+      });
+      saveSettlements(); closeSettlementModal();
+      showToast("Settlement Saved!", "success");
+      return false;
+    }
+
+    function openExpenseModal() {
+      document.getElementById("expenseDateInput").value = document.getElementById("filterExpenseDate").value || new Date().toISOString().split("T")[0];
+      document.getElementById("expenseModal").classList.remove("hidden");
+    }
+
+    function closeExpenseModal() { document.getElementById("expenseModal").classList.add("hidden"); }
+
+    function handleExpenseSubmit(e) {
+      e.preventDefault();
+      expenses.push({
+        id: 'EXP-' + Date.now(),
+        date: document.getElementById("expenseDateInput").value,
+        title: document.getElementById("expenseTitleInput").value.trim(),
+        amount: parseFloat(document.getElementById("expenseAmountInput").value) || 0
+      });
+      saveExpenses(); closeExpenseModal();
+      showToast("Expense Saved!", "success");
+    }
+
+    function toggleAllExpenses() { isShowAllExpenses = !isShowAllExpenses; renderExpensesTable(); }
+
+    function renderExpensesTable() {
+      const tbody = document.getElementById("expenseTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      const selDate = normalizeDate(document.getElementById("filterExpenseDate").value);
+      let total = 0;
+      expenses.filter(x => isShowAllExpenses || !selDate || normalizeDate(x.date) === selDate).forEach(x => {
+        total += x.amount;
+        tbody.innerHTML += `<tr><td class="p-2">${x.date}</td><td class="p-2 font-medium">${x.title}</td><td class="p-2 text-right font-bold text-red-600">₹${x.amount}</td><td class="p-2 text-center"><button onclick="expenses=expenses.filter(i=>i.id!=='${x.id}'); saveExpenses();" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+      });
+      document.getElementById("totalExpenseDisplay").innerText = `₹${total}`;
+    }
+
+    function toggleAllSettlements() { isShowAllSettlements = !isShowAllSettlements; renderSettlementsTable(); }
+
+    function renderSettlementsTable() {
+      const tbody = document.getElementById("settlementTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      const selDate = normalizeDate(document.getElementById("filterSettlementDate").value);
+      let total = 0;
+      settlements.filter(s => isShowAllSettlements || !selDate || normalizeDate(s.date) === selDate).forEach(s => {
+        total += (s.cashPaid + s.upiPaid);
+        tbody.innerHTML += `<tr><td class="p-2">${s.date}</td><td class="p-2 font-medium">${s.operator}</td><td class="p-2 text-right font-bold text-emerald-700">₹${s.cashPaid}</td><td class="p-2 text-right font-bold text-blue-700">₹${s.upiPaid}</td><td class="p-2 text-center"><button onclick="settlements=settlements.filter(i=>i.id!=='${s.id}'); saveSettlements();" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+      });
+      document.getElementById("totalSettlementDisplay").innerText = `₹${total}`;
+    }
+
+    function resetUpcomingFilter() {
+      document.getElementById("filterUpcomingDate").value = new Date().toISOString().split("T")[0];
+      renderOperatorBreakdownAndUpcoming();
+    }
+
+    function renderOperatorBreakdownAndUpcoming() {
+      const breakdownBody = document.getElementById("operatorBreakdownBody");
+      const creditBody = document.getElementById("creditDueTableBody");
+      const upcomingBody = document.getElementById("upcomingJourneysBody");
+
+      if (breakdownBody) {
+        breakdownBody.innerHTML = "";
+        busOperators.forEach(op => {
+          const list = bookings.filter(b => b.status === "CONFIRMED" && b.busName.toLowerCase().trim() === op.toLowerCase().trim());
+          const gross = list.reduce((sum, b) => sum + b.fare, 0);
+          breakdownBody.innerHTML += `<tr><td class="p-2.5 font-bold">${op}</td><td class="p-2.5 text-center">${list.length}</td><td class="p-2.5 text-center">${list.length}</td><td class="p-2.5 text-right font-bold">₹${gross}</td><td class="p-2.5 text-right text-red-600 font-bold">₹0</td><td class="p-2.5 text-right font-semibold">₹${Math.round(gross*0.1)}</td><td class="p-2.5 text-right font-black text-blue-700">₹${gross - Math.round(gross*0.1)}</td></tr>`;
+        });
+      }
+
+      if (creditBody) {
+        creditBody.innerHTML = "";
+        let due = 0;
+        bookings.filter(b => b.status === "CONFIRMED" && b.paymentMode === "Credit").forEach(b => {
+          due += b.fare;
+          creditBody.innerHTML += `<tr><td class="p-2.5 font-bold">${b.ticketNo}</td><td class="p-2.5">${b.journeyDate}</td><td class="p-2.5 font-bold">${b.passengerName}</td><td class="p-2.5">${b.mobile}</td><td class="p-2.5">${b.busName}</td><td class="p-2.5 text-center font-bold text-blue-900">${b.seatNo}</td><td class="p-2.5 text-right font-black text-red-600">₹${b.fare}</td><td class="p-2.5 text-center"><button onclick="openCreditClearModal('${b.ticketNo}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer">Received</button></td></tr>`;
+        });
+        document.getElementById("totalCreditDueBadge").innerText = `₹${due}`;
+      }
+
+      if (upcomingBody) {
+        upcomingBody.innerHTML = "";
+        const rawDate = document.getElementById("filterUpcomingDate")?.value;
+        const filterFromDate = rawDate ? normalizeDate(rawDate) : normalizeDate(new Date().toISOString().split("T")[0]);
+
+        const upcomingBookings = bookings.filter(b => {
+          if (b.status !== "CONFIRMED") return false;
+          const jDate = normalizeDate(b.journeyDate);
+          return jDate >= filterFromDate;
+        });
+
+        if (!upcomingBookings.length) {
+          upcomingBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400 italic font-semibold">Selected date ke baad kisi bhi gadi ki booking schedule nahi mili.</td></tr>`;
+          return;
+        }
+
+        const tripMap = {};
+        upcomingBookings.forEach(b => {
+          const key = `${normalizeDate(b.journeyDate)}_${b.busName}_${b.busTime}`;
+          if (!tripMap[key]) {
+            tripMap[key] = {
+              date: b.journeyDate,
+              busName: b.busName,
+              time: b.busTime,
+              route: `${b.fromCity.toUpperCase()} ➔ ${b.toCity.toUpperCase()}`,
+              seats: [],
+              passengers: [],
+              totalAmount: 0
+            };
+          }
+          splitSeats(b.seatNo).forEach(s => tripMap[key].seats.push(s));
+          tripMap[key].passengers.push(`${b.passengerName} (${b.seatNo})`);
+          tripMap[key].totalAmount += (Number(b.fare) || 0);
+        });
+
+        const sortedKeys = Object.keys(tripMap).sort();
+        sortedKeys.forEach(k => {
+          const item = tripMap[k];
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+          tr.innerHTML = `
+            <td class="p-2.5 font-bold text-slate-900">${item.date}</td>
+            <td class="p-2.5 font-bold text-blue-900"><i class="fa-solid fa-bus text-amber-500 mr-1.5"></i>${item.busName}</td>
+            <td class="p-2.5 font-mono text-[11px] font-semibold">${item.time}</td>
+            <td class="p-2.5 font-medium text-slate-700">${item.route}</td>
+            <td class="p-2.5 text-center">
+              <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">${item.seats.length} Seats (${item.seats.join(", ")})</span>
+            </td>
+            <td class="p-2.5 text-[11px] text-slate-600 truncate max-w-xs" title="${item.passengers.join(', ')}">
+              ${item.passengers.join(', ')}
+            </td>
+            <td class="p-2.5 text-right font-black text-slate-900">₹${item.totalAmount.toLocaleString()}</td>
+          `;
+          upcomingBody.appendChild(tr);
+        });
+      }
+    }
+
+    function openCreditClearModal(tktNo) {
+      const b = bookings.find(x => x.ticketNo === tktNo);
+      if (!b) return;
+      activeClearingCreditTicket = b;
+
+      document.getElementById("ccTicketNo").innerText = b.ticketNo;
+      document.getElementById("ccPassengerName").innerText = b.passengerName;
+      document.getElementById("ccDueFare").innerText = `₹${b.fare}`;
+
+      document.getElementById("ccPaymentMode").value = "Cash";
+      onCcPaymentModeChange();
+
+      document.getElementById("creditClearModal").classList.remove("hidden");
+    }
+
+    function closeCreditClearModal() {
+      activeClearingCreditTicket = null;
+      document.getElementById("creditClearModal").classList.add("hidden");
+    }
+
+    function onCcPaymentModeChange() {
+      const mode = document.getElementById("ccPaymentMode").value;
+      const splitBox = document.getElementById("ccSplitBox");
+      if (!activeClearingCreditTicket) return;
+
+      if (mode === "Split (Cash + UPI)") {
+        splitBox.classList.remove("hidden");
+        const total = Number(activeClearingCreditTicket.fare) || 0;
+        const half = Math.round(total / 2);
+        document.getElementById("ccSplitCash").value = half;
+        document.getElementById("ccSplitUpi").value = total - half;
+      } else {
+        splitBox.classList.add("hidden");
+      }
+    }
+
+    function syncCcSplitCash() {
+      if (!activeClearingCreditTicket) return;
+      const total = Number(activeClearingCreditTicket.fare) || 0;
+      const cash = parseFloat(document.getElementById("ccSplitCash").value) || 0;
+      document.getElementById("ccSplitUpi").value = Math.max(0, total - cash);
+    }
+
+    function syncCcSplitUpi() {
+      if (!activeClearingCreditTicket) return;
+      const total = Number(activeClearingCreditTicket.fare) || 0;
+      const upi = parseFloat(document.getElementById("ccSplitUpi").value) || 0;
+      document.getElementById("ccSplitCash").value = Math.max(0, total - upi);
+    }
+
+    function submitCreditClearPayment() {
+      if (!activeClearingCreditTicket) return;
+      const b = activeClearingCreditTicket;
+      const mode = document.getElementById("ccPaymentMode").value;
+      const total = Number(b.fare) || 0;
+
+      let splitCash = 0;
+      let splitUpi = 0;
+
+      if (mode === "Split (Cash + UPI)") {
+        splitCash = parseFloat(document.getElementById("ccSplitCash").value) || 0;
+        splitUpi = parseFloat(document.getElementById("ccSplitUpi").value) || 0;
+
+        if (splitCash + splitUpi !== total) {
+          alert(`Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) ka jod Total Fare (₹${total}) ke barabar hona chahiye!`);
+          return;
+        }
+      }
+
+      b.paymentMode = mode;
+      b.splitCashAmount = splitCash;
+      b.splitUpiAmount = splitUpi;
+      b.remark = (b.remark ? b.remark + " | " : "") + `Credit Cleared as ${mode}${mode.includes('Split') ? ` [Cash: ₹${splitCash}, UPI: ₹${splitUpi}]` : ''} on ${new Date().toLocaleDateString('en-GB')}`;
+
+      closeCreditClearModal();
+
+      if (mode === "UPI" || (mode === "Split (Cash + UPI)" && splitUpi > 0)) {
+        pendingUPIBooking = b;
+        openUPIModal(b);
+      } else {
+        saveBookings();
+        showToast(`Ticket ${b.ticketNo} ka payment receive ho gaya!`, "success");
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function renderBookingsTable() {
+      const tbody = document.getElementById('bookingsTableBody');
+      if (!tbody) return;
+      const dateFilter = normalizeDate(document.getElementById('filterJourneyDate')?.value || '');
+      const busFilter = (document.getElementById('filterBusName')?.value || '').trim().toLowerCase();
+      const search = (document.getElementById('filterSearch')?.value || '').trim().toLowerCase();
+
+      const busSelect = document.getElementById('filterBusName');
+      if (busSelect) {
+        const previous = busSelect.value;
+        const names = [...new Set([...busOperators, ...bookings.map(b => b.busName).filter(Boolean)])].sort((a,b) => a.localeCompare(b));
+        busSelect.innerHTML = '<option value="">All Bus Operators</option>' + names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+        if (names.some(n => n.toLowerCase() === previous.toLowerCase())) busSelect.value = names.find(n => n.toLowerCase() === previous.toLowerCase()) || '';
+      }
+
+      const visible = bookings.filter(b => {
+        if (dateFilter && normalizeDate(b.journeyDate) !== dateFilter) return false;
+        if (busFilter && busFilter !== 'all' && String(b.busName || '').trim().toLowerCase() !== busFilter) return false;
+        if (search) {
+          const haystack = [b.ticketNo,b.passengerName,b.mobile,b.busName,b.seatNo,b.fromCity,b.toCity].join(' ').toLowerCase();
+          if (!haystack.includes(search)) return false;
+        }
+        return true;
+      }).sort((a,b) => normalizeDate(b.journeyDate).localeCompare(normalizeDate(a.journeyDate)) || String(b.ticketNo).localeCompare(String(b.ticketNo)));
+
+      if (!visible.length) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400 font-semibold">No bookings found. Please save a booking or change the filters.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = visible.map(b => {
+        const status = String(b.status || 'CONFIRMED').toUpperCase();
+        const cancelled = status === 'CANCELLED';
+        const payment = b.paymentMode || 'Cash';
+        return `<tr class="${cancelled ? 'bg-red-50/60 text-slate-400' : 'hover:bg-blue-50/50'}">
+          <td class="py-3 px-3 font-bold whitespace-nowrap">${escapeHtml(b.ticketNo)}</td>
+          <td class="py-3 px-3 whitespace-nowrap">${escapeHtml(b.journeyDate || '')}${cancelled ? '<div class="text-[9px] font-bold text-red-500">CANCELLED</div>' : ''}</td>
+          <td class="py-3 px-3"><div class="font-bold">${escapeHtml(b.busName || '')}</div><div class="text-[10px] text-slate-400">${escapeHtml(b.fromCity || '')} → ${escapeHtml(b.toCity || '')}</div></td>
+          <td class="py-3 px-2 whitespace-nowrap">${escapeHtml(b.busTime || '')}</td>
+          <td class="py-3 px-2 font-bold">${escapeHtml(b.seatNo || '')}</td>
+          <td class="py-3 px-3"><div class="font-semibold">${escapeHtml(b.passengerName || '')}</div><div class="text-[10px] text-slate-400">${escapeHtml(b.bookedBy || '')}</div></td>
+          <td class="py-3 px-3 whitespace-nowrap">${escapeHtml(b.mobile || '')}</td>
+          <td class="py-3 px-3 text-right font-black whitespace-nowrap">₹${Number(b.fare || 0).toLocaleString('en-IN')}</td>
+          <td class="py-3 px-2 text-center"><span class="inline-block rounded-full px-2 py-1 text-[10px] font-bold ${payment === 'Credit' ? 'bg-amber-100 text-amber-800' : payment === 'UPI' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(payment)}</span></td>
+          <td class="py-3 px-3"><div class="flex items-center justify-center gap-1 whitespace-nowrap">
+            <button type="button" onclick="editBooking('${escapeHtml(b.ticketNo)}')" title="Edit booking" ${cancelled ? 'disabled' : ''} class="rounded bg-blue-100 text-blue-700 px-2 py-1.5 hover:bg-blue-200 disabled:opacity-30"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" onclick="openTicketModal('${escapeHtml(b.ticketNo)}')" title="Print & WhatsApp" class="rounded bg-slate-100 text-slate-700 px-2 py-1.5 hover:bg-slate-200"><i class="fa-solid fa-print"></i></button>
+            <button type="button" onclick="openCancelModal('${escapeHtml(b.ticketNo)}')" title="Cancel booking" ${cancelled ? 'disabled' : ''} class="rounded bg-red-100 text-red-700 px-2 py-1.5 hover:bg-red-200 disabled:opacity-30"><i class="fa-solid fa-ban"></i></button>
+          </div></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function saveFinalBooking(booking) {
+      if (booking && !bookings.some(b => b.ticketNo === booking.ticketNo)) bookings.push(booking);
+      if (booking && booking.paymentMode === 'UPI') booking.paymentReceived = true;
+      saveBookings();
+      resetBookingForm();
+      showToast(`Ticket ${booking?.ticketNo || ''} saved successfully and added to Live Register.`, 'success');
+      
+      // Prompt for Welcome WhatsApp
+      if (confirm(`Ticket ${booking.ticketNo} save ho gayi! Kya passenger (${booking.passengerName}) ko Welcome WhatsApp message bhejna chahte hain?`)) {
+        sendPassengerWhatsAppDirect(booking);
+      }
+    }
+
+    function resetBookingForm() {
+      const form = document.getElementById('bookingForm');
+      if (form) form.reset();
+      editingTicketNo = null;
+      const saveText = document.getElementById('saveBtnText');
+      if (saveText) saveText.innerText = 'Save Reservation';
+      const bookedBy = document.getElementById('bookedByInput');
+      if (bookedBy) bookedBy.value = currentLoggedInStaff;
+      if (document.getElementById('bookingDateInput')) document.getElementById('bookingDateInput').value = new Date().toLocaleDateString('en-GB');
+      
+      const today = new Date().toISOString().slice(0,10);
+      const jDateInput = document.getElementById('journeyDateInput');
+      if (jDateInput) {
+        jDateInput.value = today;
+        jDateInput.min = today; // Prevent Back-Date
+      }
+      
+      if (document.getElementById('splitPaymentBox')) document.getElementById('splitPaymentBox').classList.add('hidden');
+      if (document.getElementById('displayTicketNo')) document.getElementById('displayTicketNo').innerText = getNextTicketNumber();
+      if (document.getElementById('fareInput')) document.getElementById('fareInput').value = '';
+      if (document.getElementById('seatInput')) document.getElementById('seatInput').value = '';
+      if (document.getElementById('splitCashInput')) document.getElementById('splitCashInput').value = '0';
+      if (document.getElementById('splitUpiInput')) document.getElementById('splitUpiInput').value = '0';
+      if (typeof populateCities === 'function') populateCities();
+      if (typeof setDefaults === 'function') setDefaults();
+    }
+
+    function clearFilters() {
+      ['filterJourneyDate','filterSearch'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      const bus = document.getElementById('filterBusName'); if (bus) bus.value = '';
+      renderBookingsTable();
+    }
+
+    function exportBookingsToCSV() {
+      const rows = [['Ticket No','Booking Date','Journey Date','Bus Operator','Time','From','To','Seat','Passenger','Mobile','Fare','Payment Mode','Status','Booked By']];
+      bookings.forEach(b => rows.push([b.ticketNo,b.bookingDate,b.journeyDate,b.busName,b.busTime,b.fromCity,b.toCity,b.seatNo,b.passengerName,b.mobile,b.fare,b.paymentMode,b.status,b.bookedBy]));
+      const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = `Chauhan_Travels_Bookings_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    function editBooking(ticketNo) {
+      const b = bookings.find(x => x.ticketNo === ticketNo);
+      if (!b || b.status === 'CANCELLED') return;
+      editingTicketNo = ticketNo;
+
+      document.getElementById('bookingDateInput').value = b.bookingDate || '';
+      document.getElementById('journeyDateInput').value = b.journeyDate || '';
+      document.getElementById('busNameInput').value = b.busName || '';
+      updateDestinationsAndTimes();
+      document.getElementById('fromCityInput').value = b.fromCity || '';
+      onOriginChange();
+      document.getElementById('toCityInput').value = b.toCity || '';
+      document.getElementById('busTimeInput').value = b.busTime || '';
+      document.getElementById('seatInput').value = b.seatNo || '';
+      document.getElementById('passengerNameInput').value = b.passengerName || '';
+      document.getElementById('mobileInput').value = b.mobile || '';
+      
+      const seatsCount = splitSeats(b.seatNo).length || 1;
+      document.getElementById('perPassengerFareInput').value = Math.round((Number(b.fare) || 0) / seatsCount);
+      document.getElementById('fareInput').value = b.fare || 0;
+      document.getElementById('paymentModeInput').value = b.paymentMode || 'Cash';
+      document.getElementById('remarkInput').value = b.remark || '';
+      document.getElementById('bookedByInput').value = b.bookedBy || currentLoggedInStaff;
+
+      document.getElementById('saveBtnText').innerText = 'Update Reservation';
+      if (b.paymentMode === 'Split (Cash + UPI)') {
+        document.getElementById('splitPaymentBox').classList.remove('hidden');
+        document.getElementById('splitCashInput').value = Number(b.splitCashAmount) || 0;
+        document.getElementById('splitUpiInput').value = Number(b.splitUpiAmount) || 0;
+      } else {
+        document.getElementById('splitPaymentBox').classList.add('hidden');
+      }
+
+      document.getElementById('displayTicketNo').innerText = b.ticketNo;
+      switchTab('booking'); 
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      showToast(`Editing ticket ${ticketNo}`, 'info');
+    }
+
+    function openTicketModal(ticketNo) {
+      const b = bookings.find(x => x.ticketNo === ticketNo);
+      if (!b) return;
+      activePrintingTicket = b;
+      document.getElementById('ticketModalContent').innerHTML = `
+        <b>Ticket No:</b> ${b.ticketNo}<br>
+        <b>Passenger:</b> ${b.passengerName} (${b.mobile})<br>
+        <b>Journey:</b> ${b.journeyDate} | ${b.busTime}<br>
+        <b>Route:</b> ${b.fromCity} ➔ ${b.toCity}<br>
+        <b>Seats:</b> ${b.seatNo} | <b>Fare:</b> ₹${b.fare} (${b.paymentMode})
+      `;
+      document.getElementById('ticketModal').classList.remove('hidden');
+    }
+
+    function closeTicketModal() {
+      activePrintingTicket = null;
+      document.getElementById('ticketModal').classList.add('hidden');
+    }
+
+    function executePrintAction(b) {
+      const area = document.getElementById('print-area');
+      area.innerHTML = `<div style="font-family:Arial,sans-serif;max-width:420px;margin:0 auto;padding:16px;border:1px dashed #333;color:#111"><h2 style="text-align:center;margin:0">CHAUHAN TOUR & TRAVELS</h2><p style="text-align:center;margin:4px 0 12px">New Bus Stand, Bijapur • 09407996570</p><hr><p><b>Ticket:</b> ${escapeHtml(b.ticketNo)} &nbsp; <b>Date:</b> ${escapeHtml(b.bookingDate||'')}</p><p><b>Passenger:</b> ${escapeHtml(b.passengerName)}<br><b>Mobile:</b> ${escapeHtml(b.mobile)}</p><p><b>Journey:</b> ${escapeHtml(b.journeyDate)}<br><b>Bus:</b> ${escapeHtml(b.busName)} (${escapeHtml(b.busTime)})</p><p><b>Route:</b> ${escapeHtml(b.fromCity)} → ${escapeHtml(b.toCity)}<br><b>Seat:</b> ${escapeHtml(b.seatNo)}</p><h3 style="text-align:right">Fare: ₹${Number(b.fare||0).toLocaleString('en-IN')}</h3><p><b>Payment:</b> ${escapeHtml(b.paymentMode||'Cash')} &nbsp; <b>Status:</b> ${escapeHtml(b.status||'CONFIRMED')}</p><hr><p style="text-align:center;font-size:12px">Thank you for booking with us. Have a safe journey!</p></div>`;
+      window.print();
+    }
+
+    function executePrintTicketOnly() {
+      if (activePrintingTicket) {
+        executePrintAction(activePrintingTicket);
+        closeTicketModal();
+      }
+    }
+
+    function sendPassengerWelcomeWhatsApp() {
+      if (activePrintingTicket) {
+        sendPassengerWhatsAppDirect(activePrintingTicket);
+        closeTicketModal();
+      }
+    }
+
+    function sendPassengerWhatsAppDirect(b) {
+      let msg = `🚌 *CHAUHAN TOUR & TRAVELS* 🚌\n`;
+      msg += `📍 *New Bus Stand, Bijapur (C.G.)*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `✨ *BOOKING CONFIRMATION* ✨\n\n`;
+      msg += `Dear *${b.passengerName}*, aapki ticket confirm ho gayi hai:\n\n`;
+      msg += `• *Ticket No:* ${b.ticketNo}\n`;
+      msg += `• *Bus Service:* ${b.busName}\n`;
+      msg += `• *Time:* ${b.busTime}\n`;
+      msg += `• *Journey Date:* ${b.journeyDate}\n`;
+      msg += `• *Route:* ${b.fromCity} ➔ ${b.toCity}\n`;
+      msg += `• *Seat No(s):* *${b.seatNo}*\n`;
+      msg += `• *Total Fare:* ₹${b.fare} (${b.paymentMode})\n\n`;
+      msg += `🙏 Thank you for choosing Chauhan Tour & Travels. Kripya samay par boarding point par pahunche!\n`;
+      msg += `📞 *Helpline:* 094079 96570, 093406 69984`;
+
+      window.open(`https://wa.me/91${b.mobile.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function printBookingTicket(ticketNo) {
+      openTicketModal(ticketNo);
+    }
+
+    function openUPIModal(booking) {
+      if (!booking) return;
+      pendingUPIBooking = booking;
+      const amount = Number(booking.fare)||0;
+      const name = 'Chauhan Tour & Travels';
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(agencyUpiId)}&pn=${encodeURIComponent(name)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Ticket '+booking.ticketNo)}`;
+      document.getElementById('upiModalAmount').innerText = `₹${amount.toLocaleString('en-IN')}`;
+      document.getElementById('upiQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
+      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nTicket: ${booking.ticketNo}\nPlease confirm only after payment is received.`;
+      document.getElementById('upiModal').classList.remove('hidden');
+    }
+
+    function confirmUPIPayment() {
+      const booking = pendingUPIBooking;
+      if (!booking) { document.getElementById('upiModal').classList.add('hidden'); return; }
+      booking.paymentReceived = true;
+      document.getElementById('upiModal').classList.add('hidden');
+      pendingUPIBooking = null;
+      saveFinalBooking(booking);
+    }
+
+    function toggleShowAllPayments() {
+      isShowAllPaymentsActive = !isShowAllPaymentsActive;
+      const btn = document.getElementById('btnToggleAllPayments');
+      if (btn) btn.innerText = isShowAllPaymentsActive ? 'Show Selected Date' : 'Show All Payments';
+      renderCollectionStats();
+    }
+
+    function renderCollectionStats() {
+      const selectedDate = normalizeDate(document.getElementById('summaryDatePicker')?.value || new Date().toISOString().slice(0,10));
+      const list = bookings.filter(b => isShowAllPaymentsActive || !selectedDate || normalizeDate(b.bookingDate || b.journeyDate) === selectedDate);
+      let cash=0, upi=0, credit=0, gross=0;
+      list.filter(b => (b.status||'CONFIRMED') === 'CONFIRMED').forEach(b => {
+        const fare=Number(b.fare)||0; gross+=fare;
+        if (b.paymentMode === 'Credit') credit += Math.max(0, fare - (Number(b.creditPaidAmount)||0));
+        else if (b.paymentMode === 'UPI') upi += fare;
+        else if (b.paymentMode === 'Split (Cash + UPI)') { cash += Number(b.splitCashAmount)||0; upi += Number(b.splitUpiAmount)||0; }
+        else cash += fare;
+      });
+      const expensesTotal = expenses.filter(x => isShowAllPaymentsActive || !selectedDate || normalizeDate(x.date)===selectedDate).reduce((a,x)=>a+(Number(x.amount)||0),0);
+      const settlementsTotal = settlements.filter(x => isShowAllPaymentsActive || !selectedDate || normalizeDate(x.date)===selectedDate).reduce((a,x)=>a+(Number(x.cashPaid)||0),0);
+      const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.innerText='₹'+Math.round(value).toLocaleString('en-IN');};
+      setText('statCash',cash); setText('statUPI',upi); setText('statCredit',credit); setText('statTotal',gross); setText('statNetDrawer',cash-expensesTotal-settlementsTotal);
+      const today= new Date().toISOString().slice(0,10);
+      const todayBookings=bookings.filter(b => (b.status||'CONFIRMED')==='CONFIRMED' && normalizeDate(b.bookingDate||b.journeyDate)===today);
+      const countEl=document.getElementById('quickTodayCount'); if(countEl) countEl.innerText=todayBookings.length;
+      const collectionEl=document.getElementById('quickTodayCollection'); if(collectionEl) collectionEl.innerText='₹'+todayBookings.reduce((sum,b)=>sum+(Number(b.fare)||0),0).toLocaleString('en-IN');
+      if (typeof renderOperatorBreakdownAndUpcoming === 'function') renderOperatorBreakdownAndUpcoming();
+    }
+
+    function openCancelModal(ticketNo) {
+      const b=bookings.find(x=>x.ticketNo===ticketNo);
+      if(!b || b.status==='CANCELLED') return;
+      cancellingTicket=b;
+      document.getElementById('cancelTktNo').innerText=b.ticketNo;
+      document.getElementById('cancelJDate').innerText=b.journeyDate;
+      document.getElementById('cancelPName').innerText=b.passengerName;
+      document.getElementById('cancelSeatNo').innerText=b.seatNo;
+      document.getElementById('cancelTotalFare').innerText='₹'+(Number(b.fare)||0).toLocaleString('en-IN');
+      document.getElementById('cancelRuleSelect').value='10';
+      document.getElementById('cancelDeductFromCash').checked=true;
+      recalculateRefund();
+      document.getElementById('cancelModal').classList.remove('hidden');
+    }
+
+    function closeCancelModal() { document.getElementById('cancelModal').classList.add('hidden'); cancellingTicket=null; }
+
+    function recalculateRefund() {
+      if(!cancellingTicket) return;
+      const pct=Number(document.getElementById('cancelRuleSelect').value)||0;
+      const fare=Number(cancellingTicket.fare)||0;
+      document.getElementById('cancelDeductionDisplay').innerText='₹'+Math.round(fare*pct/100).toLocaleString('en-IN');
+      document.getElementById('cancelRefundDisplay').innerText='₹'+Math.round(fare*(100-pct)/100).toLocaleString('en-IN');
+    }
+
+    function confirmCancelWithRefund() {
+      if(!cancellingTicket) return;
+      const b=bookings.find(x=>x.ticketNo===cancellingTicket.ticketNo);
+      if(!b) { closeCancelModal(); return; }
+      const pct=Number(document.getElementById('cancelRuleSelect').value)||0;
+      b.status='CANCELLED';
+      b.cancellationCharge=Math.round((Number(b.fare)||0)*pct/100);
+      b.refundAmount=Math.round((Number(b.fare)||0)*(100-pct)/100);
+      b.refundDeductFromCash=!!document.getElementById('cancelDeductFromCash').checked;
+      b.cancelledAt=new Date().toISOString();
+      b.remark=(b.remark ? b.remark+' | ' : '')+`Cancelled; charge ₹${b.cancellationCharge}; refund ₹${b.refundAmount}`;
+      closeCancelModal(); saveBookings();
+      showToast(`Ticket ${b.ticketNo} cancelled. Refund: ₹${b.refundAmount}`, 'success');
+    }
+
+    function saveBookings() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+      renderBookingsTable();
+      renderCollectionStats();
+      updateMemoRoutes();
+      document.getElementById("displayTicketNo").innerText = getNextTicketNumber();
+      saveToCloudDatabase();
+    }
+
+    function getNextTicketNumber() {
+      if (!bookings.length) return "TKT-1001";
+      const nums = bookings.map(b => parseInt(b.ticketNo.split("-")[1]) || 1000);
+      return `TKT-${Math.max(...nums) + 1}`;
+    }
+
+    function splitSeats(seatString) {
+      if (!seatString) return [];
+      const clean = String(seatString).toUpperCase().trim();
+      if (clean.includes("CLICK") || clean.includes("OPEN")) return [];
+      return clean.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+    }
+
+    function getOccupiedSeatsMap(jDate, bName, bTime) {
+      const seatMap = {};
+      const normJDate = normalizeDate(jDate);
+      const bLower = (bName || "").toLowerCase().trim();
+      const tTrim = (bTime || "").trim();
+
+      if (bLower.includes("manish") && (tTrim === "04:05 AM" || tTrim === "08:25 AM")) {
+        PERMANENT_BLOCKED_SEATS_0405.forEach(s => {
+          seatMap[s] = { name: "LOCKED / BLOCKED", ticketNo: "SYSTEM", isBlocked: true };
+        });
+      }
+
+      bookings.forEach(b => {
+        if (editingTicketNo && b.ticketNo === editingTicketNo) return;
+        if (b.status === "CONFIRMED" && normalizeDate(b.journeyDate) === normJDate && b.busName.toLowerCase().trim() === bLower && b.busTime.trim() === tTrim) {
+          splitSeats(b.seatNo).forEach(s => { seatMap[s] = b; });
+        }
+      });
+      return seatMap;
+    }
+
+    function checkSeatConflict(jDate, bName, bTime, seatsToCheck) {
+      const occupiedMap = getOccupiedSeatsMap(jDate, bName, bTime);
+      return seatsToCheck.filter(seat => seat in occupiedMap);
+    }
+
+    function openSeatModal() {
+      const jDate = document.getElementById("journeyDateInput").value;
+      const bName = document.getElementById("busNameInput").value;
+      const bTime = document.getElementById("busTimeInput").value;
+      if (!jDate || !bTime) { alert("Pehle Journey Date aur Bus Time select karein!"); return; }
+      document.getElementById("seatModalTitle").innerHTML = `<i class="fa-solid fa-couch text-amber-400"></i> ${bName} Seat Layout`;
+      document.getElementById("seatModalSubtext").innerText = `${bName} • ${bTime} • Date: ${jDate}`;
+      tempSelectedSeats = splitSeats(document.getElementById("seatInput").value);
+      renderSelectedLayout(bName, bTime, jDate);
+      updateModalSelectedText();
+      document.getElementById("seatModal").classList.remove("hidden");
+    }
+
+    function closeSeatModal() { document.getElementById("seatModal").classList.add("hidden"); }
+
+    function renderSelectedLayout(bName, bTime, jDate) {
+      const container = document.getElementById("dynamicSeatMapContainer");
+      if (!container) return;
+      const occupiedMap = getOccupiedSeatsMap(jDate, bName, bTime);
+      const layoutObj = getActiveLayout(bName, bTime);
+      let html = "";
+      layoutObj.rows.forEach(row => {
+        html += `<div class="flex items-center justify-center gap-4 w-full"><div class="flex items-center gap-1.5">`;
+        row.left.forEach(seat => { html += renderSeatButton(seat, occupiedMap); });
+        html += `</div><div class="w-6 text-center text-slate-300 font-bold select-none text-xs">| |</div><div class="flex items-center gap-1.5">`;
+        row.right.forEach(seat => { html += renderSeatButton(seat, occupiedMap); });
+        html += `</div></div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderSeatButton(seat, occupiedMap) {
+      if (!seat || seat === "") return `<div class="w-10 sm:w-12 h-12 invisible"></div>`;
+      const isBooked = seat in occupiedMap;
+      const isSelected = tempSelectedSeats.includes(seat);
+      const bookedData = occupiedMap[seat];
+
+      if (isBooked) {
+        if (bookedData && bookedData.isBlocked) {
+          return `<button type="button" disabled title="Seat ${seat}: System Blocked" class="ct-seat ct-seat-blocked">${seat}</button>`;
+        }
+        return `<button type="button" disabled title="Seat ${seat}: Booked (${bookedData.passengerName || ''})" class="ct-seat ct-seat-booked">${seat}</button>`;
+      }
+      if (isSelected) return `<button type="button" onclick="toggleSeat('${seat}')" class="ct-seat ct-seat-selected">${seat}</button>`;
+      return `<button type="button" onclick="toggleSeat('${seat}')" class="ct-seat ct-seat-available">${seat}</button>`;
+    }
+
+    function toggleSeat(seat) {
+      const index = tempSelectedSeats.indexOf(seat);
+      if (index > -1) tempSelectedSeats.splice(index, 1);
+      else tempSelectedSeats.push(seat);
+      renderSelectedLayout(document.getElementById("busNameInput").value, document.getElementById("busTimeInput").value, document.getElementById("journeyDateInput").value);
+      updateModalSelectedText();
+    }
+
+    function updateModalSelectedText() {
+      document.getElementById("modalSelectedSeatsCount").innerText = tempSelectedSeats.length ? `${tempSelectedSeats.join(", ")} (${tempSelectedSeats.length} Seats)` : "None";
+    }
+
+    function confirmSeatSelection() {
+      document.getElementById("seatInput").value = tempSelectedSeats.join(", ");
+      calculateTotalFare();
+      closeSeatModal();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const mobile = document.getElementById("mobileInput").value.trim().replace(/[^0-9]/g, '');
+      if (mobile.length !== 10) { alert("Mobile number 10 digits ka hona chahiye!"); return; }
+      const seatTokens = splitSeats(document.getElementById("seatInput").value);
+      if (!seatTokens.length) { alert("Seat chunein!"); return; }
+
+      const jDate = document.getElementById("journeyDateInput").value;
+      const todayStr = new Date().toISOString().slice(0,10);
+      if (jDate < todayStr) {
+        alert("Error: Back-date (beete hue din ki) booking allow nahi hai!");
+        return;
+      }
+
+      const busName = document.getElementById("busNameInput").value;
+      const busTime = document.getElementById("busTimeInput").value;
+
+      const conflicts = checkSeatConflict(jDate, busName, busTime, seatTokens);
+      if (conflicts.length > 0) { alert(`Seat(s) ${conflicts.join(", ")} pehle se booked ya permanent blocked hain!`); return; }
+
+      const fare = parseFloat(document.getElementById("fareInput").value) || 0;
+      const payMode = document.getElementById("paymentModeInput").value;
+
+      let splitCash = 0;
+      let splitUpi = 0;
+      let splitRemark = "";
+
+      if (payMode === "Split (Cash + UPI)") {
+        splitCash = parseFloat(document.getElementById("splitCashInput").value) || 0;
+        splitUpi = parseFloat(document.getElementById("splitUpiInput").value) || 0;
+
+        if (splitCash + splitUpi !== fare) {
+          alert(`Split Payment Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) ka jod Total Fare (₹${fare}) ke barabar hona chahiye!`);
+          return;
+        }
+        splitRemark = ` [Cash: ₹${splitCash}, UPI: ₹${splitUpi}]`;
+      }
+
+      const newBooking = {
+        ticketNo: editingTicketNo || getNextTicketNumber(),
+        bookingDate: document.getElementById("bookingDateInput").value,
+        journeyDate: jDate,
+        busName: busName,
+        busTime: busTime,
+        seatNo: seatTokens.join(", "),
+        passengerName: document.getElementById("passengerNameInput").value.trim(),
+        mobile: mobile,
+        fromCity: document.getElementById("fromCityInput").value,
+        toCity: document.getElementById("toCityInput").value,
+        bookedBy: currentLoggedInStaff,
+        fare: fare,
+        splitCashAmount: splitCash,
+        splitUpiAmount: splitUpi,
+        paymentMode: payMode,
+        remark: document.getElementById("remarkInput").value.trim() + splitRemark,
+        status: "CONFIRMED"
+      };
+
+      if (editingTicketNo) {
+        const idx = bookings.findIndex(b => b.ticketNo === editingTicketNo);
+        if (idx !== -1) bookings[idx] = newBooking;
+        editingTicketNo = null;
+        document.getElementById("saveBtnText").innerText = "Save Reservation";
+      } else {
+        bookings.push(newBooking);
+      }
+
+      if (payMode === "UPI" || (payMode === "Split (Cash + UPI)" && splitUpi > 0)) {
+        pendingUPIBooking = newBooking;
+        openUPIModal(newBooking);
+      } else {
+        saveFinalBooking(newBooking);
+      }
+    }
+
+    function switchTab(tabId) {
+      if (tabId === 'admin' && currentUserRole !== 'Admin') { alert("Access Denied! Sirf Admin ke liye."); return; }
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+      ['booking', 'register', 'memo', 'financial', 'admin'].forEach(id => {
+        const btn = document.getElementById(`tab-${id}`);
+        if (btn) { btn.classList.remove('active-tab'); btn.classList.add('text-blue-200'); }
+      });
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      if (activeBtn) { activeBtn.classList.remove('text-blue-200'); activeBtn.classList.add('active-tab'); }
+      const content = document.getElementById(`content-${tabId}`);
+      if (content) content.classList.remove("hidden");
+
+      if (tabId === "memo") { updateMemoRoutes(); renderChauhanMemo(); }
+      else if (tabId === "financial") { renderCollectionStats(); renderExpensesTable(); renderSettlementsTable(); }
+      else if (tabId === "register") { loadBookings(); renderBookingsTable(); }
+      else if (tabId === "admin") { populateAdminOperatorSelects(); populateLayoutTripSelect(); }
+    }
+  </script>
+</body>
+</html>
