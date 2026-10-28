@@ -2754,6 +2754,9 @@
           <div><b>Passenger:</b> ${b.passengerName}<br><b>Mobile:</b> ${b.mobile}<br><b>Journey Date:</b> ${b.journeyDate}</div>
           <div><b>Seat No:</b> <span class="text-blue-700 font-bold">${b.seatNo}</span><br><b>Fare:</b> ₹${b.fare} (${b.paymentMode})<br><b>Booked By:</b> ${b.bookedBy}</div>
         </div>
+		<button type="button" onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2">
+ 		<i class="fa-solid fa-file-pdf"></i> Save / Download PDF
+		</button>
       `;
       document.getElementById('ticketModal').classList.remove('hidden');
     }
