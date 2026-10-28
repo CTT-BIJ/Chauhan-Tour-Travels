@@ -2084,7 +2084,7 @@
       routeSelect.innerHTML = "";
       const matched = bookings.filter(b => b.status === "CONFIRMED" && normalizeDate(b.journeyDate) === memoDate && b.busName.toLowerCase().trim() === busName.toLowerCase());
       if (matched.length === 0) {
-        const opt = document.createElement("option"); opt.value = ""; opt.textContent = "Is date par koi booking nahi hai"; routeSelect.appendChild(opt);
+        const opt = document.createElement("option"); opt.value = ""; opt.textContent = "No Booking "; routeSelect.appendChild(opt);
         renderChauhanMemo(); return;
       }
       const departureTimes = [...new Set(matched.map(b => b.busTime.trim()))];
