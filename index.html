@@ -2740,7 +2740,7 @@
       
       const masterKey = `${b.busName}_${b.busTime}`;
       const serviceObj = BUS_MASTER_ROUTES[masterKey] || { serviceName: b.busName };
-      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} and ${b.busTime}.`;
+      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} at ${b.busTime}.`;
 
       document.getElementById('ticketModalContent').innerHTML = `
         <div class="border-b border-slate-300 pb-2 mb-2 flex justify-between items-center">
@@ -2838,7 +2838,7 @@
 ━━━━━━━━━━━━━━━━━━
 🎫 BOOKING CONFIRMATION SLIP ✅
 🙏 Dear *${b.passengerName}* Ji,
-🎉 Your bus seat reservation has been CONFIRMED SUCCESSFULLY! by Chauhan Tour & Travels in association with ${b.busName}. 🚌
+🎉 Your bus seat reservation has been CONFIRMED SUCCESSFULLY! by *Chauhan Tour & Travels* in association with *${b.busName}*. 🚌
 ━━━━━━━━━━━━━━━━━━
 🧾 JOURNEY DETAILS
 🎟️ Ticket No.: ${b.ticketNo}
