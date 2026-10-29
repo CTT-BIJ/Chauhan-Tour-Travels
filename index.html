@@ -12,7 +12,7 @@
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -27,7 +27,7 @@
   </script>
 
   <style>
-       @media print {
+    @media print {
       body * { visibility: hidden !important; }
       #print-area, #print-area * { visibility: visible !important; }
       #print-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; display: block !important; background: white !important; color: black !important; }
@@ -39,10 +39,11 @@
     
     body { 
       background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
-                url('rajdhani_bus.jpg'),
-                url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed !important;
+                  url('rajdhani_bus.jpg'),
+                  url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed !important;
       background-size: cover !important;
       color: var(--ct-ink); 
+      font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important;
     }
 
     header.no-print { background: linear-gradient(115deg, #0b1329 0%, #15294d 55%, #1e3a8a 100%) !important; box-shadow: 0 14px 30px rgba(15,23,42,.22) !important; border-bottom: 3px solid var(--ct-orange); }
@@ -224,7 +225,7 @@
                     <i class="fa-solid fa-border-all"></i> Open Seat Map
                   </button>
                 </div>
-                <input type="text" id="seatInput" oninput="calculateTotalFare()" placeholder="Click 'Open Seat Map'" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs uppercase font-bold text-slate-800">
+                <input type="text" id="seatInput" onclick="openSeatModal()" oninput="calculateTotalFare()" placeholder="Click 'Open Seat Map'" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs uppercase font-bold text-slate-800 bg-white cursor-pointer">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Mobile Number (10 Digits) <span class="text-red-500">*</span></label>
@@ -311,7 +312,7 @@
     <!-- TAB 2: LIVE REGISTER -->
     <div id="content-register" class="tab-content hidden space-y-4">
       <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+        <div class="grid grid-cols-1 sm:grid-cols-6 gap-3 items-end">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Journey Date</label>
             <input type="date" id="filterJourneyDate" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
@@ -319,6 +320,15 @@
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Bus Operator</label>
             <select id="filterBusName" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Sort Order</label>
+            <select id="filterSortOrder" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer">
+              <option value="tkt_desc">Ticket No: High to Low (Newest)</option>
+              <option value="tkt_asc">Ticket No: Low to High (Oldest)</option>
+              <option value="date_desc">Journey Date: Latest First</option>
+              <option value="date_asc">Journey Date: Earliest First</option>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Search (Name/Mobile/Tkt)</label>
@@ -386,12 +396,12 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Driver Name* <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Driver Name <span class="text-red-500">*</span></label>
             <input type="text" id="voucherDriverInput" list="driverHistoryList" placeholder="Select or type driver name" required class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-amber-50/40">
             <datalist id="driverHistoryList"></datalist>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Vehicle No. / Gadi No.* <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Vehicle No. / Gadi No. <span class="text-red-500">*</span></label>
             <input type="text" id="voucherVehicleInput" list="vehicleHistoryList" placeholder="Select or type CG 18 ..." required class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase bg-amber-50/40">
             <datalist id="vehicleHistoryList"></datalist>
           </div>
@@ -413,7 +423,7 @@
           <i class="fa-solid fa-file-invoice-dollar"></i> Generate Settlement
         </button>
         <button type="button" onclick="shareMemoWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
-          <i class="fa-brands fa-whatsapp"></i> Send Professional WhatsApp to Driver
+          <i class="fa-brands fa-whatsapp"></i> Send WhatsApp to Driver
         </button>
       </div>
     </div>
@@ -490,7 +500,7 @@
         </div>
       </div>
 
-      <!-- OPERATOR-WISE TOTAL SEAT & REVENUE BREAKDOWN TABLE -->
+      <!-- OPERATOR-WISE BREAKDOWN TABLE -->
       <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
         <h3 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b border-slate-200 pb-2">
           <span class="flex items-center gap-2"><i class="fa-solid fa-bus text-blue-600"></i> Operator-Wise Seat & Revenue Matrix</span>
@@ -646,7 +656,7 @@
           <div class="space-y-3 text-xs">
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Active Agency UPI ID <span class="text-red-500">*</span></label>
-              <input type="text" id="agencyUpiInput" placeholder="e.g. nikki934066@ptyes" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold font-mono text-purple-700">
+              <input type="text" id="agencyUpiInput" placeholder="e.g. duliyant@ptyes" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold font-mono text-purple-700">
               <p class="text-[10px] text-slate-400 mt-1">Yeh UPI ID QR Code scan payments me auto-apply hogi.</p>
             </div>
             <button type="button" onclick="handleSaveAgencyUpi()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">Save UPI ID</button>
@@ -664,7 +674,7 @@
           </div>
         </div>
 
-        <!-- 4. BUS OPERATOR & ROUTES WITH RETURN TIME, RETURN SERVICE NAME & EDIT -->
+        <!-- BUS OPERATOR & ROUTES -->
         <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
             <span class="flex items-center gap-2"><i class="fa-solid fa-bus-simple text-blue-600"></i> Bus Operator & Routes</span>
@@ -719,7 +729,7 @@
           </div>
         </div>
 
-        <!-- 5. TRIP-WISE SEAT LAYOUT CREATOR -->
+        <!-- TRIP-WISE SEAT LAYOUT CREATOR -->
         <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
             <span class="flex items-center gap-2"><i class="fa-solid fa-couch text-purple-600"></i> Trip-Wise Seat Layout Creator</span>
@@ -733,7 +743,7 @@
             <div class="flex items-center gap-2 bg-purple-50 p-2.5 rounded-lg border border-purple-200">
               <input type="checkbox" id="applyToReturnTripCheckbox" checked class="w-4 h-4 text-purple-600 rounded cursor-pointer">
               <label for="applyToReturnTripCheckbox" class="font-bold text-purple-950 cursor-pointer text-xs">
-                ☑️ Ishi layout ko is bus ki return trip par bhi apply karein (Auto Sync)
+                ☑️ Return trip Seat Layout (Auto Sync)
               </label>
             </div>
 
@@ -774,7 +784,7 @@
           </div>
 
           <div class="bg-red-50/95 backdrop-blur-md rounded-xl shadow-lg border border-red-200 p-5 space-y-3">
-            <h2 class="text-sm font-bold text-red-700 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation"></i> Factory Reset (PIN: 324657)</h2>
+            <h2 class="text-sm font-bold text-red-700 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation"></i> Factory Reset </h2>
             <p class="text-xs text-red-600">Admin poore system data ko clear kar sakte hain.</p>
             <button type="button" onclick="handleClearAllDatabase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-2">
               <i class="fa-solid fa-trash-can"></i> Clear All Data
@@ -828,7 +838,7 @@
     </div>
   </div>
 
-  <!-- Credit Payment Clear Modal with Split UPI Rules -->
+  <!-- Credit Payment Clear Modal -->
   <div id="creditClearModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
       <div class="bg-emerald-800 text-white p-4 flex items-center justify-between font-bold">
@@ -1080,7 +1090,7 @@
     const UPI_ID_STORAGE_KEY = "chauhan_agency_upi_v1";
     const LAST_BACKUP_KEY = "chauhan_last_backup_time_v1";
 
-    let agencyUpiId = localStorage.getItem(UPI_ID_STORAGE_KEY) || "nikki934066@ptyes";
+    let agencyUpiId = localStorage.getItem(UPI_ID_STORAGE_KEY) || "duliyant@ptyes";
 
     let MASTER_CITIES = [];
     try {
@@ -1107,6 +1117,7 @@
       const storedS = localStorage.getItem(STAFF_STORAGE_KEY);
       staffList = storedS ? JSON.parse(storedS) : [
         { name: "Admin", pin: "1234", role: "Admin" },
+        { name: "Duliyant", pin: "1234", role: "Admin" },
         { name: "Nikki", pin: "1234", role: "Staff" },
         { name: "Asif", pin: "1234", role: "Staff" }
       ];
@@ -1900,7 +1911,7 @@
 
     function handleClearAllDatabase() {
       if (currentUserRole !== 'Admin') { alert("Sirf Admin kar sakta hai!"); return; }
-      const enteredCode = prompt("Master Code enter karein (PIN: 324657):");
+      const enteredCode = prompt("Master Code enter karein (PIN:):");
       if (enteredCode && enteredCode.trim() === "324657") {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(EXPENSE_STORAGE_KEY);
@@ -2084,7 +2095,7 @@
       routeSelect.innerHTML = "";
       const matched = bookings.filter(b => b.status === "CONFIRMED" && normalizeDate(b.journeyDate) === memoDate && b.busName.toLowerCase().trim() === busName.toLowerCase());
       if (matched.length === 0) {
-        const opt = document.createElement("option"); opt.value = ""; opt.textContent = "No Booking "; routeSelect.appendChild(opt);
+        const opt = document.createElement("option"); opt.value = ""; opt.textContent = "No Booking"; routeSelect.appendChild(opt);
         renderChauhanMemo(); return;
       }
       const departureTimes = [...new Set(matched.map(b => b.busTime.trim()))];
@@ -2220,9 +2231,8 @@
             <span>₹${netPayable}</span>
           </div>
         </div>
-	        <div class="flex justify-between pt-6 text-[11px] font-bold text-amber-900">
+        <div class="flex justify-between pt-6 text-[11px] font-bold text-amber-900">
           <span>हस्ताक्षर बुकिंग क्लर्क: ____________</span>
-         
         </div>
       `;
     }
@@ -2247,7 +2257,7 @@
       let totalDue = 0;
       creditList.forEach(b => {
         totalDue += (Number(b.fare) || 0);
-        listContainer.innerHTML += `<div class="flex justify-between p-1.5 bg-white rounded border text-xs"><div><b>(${b.seatNo})</div><div class="font-bold text-red-600">₹${b.fare}</div></div>`;
+        listContainer.innerHTML += `<div class="flex justify-between p-1.5 bg-white rounded border text-xs"><div><b>${b.passengerName}</b> (${b.seatNo})</div><div class="font-bold text-red-600">₹${b.fare}</div></div>`;
       });
       document.getElementById("creditTotalDueAmount").innerText = `₹${totalDue}`;
       document.getElementById("creditAlertModal").classList.remove("hidden");
@@ -2426,7 +2436,8 @@
         busOperators.forEach(op => {
           const list = bookings.filter(b => b.status === "CONFIRMED" && b.busName.toLowerCase().trim() === op.toLowerCase().trim());
           const gross = list.reduce((sum, b) => sum + b.fare, 0);
-          breakdownBody.innerHTML += `<tr><td class="p-2.5 font-bold">${op}</td><td class="p-2.5 text-center">${list.length}</td><td class="p-2.5 text-center">${list.length}</td><td class="p-2.5 text-right font-bold">₹${gross}</td><td class="p-2.5 text-right text-red-600 font-bold">₹0</td><td class="p-2.5 text-right font-semibold">₹${Math.round(gross*0.1)}</td><td class="p-2.5 text-right font-black text-blue-700">₹${gross - Math.round(gross*0.1)}</td></tr>`;
+          const due = list.filter(b => b.paymentMode === 'Credit').reduce((sum, b) => sum + b.fare, 0);
+          breakdownBody.innerHTML += `<tr><td class="p-2.5 font-bold">${op}</td><td class="p-2.5 text-center">${list.length}</td><td class="p-2.5 text-center">${list.reduce((sum, b) => sum + splitSeats(b.seatNo).length, 0)}</td><td class="p-2.5 text-right font-bold">₹${gross}</td><td class="p-2.5 text-right text-red-600 font-bold">₹${due}</td><td class="p-2.5 text-right font-semibold">₹${Math.round(gross*0.1)}</td><td class="p-2.5 text-right font-black text-blue-700">₹${gross - Math.round(gross*0.1)}</td></tr>`;
         });
       }
 
@@ -2593,6 +2604,7 @@
       const dateFilter = normalizeDate(document.getElementById('filterJourneyDate')?.value || '');
       const busFilter = (document.getElementById('filterBusName')?.value || '').trim().toLowerCase();
       const search = (document.getElementById('filterSearch')?.value || '').trim().toLowerCase();
+      const sortOrder = document.getElementById('filterSortOrder')?.value || 'tkt_desc';
 
       const busSelect = document.getElementById('filterBusName');
       if (busSelect) {
@@ -2602,7 +2614,7 @@
         if (names.some(n => n.toLowerCase() === previous.toLowerCase())) busSelect.value = names.find(n => n.toLowerCase() === previous.toLowerCase()) || '';
       }
 
-      const visible = bookings.filter(b => {
+      let visible = bookings.filter(b => {
         if (dateFilter && normalizeDate(b.journeyDate) !== dateFilter) return false;
         if (busFilter && busFilter !== 'all' && String(b.busName || '').trim().toLowerCase() !== busFilter) return false;
         if (search) {
@@ -2610,12 +2622,30 @@
           if (!haystack.includes(search)) return false;
         }
         return true;
-      }).sort((a,b) => normalizeDate(b.journeyDate).localeCompare(normalizeDate(a.journeyDate)) || String(b.ticketNo).localeCompare(String(b.ticketNo)));
+      });
+
+      visible.sort((a, b) => {
+        if (sortOrder === 'tkt_asc') {
+          const numA = parseInt(String(a.ticketNo).replace(/[^0-9]/g, '')) || 0;
+          const numB = parseInt(String(b.ticketNo).replace(/[^0-9]/g, '')) || 0;
+          return numA - numB;
+        } else if (sortOrder === 'tkt_desc') {
+          const numA = parseInt(String(a.ticketNo).replace(/[^0-9]/g, '')) || 0;
+          const numB = parseInt(String(b.ticketNo).replace(/[^0-9]/g, '')) || 0;
+          return numB - numA;
+        } else if (sortOrder === 'date_asc') {
+          return normalizeDate(a.journeyDate).localeCompare(normalizeDate(b.journeyDate));
+        } else if (sortOrder === 'date_desc') {
+          return normalizeDate(b.journeyDate).localeCompare(normalizeDate(a.journeyDate));
+        }
+        return 0;
+      });
 
       if (!visible.length) {
         tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400 font-semibold">No bookings found. Please save a booking or change the filters.</td></tr>';
         return;
       }
+
       tbody.innerHTML = visible.map(b => {
         const status = String(b.status || 'CONFIRMED').toUpperCase();
         const cancelled = status === 'CANCELLED';
@@ -2645,10 +2675,7 @@
       saveBookings();
       resetBookingForm();
       showToast(`Ticket ${booking?.ticketNo || ''} saved successfully!`, 'success');
-      
-      if (confirm(`Ticket ${booking.ticketNo} save ho gayi! Kya passenger (${booking.passengerName}) ko Welcome WhatsApp message bhejna chahte hain?`)) {
-        sendPassengerWhatsAppDirect(booking);
-      }
+      openTicketModal(booking.ticketNo);
     }
 
     function resetBookingForm() {
@@ -2740,7 +2767,7 @@
       
       const masterKey = `${b.busName}_${b.busTime}`;
       const serviceObj = BUS_MASTER_ROUTES[masterKey] || { serviceName: b.busName };
-      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} at ${b.busTime}.`;
+      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} @ ${b.busTime}.`;
 
       document.getElementById('ticketModalContent').innerHTML = `
         <div class="border-b border-slate-300 pb-2 mb-2 flex justify-between items-center">
@@ -2754,9 +2781,9 @@
           <div><b>Passenger:</b> ${b.passengerName}<br><b>Mobile:</b> ${b.mobile}<br><b>Journey Date:</b> ${b.journeyDate}</div>
           <div><b>Seat No:</b> <span class="text-blue-700 font-bold">${b.seatNo}</span><br><b>Fare:</b> ₹${b.fare} (${b.paymentMode})<br><b>Booked By:</b> ${b.bookedBy}</div>
         </div>
-		<button type="button" onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2">
- 		<i class="fa-solid fa-file-pdf"></i> Save / Download PDF
-		</button>
+        <button type="button" onclick="downloadA6TicketPDF()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2 mt-2">
+          <i class="fa-solid fa-file-pdf"></i> Download PDF Ticket
+        </button>
       `;
       document.getElementById('ticketModal').classList.remove('hidden');
     }
@@ -2769,7 +2796,7 @@
     function executePrintAction(b) {
       const masterKey = `${b.busName}_${b.busTime}`;
       const serviceObj = BUS_MASTER_ROUTES[masterKey] || { serviceName: b.busName };
-      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} and ${b.busTime}.`;
+      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} @ ${b.busTime}.`;
 
       const area = document.getElementById('print-area');
       area.innerHTML = `
@@ -2833,7 +2860,7 @@
     }
 
     function sendPassengerWhatsAppDirect(b) {
-      const msg = `*🚌CHAUHAN TOUR & TRAVELS🚌*
+      const msg = `🚌 *CHAUHAN TOUR & TRAVELS* 🚌
 📍 *New Bus Stand, Bijapur (C.G.)*
 ━━━━━━━━━━━━━━━━━━
 🎫 BOOKING CONFIRMATION SLIP ✅
@@ -2843,7 +2870,7 @@
 🧾 JOURNEY DETAILS
 🎟️ Ticket No.: ${b.ticketNo}
 📅 Journey Date: ${b.journeyDate}
-🛣️ Route: ${b.fromCity} ➡️ ${b.toCity}
+🛣️ Route: ${b.fromCity} - ${b.toCity}
 💺 Seat Number: ${b.seatNo}
 💰 Total Fare: ₹${b.fare}
 📲 Payment Mode: ${b.paymentMode.toUpperCase()}
@@ -2881,6 +2908,7 @@
     function printBookingTicket(ticketNo) {
       openTicketModal(ticketNo);
     }
+
     function openUPIModal(booking) {
       if (!booking) return;
       pendingUPIBooking = booking;
@@ -3060,7 +3088,8 @@
         if (bookedData && bookedData.isBlocked) {
           return `<button type="button" disabled title="Seat ${seat}: System Blocked" class="ct-seat ct-seat-blocked">${seat}</button>`;
         }
-        return `<button type="button" disabled title="Seat ${seat}: Booked (${bookedData.passengerName || ''})" class="ct-seat ct-seat-booked">${seat}</button>`;
+        const tooltipText = `Seat: ${seat} | Tkt: ${bookedData.ticketNo} | Passenger: ${bookedData.passengerName} | Mob: ${bookedData.mobile} | Fare: ₹${bookedData.fare} (${bookedData.paymentMode})`;
+        return `<button type="button" disabled title="${tooltipText}" class="ct-seat ct-seat-booked">${seat}</button>`;
       }
       if (isSelected) return `<button type="button" onclick="toggleSeat('${seat}')" class="ct-seat ct-seat-selected">${seat}</button>`;
       return `<button type="button" onclick="toggleSeat('${seat}')" class="ct-seat ct-seat-available">${seat}</button>`;
@@ -3175,6 +3204,82 @@
       else if (tabId === "financial") { renderCollectionStats(); renderExpensesTable(); renderSettlementsTable(); }
       else if (tabId === "register") { loadBookings(); renderBookingsTable(); }
       else if (tabId === "admin") { populateAdminOperatorSelects(); populateLayoutTripSelect(); }
+    }
+
+    function downloadA6TicketPDF() {
+      if (!activePrintingTicket) {
+        alert("Pehle koi ticket chunein!");
+        return;
+      }
+      
+      executePrintActionForPDF(activePrintingTicket);
+
+      const element = document.getElementById('print-area');
+      element.style.display = 'block';
+
+      const options = {
+        margin:       0,
+        filename:     `Chauhan_Ticket_${activePrintingTicket.ticketNo}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a6', orientation: 'landscape' }
+      };
+
+      html2pdf().from(element).set(options).save().then(() => {
+        element.style.display = 'none';
+        showToast("PDF Ticket successfully downloaded!", "success");
+      });
+    }
+
+    function executePrintActionForPDF(b) {
+      const masterKey = `${b.busName}_${b.busTime}`;
+      const serviceObj = BUS_MASTER_ROUTES[masterKey] || { serviceName: b.busName };
+      const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} @ ${b.busTime}.`;
+
+      const area = document.getElementById('print-area');
+      area.innerHTML = `
+        <div style="font-family:Arial,sans-serif; width:136mm; height:93mm; padding:6mm; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; color:#111; font-size:11px; background:white;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3a8a; padding-bottom:6px;">
+              <div>
+                <h2 style="margin:0; font-size:14px; font-weight:900; color:#1e3a8a;">CHAUHAN TOUR & TRAVELS</h2>
+                <div style="font-size:9px; color:#555;">New Bus Stand, Bijapur (C.G.) • Helpline: 094079 96570, 093406 69984</div>
+              </div>
+              <div style="text-align:right;">
+                <span style="background:#1e3a8a; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px;">CONFIRMED TICKET</span>
+                <div style="font-size:10px; font-family:monospace; margin-top:2px;">Ticket No: <b>${b.ticketNo}</b></div>
+              </div>
+            </div>
+            <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:4px; padding:6px 8px; margin-top:8px; font-size:11px; font-weight:bold; color:#78350f;">
+              ${subTitleText}
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+            <div>
+              <div><b>Passenger Name:</b> ${b.passengerName}</div>
+              <div><b>Mobile No:</b> ${b.mobile}</div>
+              <div><b>Boarding From:</b> ${b.fromCity}</div>
+              <div><b>Destination To:</b> ${b.toCity}</div>
+            </div>
+            <div style="border-left:1px solid #cbd5e1; padding-left:8px;">
+              <div><b>Journey Date:</b> ${b.journeyDate}</div>
+              <div><b>Departure Time:</b> ${b.busTime}</div>
+              <div><b>Seat Number(s):</b> <span style="color:#1d4ed8; font-weight:900; font-size:13px;">${b.seatNo}</span></div>
+              <div><b>Booked By:</b> ${b.bookedBy}</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #cbd5e1; padding-top:6px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px;">
+              <span>Payment Mode: <span style="text-transform:uppercase; color:#047857;">${b.paymentMode}</span></span>
+              <span>Total Fare: <span style="color:#1e40af; font-size:14px; font-weight:900;">₹${Number(b.fare||0).toLocaleString('en-IN')}</span></span>
+            </div>
+            <div style="font-size:8px; color:#666; text-align:center; border-top:1px dashed #cbd5e1; margin-top:4px; padding-top:3px; display:flex; justify-content:space-between;">
+              <span>* Kripya yatri bus departure time se 15 minute pehle boarding point par pahunchein.</span>
+              <b>Passenger Copy / Counter Copy</b>
+            </div>
+          </div>
+        </div>
+      `;
     }
   </script>
 </body>
