@@ -3,23 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chauhan Tour & Travels - Booking Management System</title>
+  <title>Chauhan Tour & Travels - Booking Counter Portal</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- Firebase & html2pdf -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'Noto Sans Devanagari', 'sans-serif'] },
+          fontFamily: { 
+            sans: ['"Plus Jakarta Sans"', '"Inter"', '"Noto Sans Devanagari"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif']
+          },
           colors: {
-            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' }
+            brand: { 
+              50: '#f0f7ff', 
+              100: '#e0effe', 
+              500: '#3b82f6', 
+              600: '#2563eb', 
+              700: '#1d4ed8', 
+              800: '#1e40af', 
+              900: '#0f172a',
+              950: '#020617' 
+            },
+            accent: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706'
+            }
+          },
+          boxShadow: {
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04)',
+            'elevated': '0 12px 32px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06)'
           }
         }
       }
@@ -30,300 +59,567 @@
     @media print {
       body * { visibility: hidden !important; }
       #print-area, #print-area * { visibility: visible !important; }
-      #print-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; display: block !important; background: white !important; color: black !important; }
+      #print-area { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 100% !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        display: block !important; 
+        background: white !important; 
+        color: black !important; 
+      }
       @page { size: auto; margin: 4mm; }
     }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
-    :root { --ct-ink: #101827; --ct-navy: #101c35; --ct-blue: #2457e6; --ct-orange: #ff9f1c; }
-    
-    body { 
-      background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), 
-                  url('rajdhani_bus.jpg'),
-                  url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed !important;
-      background-size: cover !important;
-      color: var(--ct-ink); 
-      font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important;
+
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    body {
+      background-color: #f8fafc;
+      background-image: radial-gradient(#e2e8f0 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
     }
 
-    header.no-print { background: linear-gradient(115deg, #0b1329 0%, #15294d 55%, #1e3a8a 100%) !important; box-shadow: 0 14px 30px rgba(15,23,42,.22) !important; border-bottom: 3px solid var(--ct-orange); }
-    .agency-tab { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px !important; padding: 8px 14px !important; white-space: nowrap; transition: all .2s ease !important; background: rgba(15, 23, 42, 0.45); cursor: pointer; }
-    .agency-tab:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12) !important; border-color: rgba(255, 159, 28, 0.5) !important; }
-    .agency-tab.active-tab { background: linear-gradient(135deg, #ff9f1c 0%, #f59e0b 100%) !important; color: #0f172a !important; border-color: #f59e0b !important; box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35) !important; }
-    .agency-tab.active-tab .tab-icon-box { background: rgba(15, 23, 42, 0.15) !important; color: #0f172a !important; }
-    .agency-tab.active-tab .tab-subtext { color: #334155 !important; font-weight: 700 !important; }
-    .ct-seat { position: relative; width: clamp(37px, 7vw, 48px) !important; height: clamp(45px, 8vw, 54px) !important; min-width: 35px; border-radius: 8px !important; font-size: 10px !important; font-weight: 800 !important; transition: transform .14s ease, box-shadow .14s ease, background .14s ease !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer; }
-    .ct-seat-available { background: #fff !important; border: 1px solid #aab8ca !important; border-bottom: 4px solid #9aa9bd !important; color: #24334a !important; }
-    .ct-seat-available:hover { background: #fff4e4 !important; border-color: #f59e0b !important; transform: translateY(-2px); }
-    .ct-seat-selected { background: linear-gradient(145deg, #ffbd59, #ff9815) !important; border: 1px solid #df7d00 !important; border-bottom: 4px solid #c96a00 !important; color: #172033 !important; transform: translateY(-2px); }
-    .ct-seat-booked { background: #fee8e8 !important; border: 1px solid #f5a0a0 !important; border-bottom: 4px solid #dc6262 !important; color: #a12626 !important; opacity: .95; cursor: not-allowed !important; }
-    .ct-seat-blocked { background: #e2e8f0 !important; border: 1px solid #94a3b8 !important; border-bottom: 4px solid #64748b !important; color: #64748b !important; cursor: not-allowed !important; opacity: 0.75; }
+    .nav-tab {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .nav-tab.active-tab {
+      background: #ffffff;
+      color: #0f172a !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+    }
+    .nav-tab.active-tab .tab-icon {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: #ffffff !important;
+    }
+    .nav-tab.active-tab .tab-badge {
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    /* Bus Coach Seat Styling */
+    .ct-seat {
+      position: relative;
+      width: clamp(38px, 6vw, 46px);
+      height: clamp(44px, 7vw, 50px);
+      min-width: 38px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .ct-seat::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      width: 60%;
+      height: 4px;
+      border-radius: 2px 2px 0 0;
+      background: currentColor;
+      opacity: 0.25;
+    }
+
+    .ct-seat-available {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-bottom: 3.5px solid #94a3b8;
+      color: #334155;
+    }
+    .ct-seat-available:hover {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      border-bottom-color: #2563eb;
+      color: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+    }
+    .ct-seat-selected {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 1.5px solid #b45309;
+      border-bottom: 3.5px solid #78350f;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
+    }
+    .ct-seat-booked {
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      border-bottom: 3.5px solid #f87171;
+      color: #dc2626;
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+    .ct-seat-blocked {
+      background: #f1f5f9;
+      border: 1.5px solid #e2e8f0;
+      border-bottom: 3.5px solid #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    /* Bus shell layout mock */
+    .bus-coach-shell {
+      border: 3px solid #cbd5e1;
+      border-radius: 40px 40px 24px 24px;
+      background: #ffffff;
+      position: relative;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .bus-cabin-divider {
+      border-bottom: 2px dashed #e2e8f0;
+    }
   </style>
 </head>
-<body class="font-sans min-h-screen flex flex-col">
+<body class="font-sans min-h-screen flex flex-col text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
 
-  <!-- Login Overlay -->
-  <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200">
-      <div class="bg-brand-900 text-white p-6 text-center space-y-2">
-        <div class="w-14 h-14 rounded-full bg-amber-400 text-brand-900 font-bold text-2xl flex items-center justify-center mx-auto shadow-inner">
-          <i class="fa-solid fa-bus"></i>
+  <!-- Login Modal Overlay -->
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 flex flex-col transform transition-all duration-300">
+      <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white p-7 text-center relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-28 h-28 bg-blue-500/10 rounded-full blur-xl pointer-events-none"></div>
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-300 text-slate-950 font-black text-2xl flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20 mb-3 border border-amber-200">
+          <i class="fa-solid fa-bus-simple"></i>
         </div>
-        <h2 class="text-lg font-extrabold tracking-wide">CHAUHAN TOUR & TRAVELS</h2>
-        <p class="text-xs text-blue-200">Counter Login & Agency Portal</p>
+        <h2 class="font-display text-xl font-extrabold tracking-tight">CHAUHAN TRAVELS</h2>
+        <p class="text-xs text-blue-200 font-medium mt-0.5">Counter Terminal & Dispatch Portal</p>
+        <span class="inline-block mt-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+          Bijapur (C.G.) Main Counter
+        </span>
       </div>
 
-      <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-4 text-xs">
+      <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-4">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Select Login User <span class="text-red-500">*</span></label>
-          <select id="loginUserSelect" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-semibold text-slate-800 cursor-pointer focus:ring-2 focus:ring-blue-500"></select>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Select Counter Staff <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+              <i class="fa-solid fa-user text-xs"></i>
+            </span>
+            <select id="loginUserSelect" required class="w-full pl-9 pr-8 border border-slate-200 bg-slate-50/70 rounded-xl py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"></select>
+          </div>
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">PIN Code <span class="text-red-500">*</span></label>
-          <input type="password" id="loginPasswordInput" placeholder="Enter PIN (Default: 1234)" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500">
-          <div class="text-[10px] text-slate-400 mt-1">Default PIN: <b>1234</b></div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Staff PIN Passcode <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+              <i class="fa-solid fa-lock text-xs"></i>
+            </span>
+            <input type="password" id="loginPasswordInput" placeholder="Enter 4-Digit PIN" required class="w-full pl-9 pr-3 border border-slate-200 bg-slate-50/70 rounded-xl py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent tracking-widest transition">
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
+            <span>Default PIN: <strong class="text-slate-600">1234</strong></span>
+            <span class="text-blue-600 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Protected POS</span>
+          </div>
         </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl shadow transition cursor-pointer mt-2">
-          <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Login to System
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2 mt-2">
+          <span>Login to System</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="bg-brand-900 text-white shadow-lg sticky top-0 z-40 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center space-x-3">
-          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-md border border-amber-300">
+  <!-- Main SaaS Top Navigation Header -->
+  <header class="bg-slate-900 text-white shadow-xl sticky top-0 z-40 border-b border-slate-800/80 no-print">
+    <div class="max-w-[1520px] mx-auto px-4 sm:px-6">
+      
+      <!-- Top Brand Row -->
+      <div class="flex items-center justify-between h-16 gap-3">
+        
+        <!-- Left Brand & Location -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 via-amber-300 to-amber-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-md shadow-amber-500/20 border border-amber-200/50">
             <i class="fa-solid fa-bus-simple"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">CHAUHAN TOUR & TRAVELS</h1>
-              <span class="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded shadow-sm hidden md:inline">मुख्य बुकिंग काउण्टर</span>
+              <span class="font-display font-extrabold text-base sm:text-lg tracking-tight leading-none bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+                CHAUHAN TOUR & TRAVELS
+              </span>
+              <span class="text-[9px] font-black uppercase tracking-wider bg-amber-400/90 text-slate-950 px-2 py-0.5 rounded shadow-sm hidden md:inline">
+                MAIN POS COUNTER
+              </span>
             </div>
-            <p class="text-xs text-blue-200">New Bus Stand, Bijapur (C.G.) • 📞 094079 96570, 093406 69984</p>
+            <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+              <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-amber-400 text-[10px]"></i> Bijapur (C.G.)</span>
+              <span class="text-slate-600">•</span>
+              <span class="hidden sm:inline">📞 094079 96570, 093406 69984</span>
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center space-x-2.5">
-          <div class="hidden sm:flex flex-col items-end text-right">
-            <div class="flex items-center bg-slate-900/60 border border-slate-700/80 rounded-lg px-2.5 py-0.5 text-[11px] text-blue-200 shadow-inner">
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-              Operator: <strong id="loggedInUserBadge" class="text-amber-300 ml-1">Admin (Admin)</strong>
+        <!-- Right Quick Actions & Operator Info -->
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          
+          <!-- Live Date & Time -->
+          <div class="hidden lg:flex flex-col items-end px-3 py-1 bg-slate-800/60 rounded-xl border border-slate-700/60">
+            <div class="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 font-mono" id="liveClockDisplay">
+              Loading...
             </div>
-            <div id="liveClockDisplay" class="text-[11px] text-amber-300 font-mono font-semibold mt-0.5">Loading Date & Time...</div>
+            <div class="text-[9px] text-slate-400 font-medium">Counter Server Sync: Active</div>
           </div>
 
+          <!-- Operator Pill -->
+          <div class="flex items-center bg-slate-800/80 border border-slate-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+            <div class="text-[11px] leading-tight">
+              <div class="text-slate-400 text-[9px] uppercase font-bold tracking-wider">Staff On Duty</div>
+              <strong id="loggedInUserBadge" class="text-white font-bold">Admin</strong>
+            </div>
+          </div>
+
+          <!-- Quick Backup Button -->
           <div class="flex flex-col items-end">
-            <button type="button" onclick="handleManualHeaderBackup()" title="Download Backup JSON" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md transition cursor-pointer flex items-center gap-1.5 border border-emerald-500">
-              <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
-              <span>Backup Now</span>
+            <button type="button" onclick="handleManualHeaderBackup()" title="Download Backup JSON" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-cloud-arrow-down text-emerald-400"></i>
+              <span class="hidden sm:inline">Backup</span>
             </button>
-            <div id="lastBackupDisplay" class="text-[9px] text-emerald-300 font-mono font-semibold mt-0.5 tracking-tight">Last Backup: Never</div>
+            <div id="lastBackupDisplay" class="text-[9px] text-slate-400 font-mono mt-0.5 hidden sm:block">Backup: Never</div>
           </div>
 
-          <button type="button" onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-md transition cursor-pointer flex items-center gap-1.5 border border-red-500">
-            <i class="fa-solid fa-power-off text-sm"></i>
-            <span class="hidden md:inline">Logout</span>
+          <!-- Logout Button -->
+          <button type="button" onclick="handleLogout()" title="Logout" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-power-off"></i>
+            <span class="hidden md:inline">Exit</span>
           </button>
         </div>
+
       </div>
 
-      <nav class="flex items-center space-x-2 overflow-x-auto border-t border-slate-700/60 py-2 custom-scrollbar">
-        <button type="button" onclick="switchTab('booking')" id="tab-booking" class="agency-tab active-tab flex items-center gap-2.5">
-          <div class="tab-icon-box w-7 h-7 rounded-lg bg-amber-400/20 flex items-center justify-center text-sm text-amber-300"><i class="fa-solid fa-ticket"></i></div>
-          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">New Booking</div><div class="tab-subtext text-[9px] text-blue-200 uppercase tracking-wider">सीट आरक्षण</div></div>
+      <!-- Navigation Tabs Bar -->
+      <nav class="flex items-center gap-2 overflow-x-auto py-2.5 custom-scrollbar border-t border-slate-800/60">
+        
+        <button type="button" onclick="switchTab('booking')" id="tab-booking" class="nav-tab active-tab flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer">
+          <div class="tab-icon w-6 h-6 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <div class="text-left leading-tight">
+            <div class="font-bold text-[12px]">New Booking</div>
+            <div class="tab-badge text-[9px] text-slate-400 uppercase tracking-wider">सीट आरक्षण</div>
+          </div>
         </button>
 
-        <button type="button" onclick="switchTab('register')" id="tab-register" class="agency-tab flex items-center gap-2.5 text-blue-200">
-          <div class="tab-icon-box w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center text-sm text-blue-300"><i class="fa-solid fa-table-list"></i></div>
-          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Live Register</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">दैनिक रजिस्टर</div></div>
+        <button type="button" onclick="switchTab('register')" id="tab-register" class="nav-tab flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer hover:bg-slate-800/60">
+          <div class="tab-icon w-6 h-6 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-table-list"></i>
+          </div>
+          <div class="text-left leading-tight">
+            <div class="font-bold text-[12px]">Live Register</div>
+            <div class="tab-badge text-[9px] text-slate-400 uppercase tracking-wider">दैनिक रजिस्टर</div>
+          </div>
         </button>
 
-        <button type="button" onclick="switchTab('memo')" id="tab-memo" class="agency-tab flex items-center gap-2.5 text-blue-200">
-          <div class="tab-icon-box w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-sm text-emerald-300"><i class="fa-solid fa-file-invoice"></i></div>
-          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Counter Voucher</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">गाड़ी चालान / मेमो</div></div>
+        <button type="button" onclick="switchTab('memo')" id="tab-memo" class="nav-tab flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer hover:bg-slate-800/60">
+          <div class="tab-icon w-6 h-6 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <div class="text-left leading-tight">
+            <div class="font-bold text-[12px]">Counter Voucher</div>
+            <div class="tab-badge text-[9px] text-slate-400 uppercase tracking-wider">गाड़ी चालान / मेमो</div>
+          </div>
         </button>
 
-        <button type="button" onclick="switchTab('financial')" id="tab-financial" class="agency-tab flex items-center gap-2.5 text-blue-200">
-          <div class="tab-icon-box w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center text-sm text-purple-300"><i class="fa-solid fa-chart-pie"></i></div>
-          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Financial & Ledger</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">गल्ला एवं हिसाब</div></div>
+        <button type="button" onclick="switchTab('financial')" id="tab-financial" class="nav-tab flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer hover:bg-slate-800/60">
+          <div class="tab-icon w-6 h-6 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <div class="text-left leading-tight">
+            <div class="font-bold text-[12px]">Ledger & Accounts</div>
+            <div class="tab-badge text-[9px] text-slate-400 uppercase tracking-wider">गल्ला एवं हिसाब</div>
+          </div>
         </button>
 
-        <button type="button" onclick="switchTab('admin')" id="tab-admin" class="agency-tab hidden items-center gap-2.5 text-amber-300">
-          <div class="tab-icon-box w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-sm text-amber-400"><i class="fa-solid fa-shield-halved"></i></div>
-          <div class="text-left leading-tight"><div class="font-extrabold text-[12px]">Admin Portal</div><div class="tab-subtext text-[9px] text-slate-400 uppercase tracking-wider">मास्टर सेटिंग्स</div></div>
+        <button type="button" onclick="switchTab('admin')" id="tab-admin" class="nav-tab hidden items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-300 cursor-pointer hover:bg-slate-800/60">
+          <div class="tab-icon w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs transition">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="text-left leading-tight">
+            <div class="font-bold text-[12px]">Admin Portal</div>
+            <div class="tab-badge text-[9px] text-amber-300/80 uppercase tracking-wider">मास्टर सेटिंग्स</div>
+          </div>
         </button>
+
       </nav>
+
     </div>
   </header>
 
-  <!-- Main View -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full no-print">
+  <!-- Main View Area -->
+  <main class="max-w-[1520px] mx-auto px-4 sm:px-6 py-6 flex-1 w-full no-print">
 
-    <!-- TAB 1: BOOKING FORM -->
+    <!-- ========================================== -->
+    <!-- TAB 1: NEW BOOKING (COUNTER RESERVATION)    -->
+    <!-- ========================================== -->
     <div id="content-booking" class="tab-content block">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-          <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
-            <h2 id="formTitleText" class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-pen-to-square text-blue-600"></i> New Bus Reservation Form
-            </h2>
-            <div class="flex items-center gap-2 text-xs text-slate-500">
-              <span>Ticket No:</span>
-              <span id="displayTicketNo" class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">TKT-1001</span>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Booking Form Card -->
+        <div class="lg:col-span-8 bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden">
+          
+          <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200/80 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold border border-blue-100">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </div>
+              <div>
+                <h2 id="formTitleText" class="text-sm sm:text-base font-bold text-slate-900 leading-none">
+                  Passenger Seat Reservation
+                </h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Enter journey itinerary and customer passenger data</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-semibold text-slate-500">Ticket Ref:</span>
+              <span id="displayTicketNo" class="font-mono text-xs font-black text-blue-700 bg-blue-50/80 px-2.5 py-1 rounded-lg border border-blue-200">
+                TKT-1001
+              </span>
             </div>
           </div>
 
-          <form id="bookingForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Booking Date</label>
-                <input type="text" id="bookingDateInput" readonly class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
+          <form id="bookingForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-5">
+            
+            <!-- Schedule Section -->
+            <div class="bg-slate-50/60 p-4 rounded-xl border border-slate-200/70 space-y-3.5">
+              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-regular fa-calendar-check text-blue-600"></i> Trip & Service Details
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Journey Date <span class="text-red-500">*</span></label>
-                <input type="date" id="journeyDateInput" onchange="updateDestinationsAndTimes()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium">
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Booking Date</label>
+                  <input type="text" id="bookingDateInput" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 cursor-not-allowed">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Journey Date <span class="text-red-500">*</span></label>
+                  <input type="date" id="journeyDateInput" onchange="updateDestinationsAndTimes()" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Bus Operator <span class="text-red-500">*</span></label>
+                  <select id="busNameInput" onchange="handleBusChange()" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer transition"></select>
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Bus Operator <span class="text-red-500">*</span></label>
-                <select id="busNameInput" onchange="handleBusChange()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"></select>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-end">
+                <div class="sm:col-span-2">
+                  <div class="grid grid-cols-[1fr,auto,1fr] gap-2 items-end">
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 mb-1">From Boarding <span class="text-red-500">*</span></label>
+                      <select id="fromCityInput" onchange="onOriginChange()" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600"></select>
+                    </div>
+                    <div class="flex items-center pb-0.5">
+                      <button type="button" onclick="swapOriginDestination()" title="Swap Origin and Destination" class="w-9 h-9 rounded-xl bg-white hover:bg-blue-50 border border-slate-300 hover:border-blue-300 text-slate-600 hover:text-blue-600 flex items-center justify-center transition shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-xs"></i>
+                      </button>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700 mb-1">To Destination <span class="text-red-500">*</span></label>
+                      <select id="toCityInput" onchange="updateDestinationsAndTimes()" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600"></select>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Bus Time <span class="text-red-500">*</span></label>
+                  <select id="busTimeInput" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer"></select>
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="sm:col-span-2">
-                <div class="grid grid-cols-[1fr,auto,1fr] gap-1.5 items-end">
-                  <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">From <span class="text-red-500">*</span></label>
-                    <select id="fromCityInput" onchange="onOriginChange()" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs"></select>
-                  </div>
-                  <div class="flex items-center justify-center pb-0.5">
-                    <button type="button" onclick="swapOriginDestination()" title="Swap Cities" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 text-xs font-bold border border-slate-300 flex items-center justify-center cursor-pointer transition">
-                      <i class="fa-solid fa-right-left"></i>
+            <!-- Passenger & Seat Section -->
+            <div class="bg-slate-50/60 p-4 rounded-xl border border-slate-200/70 space-y-3.5">
+              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-regular fa-user text-blue-600"></i> Passenger & Seat Assignment
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-700">Seat Number(s) <span class="text-red-500">*</span></label>
+                    <button type="button" onclick="openSeatModal()" class="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer">
+                      <i class="fa-solid fa-border-all"></i> Open Seat Map
                     </button>
                   </div>
-                  <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">To <span class="text-red-500">*</span></label>
-                    <select id="toCityInput" onchange="updateDestinationsAndTimes()" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs"></select>
+                  <input type="text" id="seatInput" onclick="openSeatModal()" oninput="calculateTotalFare()" placeholder="Click 'Open Seat Map'" required class="w-full bg-white border border-blue-300 focus:border-blue-500 rounded-xl px-3 py-2 text-xs uppercase font-extrabold text-blue-900 cursor-pointer shadow-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Number <span class="text-red-500">*</span></label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-400 font-bold">+91</span>
+                    <input type="tel" id="mobileInput" maxlength="10" minlength="10" pattern="[0-9]{10}" placeholder="9876543210" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoFillPassengerName();" class="w-full pl-10 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
                   </div>
                 </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Bus Time <span class="text-red-500">*</span></label>
-                <select id="busTimeInput" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"></select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-xs font-semibold text-slate-600">Seat Number(s) <span class="text-red-500">*</span></label>
-                  <button type="button" onclick="openSeatModal()" class="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer">
-                    <i class="fa-solid fa-border-all"></i> Open Seat Map
-                  </button>
-                </div>
-                <input type="text" id="seatInput" onclick="openSeatModal()" oninput="calculateTotalFare()" placeholder="Click 'Open Seat Map'" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs uppercase font-bold text-slate-800 bg-white cursor-pointer">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Mobile Number (10 Digits) <span class="text-red-500">*</span></label>
-                <div class="relative">
-                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-400 font-medium">+91</span>
-                  <input type="tel" id="mobileInput" maxlength="10" minlength="10" pattern="[0-9]{10}" placeholder="9876543210" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoFillPassengerName();" class="w-full pl-10 border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Passenger Name <span class="text-red-500">*</span></label>
+                  <input type="text" id="passengerNameInput" placeholder="Full Name" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
                 </div>
               </div>
+            </div>
+
+            <!-- Fare & Payment Method -->
+            <div class="bg-slate-50/60 p-4 rounded-xl border border-slate-200/70 space-y-3.5">
+              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-wallet text-blue-600"></i> Fare Calculation & Payment Mode
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-3.5 items-end">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Per Seat Fare (₹) <span class="text-red-500">*</span></label>
+                  <input type="number" id="perPassengerFareInput" min="0" value="00.00" oninput="calculateTotalFare()" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Total Fare (₹) <span class="text-red-500">*</span></label>
+                  <input type="number" id="fareInput" min="0" readonly required class="w-full bg-blue-50/80 border border-blue-200 rounded-xl px-3 py-2 text-sm font-black text-blue-700 cursor-not-allowed">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Payment Mode <span class="text-red-500">*</span></label>
+                  <select id="paymentModeInput" onchange="handlePaymentModeChange()" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer">
+                    <option value="Cash">Cash (Counter)</option>
+                    <option value="UPI">UPI (QR Scan Online)</option>
+                    <option value="Split (Cash + UPI)">Split (Cash + UPI)</option>
+                    <option value="Credit">Credit (उधार / Pending)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Booked By Staff</label>
+                  <input type="text" id="bookedByInput" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 cursor-not-allowed">
+                </div>
+              </div>
+
+              <!-- Split Payment Sub-Box -->
+              <div id="splitPaymentBox" class="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-xl border border-amber-200 hidden">
+                <div>
+                  <label class="block text-[11px] font-bold text-amber-950 mb-1">Cash Component (₹)</label>
+                  <input type="number" id="splitCashInput" min="0" value="0" oninput="syncSplitFromCash()" class="w-full bg-white border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-blue-900 mb-1">UPI QR Component (₹)</label>
+                  <input type="number" id="splitUpiInput" min="0" value="0" oninput="syncSplitFromUpi()" class="w-full bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-xs font-black text-blue-700">
+                </div>
+              </div>
+
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Passenger Name <span class="text-red-500">*</span></label>
-                <input type="text" id="passengerNameInput" placeholder="Full Name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-800">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Remark / Special Instructions</label>
+                <input type="text" id="remarkInput" placeholder="e.g. Luggage 2 Bags, Near front seat request" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Per Seat Fare (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="perPassengerFareInput" min="0" value="00.00" oninput="calculateTotalFare()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-800">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Fare (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="fareInput" min="0" readonly required class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-xs font-black text-blue-700">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Payment Mode <span class="text-red-500">*</span></label>
-                <select id="paymentModeInput" onchange="handlePaymentModeChange()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer">
-                  <option value="Cash">Cash</option>
-                  <option value="UPI">UPI (QR Scan)</option>
-                  <option value="Split (Cash + UPI)">Split (Cash + UPI)</option>
-                  <option value="Credit">Credit (Pending)</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Booked By</label>
-                <input type="text" id="bookedByInput" readonly class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-brand-900 cursor-not-allowed">
-              </div>
-            </div>
-
-            <div id="splitPaymentBox" class="grid grid-cols-2 gap-4 bg-amber-50 p-3 rounded-xl border border-amber-300 hidden">
-              <div>
-                <label class="block text-xs font-bold text-amber-950 mb-1">Cash Part (₹) <span class="text-red-500">*</span></label>
-                <input type="number" id="splitCashInput" min="0" value="0" oninput="syncSplitFromCash()" class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-bold bg-white text-slate-800">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-blue-900 mb-1">UPI Part (₹) (QR Scanner Amount) <span class="text-red-500">*</span></label>
-                <input type="number" id="splitUpiInput" min="0" value="0" oninput="syncSplitFromUpi()" class="w-full border border-blue-400 rounded-lg px-3 py-1.5 text-xs font-black bg-white text-blue-700">
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Remark / Notes</label>
-              <input type="text" id="remarkInput" placeholder="Optional notes" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs">
-            </div>
-
-            <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center gap-3">
-              <button type="submit" id="btnSaveBooking" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-lg shadow transition cursor-pointer flex items-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">Save Reservation</span>
+            <!-- Action Buttons -->
+            <div class="pt-2 flex flex-wrap items-center gap-3">
+              <button type="submit" id="btnSaveBooking" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition cursor-pointer flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span id="saveBtnText">Save Reservation</span>
               </button>
-              <button type="button" onclick="resetBookingForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-lg transition cursor-pointer">
+              
+              <button type="button" onclick="resetBookingForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition cursor-pointer">
                 Reset Form
               </button>
             </div>
           </form>
         </div>
 
-        <div class="space-y-4">
-          <div class="bg-gradient-to-br from-brand-900 to-blue-800 text-white rounded-xl shadow-lg p-5 border border-blue-700/50">
-            <h3 class="text-xs uppercase tracking-wider text-blue-200 font-semibold mb-2">Today's Quick Summary</h3>
-            <div class="grid grid-cols-2 gap-3 pt-2">
-              <div class="bg-white/10 rounded-lg p-2.5">
-                <div class="text-xs text-blue-200">Active Bookings</div>
-                <div id="quickTodayCount" class="text-lg font-bold">0</div>
+        <!-- Right: Today's Snapshot Card & Quick Stats -->
+        <div class="lg:col-span-4 space-y-4">
+          
+          <!-- Counter Status Widget -->
+          <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white rounded-2xl shadow-elevated p-6 border border-slate-800 relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-amber-400">TODAY'S DISPATCH</span>
+                <h3 class="font-display font-extrabold text-base">Quick Performance</h3>
               </div>
-              <div class="bg-white/10 rounded-lg p-2.5">
-                <div class="text-xs text-blue-200">Total Collection</div>
-                <div id="quickTodayCollection" class="text-lg font-bold">₹0</div>
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 border border-white/10">
+                <i class="fa-solid fa-gauge-high text-sm"></i>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white/10 rounded-xl p-3.5 border border-white/10">
+                <div class="text-[11px] text-blue-200 font-semibold">Active Bookings</div>
+                <div id="quickTodayCount" class="font-display text-2xl font-black text-white mt-1">0</div>
+                <div class="text-[10px] text-emerald-400 mt-0.5 flex items-center gap-1">
+                  <i class="fa-solid fa-circle-check text-[9px]"></i> Confirmed
+                </div>
+              </div>
+
+              <div class="bg-white/10 rounded-xl p-3.5 border border-white/10">
+                <div class="text-[11px] text-blue-200 font-semibold">Total Collection</div>
+                <div id="quickTodayCollection" class="font-display text-2xl font-black text-amber-300 mt-1">₹0</div>
+                <div class="text-[10px] text-slate-300 mt-0.5">Counter Gross</div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-300 flex items-center justify-between">
+              <span>Main Terminal:</span>
+              <strong class="text-white">New Bus Stand, Bijapur</strong>
+            </div>
+          </div>
+
+          <!-- Shortcuts & Guide Card -->
+          <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-3">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-bolt text-amber-500"></i> Counter Quick Help
+            </h4>
+            
+            <div class="space-y-2 text-xs text-slate-600">
+              <div class="flex items-start gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100">
+                <i class="fa-solid fa-chair text-blue-600 mt-0.5"></i>
+                <div>
+                  <strong class="text-slate-800">Seat Selection:</strong> Click "Open Seat Map" to toggle available coach seats.
+                </div>
+              </div>
+
+              <div class="flex items-start gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100">
+                <i class="fa-solid fa-qrcode text-purple-600 mt-0.5"></i>
+                <div>
+                  <strong class="text-slate-800">UPI Payments:</strong> Dynamic QR pops up automatically for quick scanning.
+                </div>
+              </div>
+
+              <div class="flex items-start gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100">
+                <i class="fa-solid fa-print text-emerald-600 mt-0.5"></i>
+                <div>
+                  <strong class="text-slate-800">A6 Slip & PDF:</strong> After save, single-click A6 Landscape print or download PDF.
+                </div>
               </div>
             </div>
           </div>
+
         </div>
+
       </div>
     </div>
 
-    <!-- TAB 2: LIVE REGISTER -->
+    <!-- ========================================== -->
+    <!-- TAB 2: LIVE REGISTER (BOOKING HISTORY)      -->
+    <!-- ========================================== -->
     <div id="content-register" class="tab-content hidden space-y-4">
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-4">
+      
+      <!-- Filter Bar -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-4">
         <div class="grid grid-cols-1 sm:grid-cols-6 gap-3 items-end">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Journey Date</label>
-            <input type="date" id="filterJourneyDate" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+            <input type="date" id="filterJourneyDate" onchange="renderBookingsTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Filter Bus Operator</label>
-            <select id="filterBusName" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs cursor-pointer"></select>
+            <select id="filterBusName" onchange="renderBookingsTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer"></select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Sort Order</label>
-            <select id="filterSortOrder" onchange="renderBookingsTable()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer">
+            <select id="filterSortOrder" onchange="renderBookingsTable()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer">
               <option value="tkt_desc">Ticket No: High to Low (Newest)</option>
               <option value="tkt_asc">Ticket No: Low to High (Oldest)</option>
               <option value="date_desc">Journey Date: Latest First</option>
@@ -331,192 +627,234 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Search (Name/Mobile/Tkt)</label>
-            <input type="text" id="filterSearch" oninput="renderBookingsTable()" placeholder="Search..." class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Quick Search</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </span>
+              <input type="text" id="filterSearch" oninput="renderBookingsTable()" placeholder="Name / Mobile / Tkt" class="w-full pl-8 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
           </div>
           <div>
-            <button type="button" onclick="clearFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-lg transition cursor-pointer">Reset Filters</button>
+            <button type="button" onclick="clearFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition cursor-pointer">
+              Reset Filters
+            </button>
           </div>
           <div>
-            <button type="button" onclick="exportBookingsToCSV()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
-              <i class="fa-solid fa-file-excel"></i> Export Excel (CSV)
+            <button type="button" onclick="exportBookingsToCSV()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-file-excel"></i> Export CSV
             </button>
           </div>
         </div>
       </div>
 
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+      <!-- Bookings Data Table Card -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-700 border-collapse">
-            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[11px]">
+            <thead class="bg-slate-50/80 text-slate-600 border-b border-slate-200 font-bold uppercase text-[11px] tracking-wider">
               <tr>
-                <th class="py-3 px-3">Ticket No</th>
+                <th class="py-3 px-4">Ticket No</th>
                 <th class="py-3 px-3">Journey Date</th>
                 <th class="py-3 px-3">Bus Service</th>
                 <th class="py-3 px-2">Time</th>
-                <th class="py-3 px-2">Seat</th>
+                <th class="py-3 px-2">Seat(s)</th>
                 <th class="py-3 px-3">Passenger</th>
                 <th class="py-3 px-3">Mobile</th>
                 <th class="py-3 px-3 text-right">Fare</th>
                 <th class="py-3 px-2 text-center">Payment</th>
-                <th class="py-3 px-3 text-center">Actions</th>
+                <th class="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="bookingsTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
           </table>
         </div>
       </div>
+
     </div>
 
-    <!-- TAB 3: COUNTER VOUCHER -->
+    <!-- ========================================== -->
+    <!-- TAB 3: COUNTER VOUCHER (MEMO / CHALAN)      -->
+    <!-- ========================================== -->
     <div id="content-memo" class="tab-content hidden space-y-4">
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-4 space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+      
+      <!-- Voucher Parameters Card -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
+        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Journey Date</label>
-            <input type="date" id="memoDateInput" onchange="onMemoParamChange()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Bus Operator</label>
-            <select id="memoBusSelect" onchange="onMemoParamChange()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Route & Time</label>
-            <select id="memoRouteSelect" onchange="onRouteSelectionChange()" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Commission (%)</label>
-            <input type="text" id="memoCommInput" oninput="renderChauhanMemo()" placeholder="e.g. 10%" value="10%" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-red-600">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">GST (%)</label>
-            <input type="text" id="memoGstInput" oninput="renderChauhanMemo()" placeholder="e.g. 5%" value="5%" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-file-invoice text-blue-600"></i> Counter Dispatch Voucher & Chalan
+            </h3>
+            <p class="text-[11px] text-slate-500">Configure trip parameters and generate driver chalan slip</p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Journey Date</label>
+            <input type="date" id="memoDateInput" onchange="onMemoParamChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Bus Operator</label>
+            <select id="memoBusSelect" onchange="onMemoParamChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Route & Time</label>
+            <select id="memoRouteSelect" onchange="onRouteSelectionChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Commission (%)</label>
+            <input type="text" id="memoCommInput" oninput="renderChauhanMemo()" placeholder="e.g. 10%" value="10%" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-black text-red-600 focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">GST (%)</label>
+            <input type="text" id="memoGstInput" oninput="renderChauhanMemo()" placeholder="e.g. 5%" value="5%" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-black text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Driver Name <span class="text-red-500">*</span></label>
-            <input type="text" id="voucherDriverInput" list="driverHistoryList" placeholder="Select or type driver name" required class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-amber-50/40">
+            <input type="text" id="voucherDriverInput" list="driverHistoryList" placeholder="Select or type driver name" required class="w-full bg-amber-50/40 border border-amber-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
             <datalist id="driverHistoryList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Vehicle No. / Gadi No. <span class="text-red-500">*</span></label>
-            <input type="text" id="voucherVehicleInput" list="vehicleHistoryList" placeholder="Select or type CG 18 ..." required class="w-full border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase bg-amber-50/40">
+            <input type="text" id="voucherVehicleInput" list="vehicleHistoryList" placeholder="e.g. CG 18 E 1234" required class="w-full bg-amber-50/40 border border-amber-300 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
             <datalist id="vehicleHistoryList"></datalist>
           </div>
         </div>
 
         <div>
-          <button type="button" onclick="generateVoucherWithCreditCheck()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer shadow">
-            <i class="fa-solid fa-rotate"></i> Generate Counter Voucher Preview
+          <button type="button" onclick="generateVoucherWithCreditCheck()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-500/20">
+            <i class="fa-solid fa-arrows-rotate"></i> Generate Voucher Preview
           </button>
         </div>
       </div>
 
-      <div class="bg-amber-50/95 border-2 border-amber-300 rounded-xl p-6 max-w-lg mx-auto shadow-xl min-h-[300px]" id="memoContainer"></div>
-      <div class="flex flex-wrap justify-center gap-3">
-        <button type="button" onclick="printCurrentMemo()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
+      <!-- Voucher Thermal/Slip Preview Area -->
+      <div class="bg-amber-50/70 border-2 border-amber-300/80 rounded-2xl p-6 max-w-xl mx-auto shadow-xl min-h-[300px]" id="memoContainer"></div>
+
+      <!-- Voucher Bottom Trigger Actions -->
+      <div class="flex flex-wrap justify-center gap-3 pt-2">
+        <button type="button" onclick="printCurrentMemo()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-lg flex items-center gap-2 cursor-pointer transition">
           <i class="fa-solid fa-print"></i> Print Voucher Slip (A5)
         </button>
-        <button type="button" onclick="openSettlementModalFromVoucher()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
-          <i class="fa-solid fa-file-invoice-dollar"></i> Generate Settlement
+        <button type="button" onclick="openSettlementModalFromVoucher()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-lg flex items-center gap-2 cursor-pointer transition">
+          <i class="fa-solid fa-hand-holding-dollar"></i> Generate Settlement
         </button>
-        <button type="button" onclick="shareMemoWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow flex items-center gap-2 cursor-pointer">
-          <i class="fa-brands fa-whatsapp"></i> Send WhatsApp to Driver
+        <button type="button" onclick="shareMemoWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-lg flex items-center gap-2 cursor-pointer transition">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp To Driver
         </button>
       </div>
+
     </div>
 
-    <!-- TAB 4: FINANCIAL & COMPLETE LEDGER -->
+    <!-- ========================================== -->
+    <!-- TAB 4: FINANCIALS & COMPLETE LEDGER         -->
+    <!-- ========================================== -->
     <div id="content-financial" class="tab-content hidden space-y-6">
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
-          <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie text-blue-600"></i> Counter Financial Overview & Cash Drawer
-          </h2>
+      
+      <!-- Top Financial Snapshot Bar -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-blue-600"></i> Counter Financial Overview & Cash Drawer
+            </h2>
+            <p class="text-[11px] text-slate-500">Live reconciliation of cash, online UPI, and driver settlements</p>
+          </div>
+
           <div class="flex items-center gap-3">
             <div id="summaryDateWrapper" class="flex items-center gap-2">
-              <label class="text-xs font-semibold text-slate-600">Date Filter:</label>
-              <input type="date" id="summaryDatePicker" onchange="renderCollectionStats()" class="border border-slate-300 rounded-lg px-3 py-1 text-xs font-semibold">
+              <label class="text-xs font-semibold text-slate-600">Date:</label>
+              <input type="date" id="summaryDatePicker" onchange="renderCollectionStats()" class="border border-slate-300 rounded-xl px-3 py-1 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600">
             </div>
-            <button type="button" onclick="toggleShowAllPayments()" id="btnToggleAllPayments" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition cursor-pointer">
+            <button type="button" onclick="toggleShowAllPayments()" id="btnToggleAllPayments" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow transition cursor-pointer">
               Show All Payments
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-            <div class="text-xs font-semibold text-emerald-800">Gross Cash Collected</div>
-            <div id="statCash" class="text-2xl font-black text-emerald-700 mt-2">₹0</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          <div class="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-200/80">
+            <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Gross Cash</div>
+            <div id="statCash" class="font-display text-2xl font-black text-emerald-700 mt-1.5">₹0</div>
           </div>
-          <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
-            <div class="text-xs font-semibold text-blue-800">UPI / QR Online</div>
-            <div id="statUPI" class="text-2xl font-black text-blue-700 mt-2">₹0</div>
+          <div class="bg-blue-50/70 rounded-2xl p-4 border border-blue-200/80">
+            <div class="text-[11px] font-bold text-blue-800 uppercase tracking-wider">UPI / Online</div>
+            <div id="statUPI" class="font-display text-2xl font-black text-blue-700 mt-1.5">₹0</div>
           </div>
-          <div class="bg-amber-50 rounded-xl p-4 border border-amber-200">
-            <div class="text-xs font-semibold text-amber-800">Credit / Due</div>
-            <div id="statCredit" class="text-2xl font-black text-amber-700 mt-2">₹0</div>
+          <div class="bg-amber-50/70 rounded-2xl p-4 border border-amber-200/80">
+            <div class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Credit / Due</div>
+            <div id="statCredit" class="font-display text-2xl font-black text-amber-700 mt-1.5">₹0</div>
           </div>
-          <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
-            <div class="text-xs font-semibold text-purple-800">Total Bookings Gross</div>
-            <div id="statTotal" class="text-2xl font-black text-purple-700 mt-2">₹0</div>
+          <div class="bg-purple-50/70 rounded-2xl p-4 border border-purple-200/80">
+            <div class="text-[11px] font-bold text-purple-800 uppercase tracking-wider">Total Gross</div>
+            <div id="statTotal" class="font-display text-2xl font-black text-purple-700 mt-1.5">₹0</div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-white shadow">
-            <div class="text-xs font-semibold text-amber-300">Net Cash in Drawer</div>
-            <div id="statNetDrawer" class="text-2xl font-black text-amber-400 mt-2">₹0</div>
-            <div class="text-[10px] text-slate-300 mt-1">(Cash In - Expenses - Paid to Bus)</div>
+          <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800 text-white shadow-lg">
+            <div class="text-[11px] font-bold text-amber-300 uppercase tracking-wider">Cash in Drawer</div>
+            <div id="statNetDrawer" class="font-display text-2xl font-black text-amber-400 mt-1.5">₹0</div>
+            <div class="text-[9px] text-slate-400 mt-1 leading-tight">(Cash In - Expenses - Paid to Bus)</div>
           </div>
         </div>
+
       </div>
 
-      <!-- DEDICATED CREDIT LEDGER -->
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-amber-300 p-5 space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200 pb-2">
-          <h3 class="text-sm font-bold text-amber-950 flex items-center gap-2">
-            <i class="fa-solid fa-hand-holding-dollar text-red-600"></i> Credit Passengers (उधार / बकाया लिस्ट)
-          </h3>
-          <span class="text-[11px] bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded-full border border-red-300">
-            Kul Baaki: <span id="totalCreditDueBadge">₹0</span>
+      <!-- Dedicated Credit Ledger -->
+      <div class="bg-white rounded-2xl shadow-card border border-amber-200 overflow-hidden">
+        <div class="p-4 bg-amber-50/60 border-b border-amber-200/70 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-hand-holding-dollar text-red-600 text-sm"></i>
+            <h3 class="text-xs sm:text-sm font-bold text-amber-950">
+              Credit Passengers (उधार / बकाया लिस्ट)
+            </h3>
+          </div>
+          <span class="text-xs bg-red-100 text-red-800 font-bold px-3 py-0.5 rounded-full border border-red-200">
+            Total Baaki: <span id="totalCreditDueBadge" class="font-black">₹0</span>
           </span>
         </div>
+
         <div class="overflow-x-auto max-h-64 custom-scrollbar">
           <table class="w-full text-left text-xs text-slate-700 border-collapse">
-            <thead class="bg-amber-100/70 text-amber-950 font-bold uppercase text-[10px] sticky top-0 border-b border-amber-300">
+            <thead class="bg-amber-100/50 text-amber-950 font-bold uppercase text-[10px] sticky top-0 border-b border-amber-200">
               <tr>
-                <th class="p-2.5">Ticket No</th>
-                <th class="p-2.5">Journey Date</th>
-                <th class="p-2.5">Passenger Name</th>
-                <th class="p-2.5">Mobile</th>
-                <th class="p-2.5">Bus & Route</th>
-                <th class="p-2.5 text-center">Seat</th>
-                <th class="p-2.5 text-right text-red-700 font-black">Due Amount (₹)</th>
-                <th class="p-2.5 text-center">Action</th>
+                <th class="p-3">Ticket No</th>
+                <th class="p-3">Journey Date</th>
+                <th class="p-3">Passenger Name</th>
+                <th class="p-3">Mobile</th>
+                <th class="p-3">Bus Operator</th>
+                <th class="p-3 text-center">Seat</th>
+                <th class="p-3 text-right text-red-700 font-bold">Due Amount (₹)</th>
+                <th class="p-3 text-center">Action</th>
               </tr>
             </thead>
-            <tbody id="creditDueTableBody" class="divide-y divide-amber-100 font-medium"></tbody>
+            <tbody id="creditDueTableBody" class="divide-y divide-amber-100/70 font-medium"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- OPERATOR-WISE BREAKDOWN TABLE -->
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
-        <h3 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b border-slate-200 pb-2">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-bus text-blue-600"></i> Operator-Wise Seat & Revenue Matrix</span>
+      <!-- Operator-Wise Matrix -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden p-5 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-bus text-blue-600"></i> Operator-Wise Seat & Revenue Matrix
+          </span>
           <span class="text-[11px] text-slate-500 font-semibold" id="opBreakdownPeriodLabel">Active Filter Period</span>
-        </h3>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-700 border-collapse">
             <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
               <tr>
-                <th class="p-2.5">Bus Operator</th>
-                <th class="p-2.5 text-center">Confirmed Bookings</th>
-                <th class="p-2.5 text-center">Total Confirmed Seats</th>
-                <th class="p-2.5 text-right">Gross Booking Amount (₹)</th>
-                <th class="p-2.5 text-right text-red-600">Credit / Due (₹)</th>
-                <th class="p-2.5 text-right">Counter Commission (10%)</th>
-                <th class="p-2.5 text-right">Net Payable to Bus (₹)</th>
+                <th class="p-3">Bus Operator</th>
+                <th class="p-3 text-center">Confirmed Bookings</th>
+                <th class="p-3 text-center">Total Seats</th>
+                <th class="p-3 text-right">Gross Booking (₹)</th>
+                <th class="p-3 text-right text-red-600">Credit / Due (₹)</th>
+                <th class="p-3 text-right">Commission (10%)</th>
+                <th class="p-3 text-right">Net Payable to Bus (₹)</th>
               </tr>
             </thead>
             <tbody id="operatorBreakdownBody" class="divide-y divide-slate-100 font-medium"></tbody>
@@ -524,32 +862,35 @@
         </div>
       </div>
 
-      <!-- UPCOMING JOURNEYS TRACKER TABLE -->
-      <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
+      <!-- Advance Upcoming Journeys -->
+      <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-2">
           <div>
             <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-calendar-days text-emerald-600"></i> Upcoming Journeys & Advance Passenger Schedule
             </h3>
-            <p class="text-[11px] text-slate-500 mt-0.5">Selected date ke baad sabhi operators ki upcoming trips auto-aggregated show hongi.</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Trips aggregated forward from selected date onwards</p>
           </div>
           <div class="flex items-center gap-2 text-xs">
             <label class="font-semibold text-slate-600">From Date:</label>
-            <input type="date" id="filterUpcomingDate" onchange="renderOperatorBreakdownAndUpcoming()" class="border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-semibold">
-            <button type="button" onclick="resetUpcomingFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg cursor-pointer">Today Onwards</button>
+            <input type="date" id="filterUpcomingDate" onchange="renderOperatorBreakdownAndUpcoming()" class="border border-slate-300 rounded-xl px-2.5 py-1 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600">
+            <button type="button" onclick="resetUpcomingFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-xl cursor-pointer">
+              Today Onwards
+            </button>
           </div>
         </div>
+
         <div class="overflow-x-auto max-h-80 custom-scrollbar">
           <table class="w-full text-left text-xs text-slate-700 border-collapse">
             <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200 sticky top-0">
               <tr>
-                <th class="p-2.5">Journey Date</th>
-                <th class="p-2.5">Bus Service</th>
-                <th class="p-2.5">Time</th>
-                <th class="p-2.5">Route</th>
-                <th class="p-2.5 text-center">Booked Seats</th>
-                <th class="p-2.5">Passenger Summary</th>
-                <th class="p-2.5 text-right">Advance Revenue (₹)</th>
+                <th class="p-3">Journey Date</th>
+                <th class="p-3">Bus Service</th>
+                <th class="p-3">Time</th>
+                <th class="p-3">Route</th>
+                <th class="p-3 text-center">Booked Seats</th>
+                <th class="p-3">Passenger Summary</th>
+                <th class="p-3 text-right">Advance Revenue (₹)</th>
               </tr>
             </thead>
             <tbody id="upcomingJourneysBody" class="divide-y divide-slate-100 font-medium"></tbody>
@@ -557,137 +898,154 @@
         </div>
       </div>
 
-      <!-- EXPENSES & SETTLEMENTS GRID -->
+      <!-- Expenses & Settlements Dual Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-receipt text-red-500"></i> Counter Expenses (खर्च)</h3>
-            <button type="button" onclick="openExpenseModal()" class="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 transition cursor-pointer">+ Add Expense</button>
+        
+        <!-- Counter Expenses -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-receipt text-red-500"></i> Counter Expenses (खर्च)
+            </h3>
+            <button type="button" onclick="openExpenseModal()" class="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-red-200 transition cursor-pointer">
+              + Add Expense
+            </button>
           </div>
-          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs">
+          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs">
             <div class="flex items-center gap-2">
               <label class="font-semibold text-slate-600">Date:</label>
-              <input type="date" id="filterExpenseDate" onchange="renderExpensesTable()" class="border border-slate-300 rounded px-2 py-0.5 text-xs font-medium">
+              <input type="date" id="filterExpenseDate" onchange="renderExpensesTable()" class="border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-semibold">
             </div>
             <button type="button" id="btnToggleAllExpenses" onclick="toggleAllExpenses()" class="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer">Show All</button>
           </div>
           <div class="overflow-x-auto max-h-60 custom-scrollbar">
             <table class="w-full text-left text-xs text-slate-700 border-collapse">
               <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
-                <tr><th class="p-2">Date</th><th class="p-2">Category / Title</th><th class="p-2 text-right">Amount (₹)</th><th class="p-2 text-center">Action</th></tr>
+                <tr><th class="p-2.5">Date</th><th class="p-2.5">Category / Title</th><th class="p-2.5 text-right">Amount (₹)</th><th class="p-2.5 text-center">Action</th></tr>
               </thead>
               <tbody id="expenseTableBody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
-          <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg text-xs font-bold text-slate-800">
-            <span>Filtered Expenses:</span><span id="totalExpenseDisplay" class="text-red-600 font-black">₹0</span>
+          <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl text-xs font-bold text-slate-800">
+            <span>Total Expenses:</span><span id="totalExpenseDisplay" class="text-red-600 font-black">₹0</span>
           </div>
         </div>
 
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i> Bus Operator Settlements (भुगतान)</h3>
-            <button type="button" onclick="openSettlementModalFromVoucher()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer">+ Record Payment</button>
+        <!-- Settlements Paid To Buses -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i> Operator Settlements (भुगतान)
+            </h3>
+            <button type="button" onclick="openSettlementModalFromVoucher()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200 transition cursor-pointer">
+              + Record Payment
+            </button>
           </div>
-          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs">
+          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs">
             <div class="flex items-center gap-2">
               <label class="font-semibold text-slate-600">Date:</label>
-              <input type="date" id="filterSettlementDate" onchange="renderSettlementsTable()" class="border border-slate-300 rounded px-2 py-0.5 text-xs font-medium">
+              <input type="date" id="filterSettlementDate" onchange="renderSettlementsTable()" class="border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-semibold">
             </div>
             <button type="button" id="btnToggleAllSettlements" onclick="toggleAllSettlements()" class="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer">Show All</button>
           </div>
           <div class="overflow-x-auto max-h-60 custom-scrollbar">
             <table class="w-full text-left text-xs text-slate-700 border-collapse">
               <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
-                <tr><th class="p-2">Date</th><th class="p-2">Operator / Driver</th><th class="p-2 text-right">Cash Paid</th><th class="p-2 text-right">UPI Paid</th><th class="p-2 text-center">Action</th></tr>
+                <tr><th class="p-2.5">Date</th><th class="p-2.5">Operator / Driver</th><th class="p-2.5 text-right">Cash Paid</th><th class="p-2.5 text-right">UPI Paid</th><th class="p-2.5 text-center">Action</th></tr>
               </thead>
               <tbody id="settlementTableBody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
-          <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg text-xs font-bold text-slate-800">
-            <span>Filtered Paid to Buses:</span><span id="totalSettlementDisplay" class="text-emerald-700 font-black">₹0</span>
+          <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl text-xs font-bold text-slate-800">
+            <span>Total Paid to Buses:</span><span id="totalSettlementDisplay" class="text-emerald-700 font-black">₹0</span>
           </div>
         </div>
+
       </div>
+
     </div>
 
-    <!-- TAB 5: ADMIN CONTROL CENTER -->
+    <!-- ========================================== -->
+    <!-- TAB 5: ADMIN PORTAL (MASTER CONFIG)         -->
+    <!-- ========================================== -->
     <div id="content-admin" class="tab-content hidden space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+        
+        <!-- Staff Management -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
             <span class="flex items-center gap-2"><i class="fa-solid fa-users-gear text-amber-600"></i> Staff PIN & Role Management</span>
-            <button type="button" onclick="resetStaffForm()" class="text-[11px] text-blue-600 hover:underline cursor-pointer">+ New Staff</button>
+            <button type="button" onclick="resetStaffForm()" class="text-[11px] text-blue-600 font-bold hover:underline cursor-pointer">+ New Staff</button>
           </h2>
           <form id="addUserForm" onsubmit="handleAddNewStaff(event)" class="space-y-3 text-xs">
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Select Staff to Edit / Delete</label>
               <div class="flex gap-2">
-                <select id="adminSelectStaff" onchange="onAdminSelectStaffChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold cursor-pointer">
-                  <option value="">-- Add New Staff --</option>
-                </select>
-                <button type="button" id="btnDeleteStaff" onclick="handleDeleteStaff()" class="hidden bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg font-bold transition cursor-pointer" title="Delete Selected Staff">
+                <select id="adminSelectStaff" onchange="onAdminSelectStaffChange()" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-semibold cursor-pointer"></select>
+                <button type="button" id="btnDeleteStaff" onclick="handleDeleteStaff()" class="hidden bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-xl font-bold transition cursor-pointer" title="Delete Selected Staff">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
             </div>
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Staff Name <span class="text-red-500">*</span></label>
-              <input type="text" id="newStaffName" placeholder="e.g. Rahul" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+              <input type="text" id="newStaffName" placeholder="e.g. Rahul" required class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium">
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block font-semibold text-slate-600 mb-1">Role</label>
-                <select id="newStaffRole" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+                <select id="newStaffRole" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium">
                   <option value="Staff">Staff</option><option value="Admin">Admin</option>
                 </select>
               </div>
               <div>
                 <label class="block font-semibold text-slate-600 mb-1">PIN Code (4-Digits) <span class="text-red-500">*</span></label>
-                <input type="password" id="newStaffPin" placeholder="PIN e.g. 1234" required class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
+                <input type="password" id="newStaffPin" placeholder="PIN e.g. 1234" required class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium">
               </div>
             </div>
-            <button type="submit" id="btnSaveStaff" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">Save Staff</button>
+            <button type="submit" id="btnSaveStaff" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl shadow transition cursor-pointer">Save Staff</button>
           </form>
         </div>
 
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+        <!-- UPI QR Configuration -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-qrcode text-purple-600"></i> Counter UPI QR Configuration</h2>
           <div class="space-y-3 text-xs">
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Active Agency UPI ID <span class="text-red-500">*</span></label>
-              <input type="text" id="agencyUpiInput" placeholder="e.g. duliyant@ptyes" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold font-mono text-purple-700">
-              <p class="text-[10px] text-slate-400 mt-1">Yeh UPI ID QR Code scan payments me auto-apply hogi.</p>
+              <label class="block font-semibold text-slate-600 mb-1">Active Agency UPI VPA <span class="text-red-500">*</span></label>
+              <input type="text" id="agencyUpiInput" placeholder="e.g. duliyant@ptyes" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-bold font-mono text-purple-700">
+              <p class="text-[10px] text-slate-400 mt-1">This UPI ID is embedded into QR codes generated at the counter.</p>
             </div>
-            <button type="button" onclick="handleSaveAgencyUpi()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">Save UPI ID</button>
+            <button type="button" onclick="handleSaveAgencyUpi()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl shadow transition cursor-pointer">Save UPI ID</button>
           </div>
         </div>
 
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+        <!-- Station Master -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-city text-emerald-600"></i> City & Station Master</h2>
           <div class="space-y-3 text-xs">
             <div class="flex gap-2">
-              <input type="text" id="newCityInput" placeholder="Add new station (e.g. Kondagaon, Kanker)" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
-              <button type="button" onclick="handleAddCity()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg shadow transition cursor-pointer whitespace-nowrap">+ Add City</button>
+              <input type="text" id="newCityInput" placeholder="Add station (e.g. Kondagaon, Kanker)" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium">
+              <button type="button" onclick="handleAddCity()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl shadow transition cursor-pointer whitespace-nowrap">+ Add City</button>
             </div>
-            <div id="adminCityTagsContainer" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg max-h-36 overflow-y-auto custom-scrollbar"></div>
+            <div id="adminCityTagsContainer" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-xl max-h-36 overflow-y-auto custom-scrollbar"></div>
           </div>
         </div>
 
-        <!-- BUS OPERATOR & ROUTES -->
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+        <!-- Bus Operators & Route Master -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
             <span class="flex items-center gap-2"><i class="fa-solid fa-bus-simple text-blue-600"></i> Bus Operator & Routes</span>
-            <button type="button" onclick="resetRouteForm()" class="text-[11px] text-blue-600 hover:underline cursor-pointer">+ New Route</button>
+            <button type="button" onclick="resetRouteForm()" class="text-[11px] text-blue-600 font-bold hover:underline cursor-pointer">+ New Route</button>
           </h2>
           <div class="space-y-3 text-xs">
             <div class="flex gap-2">
-              <input type="text" id="newOperatorInput" placeholder="New Operator Name" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-medium">
-              <button type="button" onclick="handleAddOperator()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-lg shadow transition cursor-pointer whitespace-nowrap">+ Add Bus</button>
+              <input type="text" id="newOperatorInput" placeholder="New Operator Name" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium">
+              <button type="button" onclick="handleAddOperator()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-xl shadow transition cursor-pointer whitespace-nowrap">+ Add Bus</button>
             </div>
-            <div id="adminOperatorTagsContainer" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg max-h-28 overflow-y-auto custom-scrollbar"></div>
+            <div id="adminOperatorTagsContainer" class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-xl max-h-28 overflow-y-auto custom-scrollbar"></div>
             
-            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
               <div class="font-bold text-slate-700" id="routeFormHeading">Add / Edit Trip Route</div>
               <div class="grid grid-cols-3 gap-2">
                 <div>
@@ -706,18 +1064,18 @@
               <div class="grid grid-cols-3 gap-2">
                 <div>
                   <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Service Name</label>
-                  <input type="text" id="routeServiceNameInput" placeholder="e.g. Royal AC Sleeper" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium">
+                  <input type="text" id="routeServiceNameInput" placeholder="e.g. Ramrath" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium">
                 </div>
                 <div>
-                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Return Service Name</label>
-                  <input type="text" id="routeReturnServiceNameInput" placeholder="e.g. Return Service" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium">
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Return Service</label>
+                  <input type="text" id="routeReturnServiceNameInput" placeholder="e.g. Ramrath Return" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium">
                 </div>
                 <div>
-                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Clean Route Title</label>
-                  <input type="text" id="routeCleanRouteInput" placeholder="e.g. BIJAPUR TO RAIPUR" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium uppercase">
+                  <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Route Display</label>
+                  <input type="text" id="routeCleanRouteInput" placeholder="BIJAPUR TO RAIPUR" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium uppercase">
                 </div>
               </div>
-              <button type="button" id="btnSaveMasterRoute" onclick="handleAddMasterRoute()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">
+              <button type="button" id="btnSaveMasterRoute" onclick="handleAddMasterRoute()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl shadow transition cursor-pointer">
                 Save Route & Schedule
               </button>
             </div>
@@ -729,21 +1087,21 @@
           </div>
         </div>
 
-        <!-- TRIP-WISE SEAT LAYOUT CREATOR -->
-        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-4">
+        <!-- Custom Layout Creator -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-4">
           <h2 class="text-sm font-bold text-slate-800 flex items-center justify-between border-b pb-2">
             <span class="flex items-center gap-2"><i class="fa-solid fa-couch text-purple-600"></i> Trip-Wise Seat Layout Creator</span>
           </h2>
           <div class="space-y-3 text-xs">
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Select Specific Trip (Operator + Departure Time)</label>
-              <select id="layoutTripSelect" onchange="onLayoutTripChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-semibold cursor-pointer"></select>
+              <label class="block font-semibold text-slate-600 mb-1">Select Specific Trip</label>
+              <select id="layoutTripSelect" onchange="onLayoutTripChange()" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-semibold cursor-pointer"></select>
             </div>
             
-            <div class="flex items-center gap-2 bg-purple-50 p-2.5 rounded-lg border border-purple-200">
+            <div class="flex items-center gap-2 bg-purple-50 p-2.5 rounded-xl border border-purple-200">
               <input type="checkbox" id="applyToReturnTripCheckbox" checked class="w-4 h-4 text-purple-600 rounded cursor-pointer">
               <label for="applyToReturnTripCheckbox" class="font-bold text-purple-950 cursor-pointer text-xs">
-                ☑️ Return trip Seat Layout (Auto Sync)
+                Sync with return trip layout
               </label>
             </div>
 
@@ -751,65 +1109,139 @@
               <div class="flex justify-between items-center mb-1">
                 <label class="block font-semibold text-slate-600">Row Configuration (Manual)</label>
                 <div class="flex gap-1.5">
-                  <button type="button" onclick="loadPresetLayout('2+1')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded font-bold text-slate-700 cursor-pointer">Preset 2+1</button>
-                  <button type="button" onclick="loadPresetLayout('2+2')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded font-bold text-slate-700 cursor-pointer">Preset 2+2</button>
+                  <button type="button" onclick="loadPresetLayout('2+1')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-lg font-bold text-slate-700 cursor-pointer">Preset 2+1</button>
+                  <button type="button" onclick="loadPresetLayout('2+2')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-lg font-bold text-slate-700 cursor-pointer">Preset 2+2</button>
                 </div>
               </div>
-              <textarea id="customLayoutTextarea" rows="3" placeholder="6, 5 | 1, 2W, 3, 4W&#10;7, 8 | 9, 10W, 11, 12W" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-[11px]"></textarea>
+              <textarea id="customLayoutTextarea" rows="3" placeholder="6, 5 | 1, 2W, 3, 4W&#10;7, 8 | 9, 10W, 11, 12W" class="w-full border border-slate-300 rounded-xl p-2.5 font-mono text-[11px]"></textarea>
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Or Upload Seating Chart Image (.png / .jpg)</label>
-              <input type="file" id="layoutImageInput" accept="image/*" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-slate-50 cursor-pointer">
+              <label class="block font-semibold text-slate-600 mb-1">Or Upload Seating Chart Image</label>
+              <input type="file" id="layoutImageInput" accept="image/*" class="w-full border border-slate-300 rounded-xl p-2 text-xs bg-slate-50 cursor-pointer">
             </div>
 
-            <button type="button" onclick="handleSaveCustomLayout()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg shadow transition cursor-pointer">
+            <button type="button" onclick="handleSaveCustomLayout()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl shadow transition cursor-pointer">
               Save Trip Seat Layout
             </button>
           </div>
         </div>
 
+        <!-- Backup & Factory Reset -->
         <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-          <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-5 space-y-3">
+          <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 p-5 space-y-3">
             <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-database text-blue-600"></i> Counter Data Backup & Restore</h2>
             <div class="grid grid-cols-2 gap-3 pt-1">
-              <button type="button" onclick="exportJSONBackup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-1.5">
+              <button type="button" onclick="exportJSONBackup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow transition cursor-pointer flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-download"></i> Download Backup
               </button>
-              <label class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-1.5 text-center">
+              <label class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl shadow transition cursor-pointer flex items-center justify-center gap-1.5 text-center">
                 <i class="fa-solid fa-upload"></i> Restore JSON
                 <input type="file" id="restoreFilePin" accept=".json" onchange="importJSONBackup(event)" class="hidden">
               </label>
             </div>
           </div>
 
-          <div class="bg-red-50/95 backdrop-blur-md rounded-xl shadow-lg border border-red-200 p-5 space-y-3">
-            <h2 class="text-sm font-bold text-red-700 flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation"></i> Factory Reset </h2>
-            <p class="text-xs text-red-600">Admin poore system data ko clear kar sakte hain.</p>
-            <button type="button" onclick="handleClearAllDatabase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-2">
+          <div class="bg-red-50 rounded-2xl shadow-card border border-red-200 p-5 space-y-3">
+            <h2 class="text-sm font-bold text-red-700 flex items-center gap-2 border-b border-red-200 pb-2"><i class="fa-solid fa-triangle-exclamation"></i> Factory Reset</h2>
+            <p class="text-xs text-red-600">Admin can wipe all database records for new financial year.</p>
+            <button type="button" onclick="handleClearAllDatabase()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl shadow transition cursor-pointer flex items-center justify-center gap-2">
               <i class="fa-solid fa-trash-can"></i> Clear All Data
             </button>
           </div>
         </div>
+
       </div>
     </div>
 
   </main>
 
+  <!-- ========================================== -->
+  <!-- MODALS SECTION                              -->
+  <!-- ========================================== -->
+
+  <!-- Seat Map Modal (Coach Layout View) -->
+  <div id="seatModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-slate-900 to-blue-950 text-white p-4 sm:px-6 flex items-center justify-between">
+        <div>
+          <h3 id="seatModalTitle" class="font-display font-extrabold text-base flex items-center gap-2">
+            <i class="fa-solid fa-couch text-amber-400"></i> Bus Coach Seat Matrix
+          </h3>
+          <p id="seatModalSubtext" class="text-xs text-blue-200 mt-0.5"></p>
+        </div>
+        <button type="button" onclick="closeSeatModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm cursor-pointer transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Coach Body Map -->
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar bg-slate-50/70">
+        
+        <!-- Legend Bar -->
+        <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded border border-slate-300 bg-white"></span> Available</div>
+          <div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded bg-amber-500"></span> Selected</div>
+          <div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded border border-red-300 bg-red-100"></span> Booked</div>
+          <div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded border border-slate-300 bg-slate-200"></span> Blocked</div>
+        </div>
+
+        <!-- Bus Coach Layout Container -->
+        <div class="bus-coach-shell max-w-md mx-auto p-4 sm:p-6">
+          
+          <!-- Cabin Driver Cockpit Header -->
+          <div class="bus-cabin-divider pb-4 mb-4 flex items-center justify-between text-xs text-slate-400 font-bold uppercase tracking-wider px-2">
+            <div class="flex items-center gap-2 text-slate-600">
+              <span class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200"><i class="fa-solid fa-door-open"></i></span>
+              <span>Entry Door</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-800">
+              <span>Driver Cabin</span>
+              <span class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 shadow-inner"><i class="fa-solid fa-dharmachakra"></i></span>
+            </div>
+          </div>
+
+          <!-- Dynamic Seats Grid -->
+          <div id="dynamicSeatMapContainer" class="flex flex-col items-center gap-2.5"></div>
+        </div>
+
+      </div>
+
+      <!-- Modal Bottom Actions -->
+      <div class="p-4 bg-white border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span class="text-slate-500 font-semibold">Selected Seats:</span>
+          <span id="modalSelectedSeatsCount" class="font-extrabold text-blue-700 ml-1">None</span>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeSeatModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer transition">
+            Cancel
+          </button>
+          <button type="button" onclick="confirmSeatSelection()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 cursor-pointer transition">
+            Confirm Seat(s)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Ticket Print & WhatsApp Modal -->
-  <div id="ticketModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border flex flex-col">
-      <div class="bg-brand-900 text-white p-4 flex items-center justify-between font-bold">
-        <h3 class="flex items-center gap-2"><i class="fa-solid fa-ticket text-amber-400"></i> A6 Landscape Ticket Preview & Actions</h3>
-        <button type="button" onclick="closeTicketModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+  <div id="ticketModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 flex flex-col">
+      <div class="bg-gradient-to-r from-slate-900 to-blue-950 text-white p-4 px-6 flex items-center justify-between font-bold">
+        <h3 class="flex items-center gap-2 text-sm"><i class="fa-solid fa-ticket text-amber-400"></i> A6 Landscape Ticket Slip</h3>
+        <button type="button" onclick="closeTicketModal()" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-6 space-y-4 text-xs">
-        <div id="ticketModalContent" class="bg-slate-50 border-2 border-slate-300 rounded-xl p-4 font-sans text-xs space-y-2"></div>
+        <div id="ticketModalContent" class="bg-slate-50/70 border border-slate-200 rounded-2xl p-4 font-sans text-xs space-y-2"></div>
         <div class="grid grid-cols-2 gap-3 pt-2">
-          <button type="button" onclick="executePrintTicketOnly()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2">
+          <button type="button" onclick="executePrintTicketOnly()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2 transition">
             <i class="fa-solid fa-print"></i> Print A6 Ticket
           </button>
-          <button type="button" onclick="sendPassengerWelcomeWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2">
+          <button type="button" onclick="sendPassengerWelcomeWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2 transition">
             <i class="fa-brands fa-whatsapp"></i> Send WhatsApp
           </button>
         </div>
@@ -817,194 +1249,180 @@
     </div>
   </div>
 
+  <!-- UPI QR Scan Modal -->
+  <div id="upiModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full text-center p-6 space-y-3.5 text-xs">
+      <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto text-xl border border-purple-100">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+      <h3 class="font-display font-extrabold text-base text-slate-900">Scan & Pay Counter UPI</h3>
+      <div id="upiModalAmount" class="font-display text-3xl font-black text-slate-900">₹0</div>
+      <div class="flex justify-center py-1">
+        <img id="upiQRImage" src="" alt="UPI QR" class="w-48 h-48 object-contain border border-slate-200 p-2 rounded-2xl bg-white shadow-md">
+      </div>
+      <div id="upiRemarkText" class="text-[10px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-slate-600 break-all text-left"></div>
+      <button type="button" onclick="confirmUPIPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-3 rounded-xl shadow-md shadow-emerald-600/20 cursor-pointer transition">
+        Payment Received / Confirm Ticket
+      </button>
+    </div>
+  </div>
+
   <!-- Credit Alert Modal -->
-  <div id="creditAlertModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-amber-300 flex flex-col">
-      <div class="bg-amber-500 text-amber-950 p-4 flex items-center justify-between font-bold">
-        <h3 class="text-sm flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-lg"></i> Credit Sawari Warning! (उधार बाकी)</h3>
-        <button type="button" onclick="closeCreditAlertModal()" class="text-amber-950 hover:text-black text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+  <div id="creditAlertModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-amber-300 flex flex-col">
+      <div class="bg-amber-500 text-amber-950 p-4 px-6 flex items-center justify-between font-bold">
+        <h3 class="text-sm flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-lg"></i> Credit Passengers Warning (उधार बाकी)</h3>
+        <button type="button" onclick="closeCreditAlertModal()" class="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 space-y-3 text-xs">
         <p class="text-slate-700 font-semibold">Is bus voucher me <span id="creditPassengerCount" class="text-red-600 font-bold">0</span> sawari <b>Credit (Pending)</b> payment wali hai:</p>
-        <div class="max-h-40 overflow-y-auto custom-scrollbar border border-amber-200 rounded-lg p-2 bg-amber-50/50 space-y-1.5" id="creditPassengerList"></div>
-        <div class="flex justify-between items-center bg-red-50 border border-red-200 p-2.5 rounded-lg font-bold text-red-700">
-          <span>Kul Baaki Rashi (Total Due):</span><span id="creditTotalDueAmount" class="text-sm font-black">₹0</span>
+        <div class="max-h-40 overflow-y-auto custom-scrollbar border border-amber-200 rounded-xl p-2 bg-amber-50/50 space-y-1.5" id="creditPassengerList"></div>
+        <div class="flex justify-between items-center bg-red-50 border border-red-200 p-3 rounded-xl font-bold text-red-700">
+          <span>Total Due Amount:</span><span id="creditTotalDueAmount" class="text-base font-black">₹0</span>
         </div>
-        <div class="pt-3 flex gap-2">
-          <button type="button" onclick="closeCreditAlertModal()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-lg transition cursor-pointer">Rokein</button>
-          <button type="button" onclick="proceedPrintAfterCreditWarning()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg shadow transition cursor-pointer">Fir Bhi Print Karein</button>
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeCreditAlertModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl cursor-pointer">Stop</button>
+          <button type="button" onclick="proceedPrintAfterCreditWarning()" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl shadow cursor-pointer">Print Anyway</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Credit Payment Clear Modal -->
-  <div id="creditClearModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
-      <div class="bg-emerald-800 text-white p-4 flex items-center justify-between font-bold">
-        <h3 class="flex items-center gap-1.5 text-sm"><i class="fa-solid fa-hand-holding-dollar text-amber-300"></i> Clear Credit Payment</h3>
-        <button type="button" onclick="closeCreditClearModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+  <div id="creditClearModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
+      <div class="bg-emerald-800 text-white p-4 px-6 flex items-center justify-between font-bold">
+        <h3 class="flex items-center gap-1.5 text-sm"><i class="fa-solid fa-hand-holding-dollar text-amber-300"></i> Clear Credit Due</h3>
+        <button type="button" onclick="closeCreditClearModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 space-y-3.5">
-        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
           <div>Ticket: <strong id="ccTicketNo" class="text-slate-900 font-bold"></strong></div>
           <div>Passenger: <strong id="ccPassengerName" class="text-slate-900"></strong></div>
           <div>Total Due Amount: <strong id="ccDueFare" class="text-red-600 font-black text-sm">₹0</strong></div>
         </div>
         <div>
-          <label class="block font-semibold mb-1 text-slate-700">Select Received Payment Mode *</label>
-          <select id="ccPaymentMode" onchange="onCcPaymentModeChange()" class="w-full border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-800 cursor-pointer">
+          <label class="block font-semibold mb-1 text-slate-700">Received Payment Mode *</label>
+          <select id="ccPaymentMode" onchange="onCcPaymentModeChange()" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-bold text-slate-800 cursor-pointer">
             <option value="Cash">Cash</option>
             <option value="UPI">UPI (Online Scan)</option>
             <option value="Split (Cash + UPI)">Split (Cash + UPI)</option>
           </select>
         </div>
-        <div id="ccSplitBox" class="grid grid-cols-2 gap-3 bg-amber-50 p-2.5 rounded-lg border border-amber-300 hidden">
+        <div id="ccSplitBox" class="grid grid-cols-2 gap-3 bg-amber-50 p-2.5 rounded-xl border border-amber-300 hidden">
           <div>
             <label class="block text-[11px] font-bold text-amber-950 mb-0.5">Cash (₹)</label>
-            <input type="number" id="ccSplitCash" min="0" value="0" oninput="syncCcSplitCash()" class="w-full border border-amber-300 rounded p-1.5 font-bold bg-white text-slate-800">
+            <input type="number" id="ccSplitCash" min="0" value="0" oninput="syncCcSplitCash()" class="w-full border border-amber-300 rounded-lg p-1.5 font-bold bg-white text-slate-800">
           </div>
           <div>
             <label class="block text-[11px] font-bold text-blue-900 mb-0.5">UPI (₹)</label>
-            <input type="number" id="ccSplitUpi" min="0" value="0" oninput="syncCcSplitUpi()" class="w-full border border-blue-400 rounded p-1.5 font-black bg-white text-blue-700">
+            <input type="number" id="ccSplitUpi" min="0" value="0" oninput="syncCcSplitUpi()" class="w-full border border-blue-400 rounded-lg p-1.5 font-black bg-white text-blue-700">
           </div>
         </div>
         <div class="pt-2 flex gap-2">
-          <button type="button" onclick="closeCreditClearModal()" class="w-1/2 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg cursor-pointer">Cancel</button>
-          <button type="button" onclick="submitCreditClearPayment()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Receive & Clear</button>
+          <button type="button" onclick="closeCreditClearModal()" class="w-1/2 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer">Cancel</button>
+          <button type="button" onclick="submitCreditClearPayment()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer">Receive & Clear</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Cancellation Modal -->
-  <div id="cancelModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 flex flex-col">
-      <div class="bg-red-800 text-white p-4 flex items-center justify-between font-bold">
+  <!-- Cancellation & Refund Modal -->
+  <div id="cancelModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 flex flex-col">
+      <div class="bg-red-800 text-white p-4 px-6 flex items-center justify-between font-bold">
         <h3 class="text-sm flex items-center gap-2"><i class="fa-solid fa-ban"></i> Seat Cancellation & Refund Rule</h3>
-        <button type="button" onclick="closeCancelModal()" class="text-red-200 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeCancelModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 space-y-4 text-xs">
-        <div class="bg-slate-50 border rounded-lg p-3 space-y-1.5 font-medium text-slate-700">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5 font-medium text-slate-700">
           <div class="flex justify-between"><span>Ticket: <strong id="cancelTktNo"></strong></span><span>Journey: <strong id="cancelJDate"></strong></span></div>
           <div>Passenger: <strong id="cancelPName"></strong> (Seat: <span id="cancelSeatNo" class="text-blue-700 font-bold"></span>)</div>
           <div>Total Fare: <strong id="cancelTotalFare" class="text-emerald-700 font-bold text-sm">₹0</strong></div>
         </div>
         <div>
-          <label class="block font-semibold text-slate-600 mb-1">Select Cancellation Time Slot</label>
-          <select id="cancelRuleSelect" onchange="recalculateRefund()" class="w-full border rounded-lg px-3 py-2 font-semibold text-slate-800 cursor-pointer">
-            <option value="10">24+ Hours Before Departure (10% Charge, 90% Refund)</option>
+          <label class="block font-semibold text-slate-600 mb-1">Cancellation Time Bracket</label>
+          <select id="cancelRuleSelect" onchange="recalculateRefund()" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-semibold text-slate-800 cursor-pointer">
+            <option value="10">24+ Hours Before (10% Charge, 90% Refund)</option>
             <option value="25">12 to 24 Hours Before (25% Charge, 75% Refund)</option>
             <option value="50">06 to 12 Hours Before (50% Charge, 50% Refund)</option>
             <option value="75">04 to 06 Hours Before (75% Charge, 25% Refund)</option>
             <option value="100">Within 4 Hours / No-Show (100% Charge, 0% Refund)</option>
           </select>
         </div>
-        <div class="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-xl border border-amber-200 font-bold text-slate-800">
-          <div><div class="text-[10px] text-slate-500 uppercase">Cancellation Charge</div><div id="cancelDeductionDisplay" class="text-lg font-black text-red-600">₹0</div></div>
-          <div><div class="text-[10px] text-slate-500 uppercase">Refund To Return</div><div id="cancelRefundDisplay" class="text-lg font-black text-emerald-700">₹0</div></div>
+        <div class="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-2xl border border-amber-200 font-bold text-slate-800">
+          <div><div class="text-[10px] text-slate-500 uppercase">Cancellation Charge</div><div id="cancelDeductionDisplay" class="font-display text-lg font-black text-red-600">₹0</div></div>
+          <div><div class="text-[10px] text-slate-500 uppercase">Refund Return</div><div id="cancelRefundDisplay" class="font-display text-lg font-black text-emerald-700">₹0</div></div>
         </div>
         <div class="flex items-center gap-2">
           <input type="checkbox" id="cancelDeductFromCash" checked class="rounded text-blue-600 cursor-pointer">
           <label for="cancelDeductFromCash" class="text-[11px] font-medium text-slate-600 cursor-pointer">Refund ko Cash Drawer se ghatayein</label>
         </div>
         <div class="pt-2 flex gap-2">
-          <button type="button" onclick="closeCancelModal()" class="w-1/2 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg cursor-pointer">Close</button>
-          <button type="button" onclick="confirmCancelWithRefund()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Confirm Cancel</button>
+          <button type="button" onclick="closeCancelModal()" class="w-1/2 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer">Close</button>
+          <button type="button" onclick="confirmCancelWithRefund()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer">Confirm Cancel</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Seat Map Modal -->
-  <div id="seatModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[95vh]">
-      <div class="bg-brand-900 text-white p-4 flex items-center justify-between">
-        <div>
-          <h3 id="seatModalTitle" class="font-bold text-sm tracking-wide flex items-center gap-2"><i class="fa-solid fa-couch text-amber-400"></i> Bus Seat Selection Map</h3>
-          <p id="seatModalSubtext" class="text-xs text-blue-200 mt-1"></p>
-        </div>
-        <button type="button" onclick="closeSeatModal()" class="text-blue-200 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar bg-slate-50/50">
-        <div id="dynamicSeatMapContainer" class="flex flex-col items-center gap-2.5"></div>
-      </div>
-      <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div>Selected: <span id="modalSelectedSeatsCount" class="font-bold text-blue-700">None</span></div>
-        <div class="flex gap-2">
-          <button type="button" onclick="closeSeatModal()" class="px-4 py-2 bg-slate-200 font-bold rounded-lg cursor-pointer">Cancel</button>
-          <button type="button" onclick="confirmSeatSelection()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow cursor-pointer">Apply Seat(s)</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- UPI Modal -->
-  <div id="upiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full text-center p-6 space-y-3 text-xs">
-      <h3 class="font-bold text-sm text-slate-800">Scan & Pay via UPI</h3>
-      <div id="upiModalAmount" class="text-2xl font-black text-slate-800">₹0</div>
-      <div class="flex justify-center">
-        <img id="upiQRImage" src="" alt="UPI QR" class="w-44 h-44 object-contain border p-2 rounded-xl bg-white shadow-sm">
-      </div>
-      <div id="upiRemarkText" class="text-[10px] font-mono bg-slate-100 p-2 rounded text-slate-600 break-all text-left"></div>
-      <button type="button" onclick="confirmUPIPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2.5 rounded-xl cursor-pointer">
-        Payment Received / Confirm
-      </button>
-    </div>
-  </div>
-
-  <!-- Expense Modal -->
-  <div id="expenseModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
-      <div class="bg-red-800 text-white p-4 flex items-center justify-between font-bold">
+  <!-- Expense Add Modal -->
+  <div id="expenseModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 flex flex-col text-xs">
+      <div class="bg-red-800 text-white p-4 px-6 flex items-center justify-between font-bold">
         <h3><i class="fa-solid fa-receipt mr-1.5"></i> Add Counter Expense</h3>
-        <button type="button" onclick="closeExpenseModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeExpenseModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="expenseForm" onsubmit="handleExpenseSubmit(event)" class="p-6 space-y-4">
-        <div><label class="block font-semibold mb-1">Expense Date</label><input type="date" id="expenseDateInput" required class="w-full border rounded-lg px-3 py-2"></div>
-        <div><label class="block font-semibold mb-1">Category / Purpose</label><input type="text" id="expenseTitleInput" placeholder="Chai, Diesel, Stationery..." required class="w-full border rounded-lg px-3 py-2"></div>
-        <div><label class="block font-semibold mb-1">Amount (₹)</label><input type="number" id="expenseAmountInput" min="1" placeholder="₹ Amount" required class="w-full border rounded-lg px-3 py-2 font-bold text-red-600"></div>
+        <div><label class="block font-semibold mb-1">Expense Date</label><input type="date" id="expenseDateInput" required class="w-full border rounded-xl px-3 py-2"></div>
+        <div><label class="block font-semibold mb-1">Category / Purpose</label><input type="text" id="expenseTitleInput" placeholder="Chai, Diesel, Stationery..." required class="w-full border rounded-xl px-3 py-2"></div>
+        <div><label class="block font-semibold mb-1">Amount (₹)</label><input type="number" id="expenseAmountInput" min="1" placeholder="₹ Amount" required class="w-full border rounded-xl px-3 py-2 font-bold text-red-600"></div>
         <div class="pt-2 flex gap-3">
-          <button type="button" onclick="closeExpenseModal()" class="w-1/2 bg-slate-200 font-bold py-2.5 rounded-lg cursor-pointer">Cancel</button>
-          <button type="submit" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Save Expense</button>
+          <button type="button" onclick="closeExpenseModal()" class="w-1/2 bg-slate-100 font-bold py-2.5 rounded-xl cursor-pointer">Cancel</button>
+          <button type="submit" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer">Save Expense</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Settlement Modal -->
-  <div id="settlementModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border flex flex-col text-xs">
-      <div class="bg-brand-900 text-white p-4 flex items-center justify-between font-bold">
+  <!-- Settlement Add Modal -->
+  <div id="settlementModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border flex flex-col text-xs">
+      <div class="bg-gradient-to-r from-slate-900 to-blue-950 text-white p-4 px-6 flex items-center justify-between font-bold">
         <h3 class="flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Record Operator Settlement</h3>
-        <button type="button" onclick="closeSettlementModal()" class="text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="closeSettlementModal()" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="settlementForm" onsubmit="handleSettlementSubmit(event); return false;" class="p-6 space-y-4">
-        <div><label class="block font-semibold mb-1">Bus Operator</label><select id="settleOperatorSelect" required class="w-full border rounded-lg px-3 py-2 font-semibold cursor-pointer"></select></div>
+        <div><label class="block font-semibold mb-1">Bus Operator</label><select id="settleOperatorSelect" required class="w-full border rounded-xl px-3 py-2 font-semibold cursor-pointer"></select></div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="block font-semibold mb-1">Route</label><input type="text" id="settleRouteInput" class="w-full border rounded-lg px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">Vehicle No.</label><input type="text" id="settleVehicleInput" class="w-full border rounded-lg px-3 py-2 uppercase"></div>
+          <div><label class="block font-semibold mb-1">Route</label><input type="text" id="settleRouteInput" class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Vehicle No.</label><input type="text" id="settleVehicleInput" class="w-full border rounded-xl px-3 py-2 uppercase"></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="block font-semibold mb-1">Driver Name</label><input type="text" id="settleDriverInput" required class="w-full border rounded-lg px-3 py-2"></div>
-          <div><label class="block font-semibold mb-1">Date</label><input type="date" id="settleDateInput" required class="w-full border rounded-lg px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Driver Name</label><input type="text" id="settleDriverInput" required class="w-full border rounded-xl px-3 py-2"></div>
+          <div><label class="block font-semibold mb-1">Date</label><input type="date" id="settleDateInput" required class="w-full border rounded-xl px-3 py-2"></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="block font-semibold mb-1">Cash Paid (₹)</label><input type="number" id="settleCashInput" min="0" value="0" class="w-full border rounded-lg px-3 py-2 font-bold text-emerald-700"></div>
-          <div><label class="block font-semibold mb-1">UPI Paid (₹)</label><input type="number" id="settleUpiInput" min="0" value="0" class="w-full border rounded-lg px-3 py-2 font-bold text-blue-700"></div>
+          <div><label class="block font-semibold mb-1">Cash Paid (₹)</label><input type="number" id="settleCashInput" min="0" value="0" class="w-full border rounded-xl px-3 py-2 font-bold text-emerald-700"></div>
+          <div><label class="block font-semibold mb-1">UPI Paid (₹)</label><input type="number" id="settleUpiInput" min="0" value="0" class="w-full border rounded-xl px-3 py-2 font-bold text-blue-700"></div>
         </div>
         <div class="pt-2 flex gap-3">
-          <button type="button" onclick="closeSettlementModal()" class="w-1/2 bg-slate-200 font-bold py-2.5 rounded-lg cursor-pointer">Cancel</button>
-          <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow cursor-pointer">Save Settlement</button>
+          <button type="button" onclick="closeSettlementModal()" class="w-1/2 bg-slate-100 font-bold py-2.5 rounded-xl cursor-pointer">Cancel</button>
+          <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer">Save Settlement</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- Print Render Container -->
   <div id="print-area" style="display: none;"></div>
-  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+  
+  <!-- Modern Floating Notification Toasts -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+  <!-- ========================================== -->
+  <!-- COMPLETE PRESERVED CORE JAVASCRIPT LOGIC   -->
+  <!-- ========================================== -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDoK7Eao0-pdoCHj10-8RQZwlePFx1cl6w",
@@ -1266,10 +1684,10 @@
       if (!displayEl) return;
       if (timeStr) {
         localStorage.setItem(LAST_BACKUP_KEY, timeStr);
-        displayEl.innerText = `Last Backup: ${timeStr}`;
+        displayEl.innerText = `Backup: ${timeStr}`;
       } else {
         const savedTime = localStorage.getItem(LAST_BACKUP_KEY);
-        displayEl.innerText = savedTime ? `Last Backup: ${savedTime}` : "Last Backup: Never";
+        displayEl.innerText = savedTime ? `Backup: ${savedTime}` : "Backup: Never";
       }
     }
 
@@ -1278,13 +1696,13 @@
       if (!container) return;
       const toast = document.createElement('div');
       const bg = type === 'error' ? 'bg-red-600' : type === 'info' ? 'bg-blue-600' : 'bg-emerald-600';
-      toast.className = `${bg} text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2`;
-      toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> <span>${message}</span>`;
+      toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center gap-2.5 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'} text-sm"></i> <span>${message}</span>`;
       container.appendChild(toast);
-      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => toast.classList.remove('translate-y-3', 'opacity-0'), 10);
       setTimeout(() => {
-        toast.classList.add('translate-y-2', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
+        toast.classList.add('translate-y-3', 'opacity-0');
+        setTimeout(() => toast.remove(), 350);
       }, 3500);
     }
 
@@ -1298,7 +1716,7 @@
         const found = bookings.slice().reverse().find(b => b.mobile === typedMob && b.passengerName);
         if (found && found.passengerName) {
           nameInput.value = found.passengerName;
-          showToast(`Purana record mila: ${found.passengerName}`, "success");
+          showToast(`Found regular passenger: ${found.passengerName}`, "info");
         }
       }
     }
@@ -1370,13 +1788,13 @@
       const vehicleNo = document.getElementById("voucherVehicleInput").value.trim().toUpperCase();
 
       if (!driverName) {
-        alert("CRITICAL: Driver Name likhna anivarya hai!");
+        showToast("CRITICAL: Driver Name enter karna anivarya hai!", "error");
         document.getElementById("voucherDriverInput").focus();
         return;
       }
 
       if (!vehicleNo) {
-        alert("CRITICAL: Vehicle No. / Gadi No. likhna anivarya hai!");
+        showToast("CRITICAL: Vehicle No. / Gadi No. enter karna anivarya hai!", "error");
         document.getElementById("voucherVehicleInput").focus();
         return;
       }
@@ -1405,7 +1823,7 @@
       populateRouteDriverAndVehicleHistory();
       renderChauhanMemo();
       saveToCloudDatabase();
-      showToast("Voucher generated! Driver aur Gadi details save ho gayi.", "success");
+      showToast("Voucher generated! Driver & Gadi data saved.", "success");
     }
 
     function applyUserPermissions() {
@@ -1450,7 +1868,7 @@
 
     function handleSaveAgencyUpi() {
       const val = document.getElementById("agencyUpiInput").value.trim();
-      if (!val) { alert("UPI ID khali nahi ho sakti!"); return; }
+      if (!val) { showToast("UPI ID cannot be blank!", "error"); return; }
       agencyUpiId = val;
       localStorage.setItem(UPI_ID_STORAGE_KEY, agencyUpiId);
       saveToCloudDatabase();
@@ -1499,11 +1917,11 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast("Backup JSON downloaded!", "success");
+      showToast("Backup JSON file generated & saved!", "success");
     }
 
     function importJSONBackup(event) {
-      if (currentUserRole !== 'Admin') { alert("Access Denied! Only Admin can restore."); return; }
+      if (currentUserRole !== 'Admin') { showToast("Access Denied! Only Admin can restore.", "error"); return; }
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -1521,7 +1939,7 @@
           localStorage.setItem(EXPENSE_STORAGE_KEY, JSON.stringify(expenses));
           localStorage.setItem(SETTLEMENT_STORAGE_KEY, JSON.stringify(settlements));
           location.reload();
-        } catch (err) { alert("Invalid backup JSON file!"); }
+        } catch (err) { showToast("Invalid backup JSON file!", "error"); }
       };
       reader.readAsText(file);
       event.target.value = "";
@@ -1564,7 +1982,7 @@
       const staffName = document.getElementById("loginUserSelect").value;
       const pass = document.getElementById("loginPasswordInput").value.trim();
       const found = staffList.find(s => s.name === staffName);
-      if (!found || found.pin !== pass) { alert("Incorrect PIN! Default: 1234"); return; }
+      if (!found || found.pin !== pass) { showToast("Incorrect PIN! Default is 1234", "error"); return; }
       currentLoggedInStaff = found.name;
       currentUserRole = found.role;
       document.getElementById("loggedInUserBadge").innerText = `${currentLoggedInStaff} (${currentUserRole})`;
@@ -1575,11 +1993,10 @@
     }
 
     function handleLogout() {
-      if (confirm("Logout karna chahte hain?")) {
-        document.getElementById("loginPasswordInput").value = "";
-        document.getElementById("loginOverlay").classList.remove("hidden");
-        switchTab('booking');
-      }
+      document.getElementById("loginPasswordInput").value = "";
+      document.getElementById("loginOverlay").classList.remove("hidden");
+      switchTab('booking');
+      showToast("Logged out successfully.", "info");
     }
 
     function onAdminSelectStaffChange() {
@@ -1627,14 +2044,12 @@
 
     function handleDeleteStaff() {
       const selectedName = document.getElementById("adminSelectStaff").value;
-      if (!selectedName || selectedName === "Admin") { alert("Main Admin cannot be deleted!"); return; }
-      if (confirm(`Staff "${selectedName}" ko delete karein?`)) {
-        staffList = staffList.filter(s => s.name !== selectedName);
-        localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staffList));
-        loadStaff();
-        resetStaffForm();
-        showToast("Staff deleted!", "info");
-      }
+      if (!selectedName || selectedName === "Admin") { showToast("Main Admin cannot be deleted!", "error"); return; }
+      staffList = staffList.filter(s => s.name !== selectedName);
+      localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(staffList));
+      loadStaff();
+      resetStaffForm();
+      showToast("Staff deleted!", "info");
     }
 
     function renderAdminCityTags() {
@@ -1643,7 +2058,7 @@
       container.innerHTML = "";
       MASTER_CITIES.forEach((city, index) => {
         const tag = document.createElement("span");
-        tag.className = "inline-flex items-center gap-1.5 px-2 py-1 rounded bg-white border text-xs font-semibold shadow-sm";
+        tag.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-xs font-semibold shadow-sm";
         tag.innerHTML = `<span>${city}</span><button type="button" onclick="handleDeleteCity(${index})" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>`;
         container.appendChild(tag);
       });
@@ -1656,13 +2071,15 @@
       localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES));
       document.getElementById("newCityInput").value = "";
       renderAdminCityTags(); populateCities();
+      showToast(`City added: ${val}`, "success");
     }
 
     function handleDeleteCity(index) {
-      if (MASTER_CITIES.length <= 2) { alert("Min 2 cities required!"); return; }
+      if (MASTER_CITIES.length <= 2) { showToast("Minimum 2 cities required!", "error"); return; }
       MASTER_CITIES.splice(index, 1);
       localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES));
       renderAdminCityTags(); populateCities();
+      showToast("City removed.", "info");
     }
 
     function renderAdminOperatorTags() {
@@ -1671,7 +2088,7 @@
       container.innerHTML = "";
       busOperators.forEach((op, index) => {
         const tag = document.createElement("span");
-        tag.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border text-xs font-bold shadow-sm";
+        tag.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold shadow-sm";
         tag.innerHTML = `<span><i class="fa-solid fa-bus text-blue-600 mr-1"></i>${op}</span><button type="button" onclick="handleDeleteOperator(${index})" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>`;
         container.appendChild(tag);
       });
@@ -1684,16 +2101,16 @@
       localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
       document.getElementById("newOperatorInput").value = "";
       loadBusOperators(); populateAdminOperatorSelects();
+      showToast(`Bus operator added: ${opName}`, "success");
     }
 
     function handleDeleteOperator(index) {
-      if (busOperators.length <= 1) { alert("Min 1 operator required!"); return; }
+      if (busOperators.length <= 1) { showToast("Min 1 operator required!", "error"); return; }
       const opName = busOperators[index];
-      if (confirm(`Operator "${opName}" delete karein?`)) {
-        busOperators.splice(index, 1);
-        localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
-        loadBusOperators(); populateAdminOperatorSelects();
-      }
+      busOperators.splice(index, 1);
+      localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
+      loadBusOperators(); populateAdminOperatorSelects();
+      showToast(`Operator ${opName} deleted.`, "info");
     }
 
     function resetRouteForm() {
@@ -1736,7 +2153,7 @@
       const cleanRoute = document.getElementById("routeCleanRouteInput").value.trim().toUpperCase();
 
       if (!operator || !time || !cleanRoute) {
-        alert("Operator, Departure Time aur Route Title bharna anivarya hai!");
+        showToast("Operator, Departure Time and Route Title are required!", "error");
         return;
       }
 
@@ -1759,7 +2176,7 @@
       updateDestinationsAndTimes();
       updateMemoRoutes();
       saveToCloudDatabase();
-      showToast(`Route successfully saved for ${newKey}!`, "success");
+      showToast(`Route saved for ${newKey}!`, "success");
     }
 
     function renderAdminRoutesList() {
@@ -1774,16 +2191,16 @@
       keys.forEach(key => {
         const item = BUS_MASTER_ROUTES[key];
         const row = document.createElement("div");
-        row.className = "flex items-center justify-between p-2 bg-slate-50 border rounded text-[11px]";
+        row.className = "flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px]";
         row.innerHTML = `
           <div>
             <b>${key.replace('_', ' • ')}</b> (${item.serviceName})
-            <div class="text-blue-700">${item.fullRouteDisplay}</div>
+            <div class="text-blue-700 font-bold">${item.fullRouteDisplay}</div>
             <div class="text-slate-500 text-[10px]">Return: <b class="text-emerald-700">${item.returnTime || 'N/A'}</b> (${item.returnServiceName || '-'})</div>
           </div>
           <div class="flex items-center gap-1.5">
-            <button type="button" onclick="editMasterRoute('${key}')" title="Edit" class="p-1 text-amber-600 hover:text-amber-800 cursor-pointer"><i class="fa-solid fa-pen"></i></button>
-            <button type="button" onclick="delete BUS_MASTER_ROUTES['${key}']; localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES)); renderAdminRoutesList(); populateLayoutTripSelect();" title="Delete" class="p-1 text-red-500 hover:text-red-700 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
+            <button type="button" onclick="editMasterRoute('${key}')" title="Edit" class="p-1.5 text-amber-600 hover:text-amber-800 cursor-pointer"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" onclick="delete BUS_MASTER_ROUTES['${key}']; localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES)); renderAdminRoutesList(); populateLayoutTripSelect();" title="Delete" class="p-1.5 text-red-500 hover:text-red-700 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
           </div>
         `;
         container.appendChild(row);
@@ -1846,7 +2263,7 @@
       } else if (type === '2+2') {
         textarea.value = `4, 3 | 1, 2, 5, 6\n10, 9 | 8, 7, 11, 12\n16, 15 | 14, 13, 17, 18\n22, 21 | 20, 19, 23, 24\n28, 27 | 26, 25, 29, 30\n34, 33 | 32, 31, 35, 36`;
       }
-      showToast(`${type} preset loaded!`, "info");
+      showToast(`${type} layout preset loaded!`, "info");
     }
 
     function handleSaveCustomLayout() {
@@ -1855,7 +2272,7 @@
       const imageInput = document.getElementById("layoutImageInput");
       const syncCheckbox = document.getElementById("applyToReturnTripCheckbox");
 
-      if (!tripKey) { alert("Trip select karein!"); return; }
+      if (!tripKey) { showToast("Please select trip first!", "error"); return; }
 
       if (BUS_MASTER_ROUTES[tripKey]) {
         BUS_MASTER_ROUTES[tripKey].syncReturnLayout = syncCheckbox ? syncCheckbox.checked : true;
@@ -1879,7 +2296,7 @@
       }
 
       if (!textareaVal) {
-        alert("Kripya row configuration text likhein ya image upload karein!");
+        showToast("Please enter text layout or upload image!", "error");
         return;
       }
 
@@ -1895,7 +2312,7 @@
       });
 
       if (rows.length === 0) {
-        alert("Galat format! Format: 'Left seats | Right seats'");
+        showToast("Invalid format! Use format: 'Left seats | Right seats'", "error");
         return;
       }
 
@@ -1906,18 +2323,20 @@
 
       localStorage.setItem(CUSTOM_LAYOUT_KEY, JSON.stringify(customLayouts));
       saveToCloudDatabase();
-      showToast(`Manual seat layout saved for ${tripKey}!`, "success");
+      showToast(`Custom seat layout saved for ${tripKey}!`, "success");
     }
 
     function handleClearAllDatabase() {
-      if (currentUserRole !== 'Admin') { alert("Sirf Admin kar sakta hai!"); return; }
-      const enteredCode = prompt("Master Code enter karein (PIN:):");
+      if (currentUserRole !== 'Admin') { showToast("Only Admin can perform this action!", "error"); return; }
+      const enteredCode = prompt("Enter Master Security Code (PIN:):");
       if (enteredCode && enteredCode.trim() === "324657") {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(EXPENSE_STORAGE_KEY);
         localStorage.removeItem(SETTLEMENT_STORAGE_KEY);
         bookings = []; expenses = []; settlements = [];
         saveBookings(); location.reload();
+      } else {
+        showToast("Security code incorrect!", "error");
       }
     }
 
@@ -2159,12 +2578,12 @@
 
       let totalGrossFare = 0, totalSeatCount = 0, rowsHtml = "";
       if (!tripBookings.length) {
-        rowsHtml = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-semibold">Koi booking nahi mili.</td></tr>`;
+        rowsHtml = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-semibold">Koi booking record nahi mila.</td></tr>`;
       } else {
         tripBookings.forEach(b => {
           const count = splitSeats(b.seatNo).length || 1;
           totalSeatCount += count; totalGrossFare += Number(b.fare) || 0;
-          rowsHtml += `<tr class="border-b border-amber-200 text-xs"><td class="p-2 font-bold">${b.fromCity.toUpperCase()} TO ${b.toCity.toUpperCase()}<div class="text-[10px] text-slate-500 font-normal"> </div></td><td class="p-2 text-center font-bold">${count}</td><td class="p-2 font-bold text-blue-900">${b.seatNo}</td><td class="p-2 text-right">₹${Math.round(b.fare/count)}</td><td class="p-2 text-right font-bold">₹${b.fare}</td></tr>`;
+          rowsHtml += `<tr class="border-b border-amber-200/80 text-xs"><td class="p-2 font-bold">${b.fromCity.toUpperCase()} TO ${b.toCity.toUpperCase()}</td><td class="p-2 text-center font-bold">${count}</td><td class="p-2 font-bold text-blue-900">${b.seatNo}</td><td class="p-2 text-right">₹${Math.round(b.fare/count)}</td><td class="p-2 text-right font-bold">₹${b.fare}</td></tr>`;
         });
       }
 
@@ -2180,36 +2599,36 @@
           <h2 class="text-lg font-black text-amber-950">चौहान बुकिंग काउण्टर (VOUCHER)</h2>
           <div class="text-[10px] text-amber-900 font-sans">न्यू बस स्टैण्ड, बीजापुर (छ.ग.) • 9340669984</div>
         </div>
-        <div class="text-xs mb-2 font-semibold">
+        <div class="text-xs mb-2 font-semibold text-slate-800">
           <div>बस सेवा: <span class="font-bold underline text-amber-950">${busName}</span> (${selectedTime || 'General'})</div>
           <div>मुख्य रूट: <span class="font-bold text-blue-900">${detectedRoute}</span></div>
-          <div class="flex justify-between mt-1">
+          <div class="flex justify-between mt-1 text-[11px]">
             <span>वाहन क्र.: <b>${vehicleNo}</b></span>
             <span>चालक: <b>${driverName}</b></span>
             <span>दिनांक: <b>${document.getElementById("memoDateInput").value}</b></span>
           </div>
         </div>
-        <table class="w-full text-left text-xs border border-amber-300 mb-2 bg-white/70">
+        <table class="w-full text-left text-xs border border-amber-300 mb-2 bg-white/80 rounded-xl overflow-hidden">
           <thead class="bg-amber-200/80">
             <tr>
-              <th class="p-1.5">रूट</th>
-              <th class="p-1.5 text-center">सीट</th>
-              <th class="p-1.5">सीट नं.</th>
-              <th class="p-1.5 text-right">दर</th>
-              <th class="p-1.5 text-right">किराया</th>
+              <th class="p-2">रूट</th>
+              <th class="p-2 text-center">सीट</th>
+              <th class="p-2">सीट नं.</th>
+              <th class="p-2 text-right">दर</th>
+              <th class="p-2 text-right">किराया</th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
           <tfoot>
-            <tr class="bg-amber-100/60 font-bold">
-              <td class="p-1.5">योग</td>
-              <td class="p-1.5 text-center text-blue-900">${totalSeatCount}</td>
+            <tr class="bg-amber-100/70 font-bold">
+              <td class="p-2">योग</td>
+              <td class="p-2 text-center text-blue-900">${totalSeatCount}</td>
               <td colspan="2"></td>
-              <td class="p-1.5 text-right">₹${totalGrossFare}</td>
+              <td class="p-2 text-right">₹${totalGrossFare}</td>
             </tr>
           </tfoot>
         </table>
-        <div class="text-xs font-bold border-t border-amber-400 pt-1.5 space-y-1">
+        <div class="text-xs font-bold border-t border-amber-400 pt-2 space-y-1">
           <div class="flex justify-between">
             <span>कुल किराया (Gross Total):</span>
             <span>₹${totalGrossFare}</span>
@@ -2226,7 +2645,7 @@
               <span>+ ₹${gstAmount}</span>
             </div>
           ` : ''}
-          <div class="flex justify-between text-sm bg-amber-200 p-1.5 rounded font-black">
+          <div class="flex justify-between text-sm bg-amber-200 p-2 rounded-xl font-black text-amber-950">
             <span>देय राशि (NET PAYABLE TO BUS):</span>
             <span>₹${netPayable}</span>
           </div>
@@ -2240,12 +2659,12 @@
     function printCurrentMemo() {
       const d = document.getElementById("voucherDriverInput").value.trim();
       const v = document.getElementById("voucherVehicleInput").value.trim();
-      if (!d || !v) { alert("Driver Name aur Vehicle No. bharna anivarya hai!"); return; }
+      if (!d || !v) { showToast("Driver Name and Vehicle No. are required!", "error"); return; }
       const tripBookings = bookings.filter(b => b.status === "CONFIRMED" && b.paymentMode === "Credit");
       if (tripBookings.length > 0) { openCreditAlertModal(tripBookings); return; }
       
       const memoContainer = document.getElementById("memoContainer");
-      if (!memoContainer || !memoContainer.innerHTML.trim()) { alert("Pehle voucher preview generate karein!"); return; }
+      if (!memoContainer || !memoContainer.innerHTML.trim()) { showToast("Generate voucher preview first!", "info"); return; }
       document.getElementById("print-area").innerHTML = `<div style="max-width: 148mm; margin: 0 auto; padding: 12px;">${memoContainer.innerHTML}</div>`;
       setTimeout(() => { window.print(); }, 150);
     }
@@ -2257,7 +2676,7 @@
       let totalDue = 0;
       creditList.forEach(b => {
         totalDue += (Number(b.fare) || 0);
-        listContainer.innerHTML += `<div class="flex justify-between p-1.5 bg-white rounded border text-xs"><div><b>${b.passengerName}</b> (${b.seatNo})</div><div class="font-bold text-red-600">₹${b.fare}</div></div>`;
+        listContainer.innerHTML += `<div class="flex justify-between p-2 bg-white rounded-xl border border-slate-200 text-xs"><div><b>${b.passengerName}</b> (${b.seatNo})</div><div class="font-bold text-red-600">₹${b.fare}</div></div>`;
       });
       document.getElementById("creditTotalDueAmount").innerText = `₹${totalDue}`;
       document.getElementById("creditAlertModal").classList.remove("hidden");
@@ -2289,7 +2708,7 @@
         (!selectedTime || b.busTime.trim() === selectedTime)
       );
 
-      if (!tripBookings.length) { alert("No active bookings found for this trip!"); return; }
+      if (!tripBookings.length) { showToast("No active bookings found for this trip!", "info"); return; }
 
       const totalGross = tripBookings.reduce((sum, b) => sum + Number(b.fare), 0);
       const totalSeats = tripBookings.reduce((sum, b) => sum + splitSeats(b.seatNo).length, 0);
@@ -2321,7 +2740,7 @@
       pList += `━━━━━━━━━━━━━━━━━━━━━━\n`;
       pList += `📞 *Counter Helpline:* 094079 96570, 093406 69984`;
 
-      const mob = prompt("Driver ka WhatsApp Number dalein:");
+      const mob = prompt("Enter Driver's WhatsApp Mobile Number:");
       if (mob) {
         window.open(`https://wa.me/91${mob.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(pList)}`, '_blank');
       }
@@ -2368,7 +2787,7 @@
         upiPaid: parseFloat(document.getElementById("settleUpiInput").value) || 0
       });
       saveSettlements(); closeSettlementModal();
-      showToast("Settlement Saved!", "success");
+      showToast("Settlement Saved Successfully!", "success");
       return false;
     }
 
@@ -2388,7 +2807,7 @@
         amount: parseFloat(document.getElementById("expenseAmountInput").value) || 0
       });
       saveExpenses(); closeExpenseModal();
-      showToast("Expense Saved!", "success");
+      showToast("Expense Recorded!", "success");
     }
 
     function toggleAllExpenses() { isShowAllExpenses = !isShowAllExpenses; renderExpensesTable(); }
@@ -2401,7 +2820,7 @@
       let total = 0;
       expenses.filter(x => isShowAllExpenses || !selDate || normalizeDate(x.date) === selDate).forEach(x => {
         total += x.amount;
-        tbody.innerHTML += `<tr><td class="p-2">${x.date}</td><td class="p-2 font-medium">${x.title}</td><td class="p-2 text-right font-bold text-red-600">₹${x.amount}</td><td class="p-2 text-center"><button onclick="expenses=expenses.filter(i=>i.id!=='${x.id}'); saveExpenses();" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+        tbody.innerHTML += `<tr><td class="p-2.5">${x.date}</td><td class="p-2.5 font-medium">${x.title}</td><td class="p-2.5 text-right font-bold text-red-600">₹${x.amount}</td><td class="p-2.5 text-center"><button onclick="expenses=expenses.filter(i=>i.id!=='${x.id}'); saveExpenses();" class="text-red-500 hover:text-red-700 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
       });
       document.getElementById("totalExpenseDisplay").innerText = `₹${total}`;
     }
@@ -2416,7 +2835,7 @@
       let total = 0;
       settlements.filter(s => isShowAllSettlements || !selDate || normalizeDate(s.date) === selDate).forEach(s => {
         total += (s.cashPaid + s.upiPaid);
-        tbody.innerHTML += `<tr><td class="p-2">${s.date}</td><td class="p-2 font-medium">${s.operator}</td><td class="p-2 text-right font-bold text-emerald-700">₹${s.cashPaid}</td><td class="p-2 text-right font-bold text-blue-700">₹${s.upiPaid}</td><td class="p-2 text-center"><button onclick="settlements=settlements.filter(i=>i.id!=='${s.id}'); saveSettlements();" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+        tbody.innerHTML += `<tr><td class="p-2.5">${s.date}</td><td class="p-2.5 font-medium">${s.operator}</td><td class="p-2.5 text-right font-bold text-emerald-700">₹${s.cashPaid}</td><td class="p-2.5 text-right font-bold text-blue-700">₹${s.upiPaid}</td><td class="p-2.5 text-center"><button onclick="settlements=settlements.filter(i=>i.id!=='${s.id}'); saveSettlements();" class="text-red-500 hover:text-red-700 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
       });
       document.getElementById("totalSettlementDisplay").innerText = `₹${total}`;
     }
@@ -2437,7 +2856,7 @@
           const list = bookings.filter(b => b.status === "CONFIRMED" && b.busName.toLowerCase().trim() === op.toLowerCase().trim());
           const gross = list.reduce((sum, b) => sum + b.fare, 0);
           const due = list.filter(b => b.paymentMode === 'Credit').reduce((sum, b) => sum + b.fare, 0);
-          breakdownBody.innerHTML += `<tr><td class="p-2.5 font-bold">${op}</td><td class="p-2.5 text-center">${list.length}</td><td class="p-2.5 text-center">${list.reduce((sum, b) => sum + splitSeats(b.seatNo).length, 0)}</td><td class="p-2.5 text-right font-bold">₹${gross}</td><td class="p-2.5 text-right text-red-600 font-bold">₹${due}</td><td class="p-2.5 text-right font-semibold">₹${Math.round(gross*0.1)}</td><td class="p-2.5 text-right font-black text-blue-700">₹${gross - Math.round(gross*0.1)}</td></tr>`;
+          breakdownBody.innerHTML += `<tr><td class="p-3 font-bold">${op}</td><td class="p-3 text-center">${list.length}</td><td class="p-3 text-center">${list.reduce((sum, b) => sum + splitSeats(b.seatNo).length, 0)}</td><td class="p-3 text-right font-bold">₹${gross}</td><td class="p-3 text-right text-red-600 font-bold">₹${due}</td><td class="p-3 text-right font-semibold">₹${Math.round(gross*0.1)}</td><td class="p-3 text-right font-black text-blue-700">₹${gross - Math.round(gross*0.1)}</td></tr>`;
         });
       }
 
@@ -2446,7 +2865,7 @@
         let due = 0;
         bookings.filter(b => b.status === "CONFIRMED" && b.paymentMode === "Credit").forEach(b => {
           due += b.fare;
-          creditBody.innerHTML += `<tr><td class="p-2.5 font-bold">${b.ticketNo}</td><td class="p-2.5">${b.journeyDate}</td><td class="p-2.5 font-bold">${b.passengerName}</td><td class="p-2.5">${b.mobile}</td><td class="p-2.5">${b.busName}</td><td class="p-2.5 text-center font-bold text-blue-900">${b.seatNo}</td><td class="p-2.5 text-right font-black text-red-600">₹${b.fare}</td><td class="p-2.5 text-center"><button onclick="openCreditClearModal('${b.ticketNo}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer">Received</button></td></tr>`;
+          creditBody.innerHTML += `<tr><td class="p-3 font-bold">${b.ticketNo}</td><td class="p-3">${b.journeyDate}</td><td class="p-3 font-bold">${b.passengerName}</td><td class="p-3">${b.mobile}</td><td class="p-3">${b.busName}</td><td class="p-3 text-center font-bold text-blue-900">${b.seatNo}</td><td class="p-3 text-right font-black text-red-600">₹${b.fare}</td><td class="p-3 text-center"><button onclick="openCreditClearModal('${b.ticketNo}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] cursor-pointer">Received</button></td></tr>`;
         });
         document.getElementById("totalCreditDueBadge").innerText = `₹${due}`;
       }
@@ -2492,17 +2911,17 @@
           const tr = document.createElement("tr");
           tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
           tr.innerHTML = `
-            <td class="p-2.5 font-bold text-slate-900">${item.date}</td>
-            <td class="p-2.5 font-bold text-blue-900"><i class="fa-solid fa-bus text-amber-500 mr-1.5"></i>${item.busName}</td>
-            <td class="p-2.5 font-mono text-[11px] font-semibold">${item.time}</td>
-            <td class="p-2.5 font-medium text-slate-700">${item.route}</td>
-            <td class="p-2.5 text-center">
-              <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">${item.seats.length} Seats (${item.seats.join(", ")})</span>
+            <td class="p-3 font-bold text-slate-900">${item.date}</td>
+            <td class="p-3 font-bold text-blue-900"><i class="fa-solid fa-bus text-amber-500 mr-1.5"></i>${item.busName}</td>
+            <td class="p-3 font-mono text-[11px] font-semibold">${item.time}</td>
+            <td class="p-3 font-medium text-slate-700">${item.route}</td>
+            <td class="p-3 text-center">
+              <span class="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">${item.seats.length} Seats (${item.seats.join(", ")})</span>
             </td>
-            <td class="p-2.5 text-[11px] text-slate-600 truncate max-w-xs" title="${item.passengers.join(', ')}">
+            <td class="p-3 text-[11px] text-slate-600 truncate max-w-xs" title="${item.passengers.join(', ')}">
               ${item.passengers.join(', ')}
             </td>
-            <td class="p-2.5 text-right font-black text-slate-900">₹${item.totalAmount.toLocaleString()}</td>
+            <td class="p-3 text-right font-black text-slate-900">₹${item.totalAmount.toLocaleString()}</td>
           `;
           upcomingBody.appendChild(tr);
         });
@@ -2573,7 +2992,7 @@
         splitUpi = parseFloat(document.getElementById("ccSplitUpi").value) || 0;
 
         if (splitCash + splitUpi !== total) {
-          alert(`Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) ka jod Total Fare (₹${total}) ke barabar hona chahiye!`);
+          showToast(`Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) must equal Total Fare (₹${total})!`, "error");
           return;
         }
       }
@@ -2590,7 +3009,7 @@
         openUPIModal(b);
       } else {
         saveBookings();
-        showToast(`Ticket ${b.ticketNo} ka payment receive ho gaya!`, "success");
+        showToast(`Ticket ${b.ticketNo} payment received!`, "success");
       }
     }
 
@@ -2642,7 +3061,7 @@
       });
 
       if (!visible.length) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400 font-semibold">No bookings found. Please save a booking or change the filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400 font-semibold">No bookings found for the selected filters.</td></tr>';
         return;
       }
 
@@ -2650,20 +3069,20 @@
         const status = String(b.status || 'CONFIRMED').toUpperCase();
         const cancelled = status === 'CANCELLED';
         const payment = b.paymentMode || 'Cash';
-        return `<tr class="${cancelled ? 'bg-red-50/60 text-slate-400' : 'hover:bg-blue-50/50'}">
-          <td class="py-3 px-3 font-bold whitespace-nowrap">${escapeHtml(b.ticketNo)}</td>
+        return `<tr class="${cancelled ? 'bg-red-50/50 text-slate-400' : 'hover:bg-slate-50 transition'}">
+          <td class="py-3 px-4 font-bold whitespace-nowrap text-blue-700">${escapeHtml(b.ticketNo)}</td>
           <td class="py-3 px-3 whitespace-nowrap">${escapeHtml(b.journeyDate || '')}${cancelled ? '<div class="text-[9px] font-bold text-red-500">CANCELLED</div>' : ''}</td>
-          <td class="py-3 px-3"><div class="font-bold">${escapeHtml(b.busName || '')}</div><div class="text-[10px] text-slate-400">${escapeHtml(b.fromCity || '')} → ${escapeHtml(b.toCity || '')}</div></td>
-          <td class="py-3 px-2 whitespace-nowrap">${escapeHtml(b.busTime || '')}</td>
-          <td class="py-3 px-2 font-bold">${escapeHtml(b.seatNo || '')}</td>
-          <td class="py-3 px-3"><div class="font-semibold">${escapeHtml(b.passengerName || '')}</div><div class="text-[10px] text-slate-400">${escapeHtml(b.bookedBy || '')}</div></td>
-          <td class="py-3 px-3 whitespace-nowrap">${escapeHtml(b.mobile || '')}</td>
-          <td class="py-3 px-3 text-right font-black whitespace-nowrap">₹${Number(b.fare || 0).toLocaleString('en-IN')}</td>
-          <td class="py-3 px-2 text-center"><span class="inline-block rounded-full px-2 py-1 text-[10px] font-bold ${payment === 'Credit' ? 'bg-amber-100 text-amber-800' : payment === 'UPI' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(payment)}</span></td>
-          <td class="py-3 px-3"><div class="flex items-center justify-center gap-1 whitespace-nowrap">
-            <button type="button" onclick="editBooking('${escapeHtml(b.ticketNo)}')" title="Edit booking" ${cancelled ? 'disabled' : ''} class="rounded bg-blue-100 text-blue-700 px-2 py-1.5 hover:bg-blue-200 disabled:opacity-30"><i class="fa-solid fa-pen"></i></button>
-            <button type="button" onclick="openTicketModal('${escapeHtml(b.ticketNo)}')" title="Print A6 & WhatsApp" class="rounded bg-slate-100 text-slate-700 px-2 py-1.5 hover:bg-slate-200"><i class="fa-solid fa-print"></i></button>
-            <button type="button" onclick="openCancelModal('${escapeHtml(b.ticketNo)}')" title="Cancel booking" ${cancelled ? 'disabled' : ''} class="rounded bg-red-100 text-red-700 px-2 py-1.5 hover:bg-red-200 disabled:opacity-30"><i class="fa-solid fa-ban"></i></button>
+          <td class="py-3 px-3"><div class="font-bold text-slate-900">${escapeHtml(b.busName || '')}</div><div class="text-[10px] text-slate-400 font-medium">${escapeHtml(b.fromCity || '')} → ${escapeHtml(b.toCity || '')}</div></td>
+          <td class="py-3 px-2 whitespace-nowrap font-mono text-[11px]">${escapeHtml(b.busTime || '')}</td>
+          <td class="py-3 px-2 font-bold text-slate-900">${escapeHtml(b.seatNo || '')}</td>
+          <td class="py-3 px-3"><div class="font-semibold text-slate-900">${escapeHtml(b.passengerName || '')}</div><div class="text-[10px] text-slate-400">${escapeHtml(b.bookedBy || '')}</div></td>
+          <td class="py-3 px-3 whitespace-nowrap font-mono text-[11px]">${escapeHtml(b.mobile || '')}</td>
+          <td class="py-3 px-3 text-right font-black whitespace-nowrap text-slate-900">₹${Number(b.fare || 0).toLocaleString('en-IN')}</td>
+          <td class="py-3 px-2 text-center"><span class="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold ${payment === 'Credit' ? 'bg-amber-100 text-amber-800 border border-amber-200' : payment === 'UPI' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">${escapeHtml(payment)}</span></td>
+          <td class="py-3 px-4"><div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <button type="button" onclick="editBooking('${escapeHtml(b.ticketNo)}')" title="Edit booking" ${cancelled ? 'disabled' : ''} class="rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 p-2 disabled:opacity-30 transition cursor-pointer"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button type="button" onclick="openTicketModal('${escapeHtml(b.ticketNo)}')" title="Print A6 & WhatsApp" class="rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 p-2 transition cursor-pointer"><i class="fa-solid fa-print text-xs"></i></button>
+            <button type="button" onclick="openCancelModal('${escapeHtml(b.ticketNo)}')" title="Cancel booking" ${cancelled ? 'disabled' : ''} class="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 p-2 disabled:opacity-30 transition cursor-pointer"><i class="fa-solid fa-ban text-xs"></i></button>
           </div></td>
         </tr>`;
       }).join('');
@@ -2770,18 +3189,18 @@
       const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} @ ${b.busTime}.`;
 
       document.getElementById('ticketModalContent').innerHTML = `
-        <div class="border-b border-slate-300 pb-2 mb-2 flex justify-between items-center">
-          <div><b>CHAUHAN TOUR & TRAVELS</b><div class="text-[9px] text-slate-500">New Bus Stand, Bijapur • 09407996570</div></div>
-          <div class="text-right"><span class="bg-brand-900 text-white px-2 py-0.5 rounded text-[10px] font-bold">CONFIRMED</span><div class="text-[10px] font-mono mt-0.5"><b>Tkt:</b> ${b.ticketNo}</div></div>
+        <div class="border-b border-slate-200 pb-2 mb-2 flex justify-between items-center">
+          <div><b class="text-slate-900 font-extrabold">CHAUHAN TOUR & TRAVELS</b><div class="text-[9px] text-slate-500">New Bus Stand, Bijapur • 09407996570</div></div>
+          <div class="text-right"><span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">CONFIRMED</span><div class="text-[10px] font-mono mt-0.5"><b>Tkt:</b> ${b.ticketNo}</div></div>
         </div>
-        <div class="bg-amber-50 border border-amber-300 rounded p-2 text-[11px] font-bold text-amber-950 mb-2">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] font-bold text-amber-950 mb-2">
           ${subTitleText}
         </div>
-        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded border">
+        <div class="grid grid-cols-2 gap-2 bg-white p-3 rounded-xl border border-slate-200">
           <div><b>Passenger:</b> ${b.passengerName}<br><b>Mobile:</b> ${b.mobile}<br><b>Journey Date:</b> ${b.journeyDate}</div>
           <div><b>Seat No:</b> <span class="text-blue-700 font-bold">${b.seatNo}</span><br><b>Fare:</b> ₹${b.fare} (${b.paymentMode})<br><b>Booked By:</b> ${b.bookedBy}</div>
         </div>
-        <button type="button" onclick="downloadA6TicketPDF()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2 mt-2">
+        <button type="button" onclick="downloadA6TicketPDF()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow cursor-pointer flex items-center justify-center gap-2 mt-2 transition">
           <i class="fa-solid fa-file-pdf"></i> Download PDF Ticket
         </button>
       `;
@@ -2889,7 +3308,7 @@
 📌 IMPORTANT TRAVEL GUIDELINES
 1️⃣ ⏰ Please reach the boarding counter at least 15 minutes before departure.
 2️⃣ 🪪 Carry a valid Government Photo ID (Voter ID / Driving Licence).
-3️⃣ 🚫🍺 ALCOHOL & INTOXICATION STRICTLY PROHIBITED inside the bus. Passengers under the influence of intoxicating substances will not be permitted to travel.
+3️⃣ 🚫🍺 ALCOHOL & INTOXICATION STRICTLY PROHIBITED inside the bus.
 ━━━━━━━━━━━━━━━━━━
 🌟 Thank you for choosing Chauhan Tour & Travels! 🙏
 💐 Wishing you a SAFE, SMOOTH & COMFORTABLE JOURNEY! 🚌✨
@@ -2917,7 +3336,7 @@
       const upiUrl = `upi://pay?pa=${encodeURIComponent(agencyUpiId)}&pn=${encodeURIComponent(name)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Ticket '+booking.ticketNo)}`;
       document.getElementById('upiModalAmount').innerText = `₹${amount.toLocaleString('en-IN')}`;
       document.getElementById('upiQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
-      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nTicket: ${booking.ticketNo}\nPlease confirm only after payment is received.`;
+      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nTicket: ${booking.ticketNo}\nPlease confirm payment on customer screen.`;
       document.getElementById('upiModal').classList.remove('hidden');
     }
 
@@ -3051,7 +3470,7 @@
       const jDate = document.getElementById("journeyDateInput").value;
       const bName = document.getElementById("busNameInput").value;
       const bTime = document.getElementById("busTimeInput").value;
-      if (!jDate || !bTime) { alert("Pehle Journey Date aur Bus Time select karein!"); return; }
+      if (!jDate || !bTime) { showToast("Please select Journey Date and Bus Time first!", "info"); return; }
       document.getElementById("seatModalTitle").innerHTML = `<i class="fa-solid fa-couch text-amber-400"></i> ${bName} Seat Layout`;
       document.getElementById("seatModalSubtext").innerText = `${bName} • ${bTime} • Date: ${jDate}`;
       tempSelectedSeats = splitSeats(document.getElementById("seatInput").value);
@@ -3071,7 +3490,7 @@
       layoutObj.rows.forEach(row => {
         html += `<div class="flex items-center justify-center gap-4 w-full"><div class="flex items-center gap-1.5">`;
         row.left.forEach(seat => { html += renderSeatButton(seat, occupiedMap); });
-        html += `</div><div class="w-6 text-center text-slate-300 font-bold select-none text-xs">| |</div><div class="flex items-center gap-1.5">`;
+        html += `</div><div class="w-6 text-center text-slate-300 font-black select-none text-xs">| |</div><div class="flex items-center gap-1.5">`;
         row.right.forEach(seat => { html += renderSeatButton(seat, occupiedMap); });
         html += `</div></div>`;
       });
@@ -3079,7 +3498,7 @@
     }
 
     function renderSeatButton(seat, occupiedMap) {
-      if (!seat || seat === "") return `<div class="w-10 sm:w-12 h-12 invisible"></div>`;
+      if (!seat || seat === "") return `<div class="w-10 sm:w-11 h-11 invisible"></div>`;
       const isBooked = seat in occupiedMap;
       const isSelected = tempSelectedSeats.includes(seat);
       const bookedData = occupiedMap[seat];
@@ -3116,14 +3535,14 @@
     function handleFormSubmit(e) {
       e.preventDefault();
       const mobile = document.getElementById("mobileInput").value.trim().replace(/[^0-9]/g, '');
-      if (mobile.length !== 10) { alert("Mobile number 10 digits ka hona chahiye!"); return; }
+      if (mobile.length !== 10) { showToast("Mobile number must be exactly 10 digits!", "error"); return; }
       const seatTokens = splitSeats(document.getElementById("seatInput").value);
-      if (!seatTokens.length) { alert("Seat chunein!"); return; }
+      if (!seatTokens.length) { showToast("Please assign at least one seat!", "error"); return; }
 
       const jDate = document.getElementById("journeyDateInput").value;
       const todayStr = new Date().toISOString().slice(0,10);
       if (jDate < todayStr) {
-        alert("Error: Back-date (beete hue din ki) booking allow nahi hai!");
+        showToast("Error: Back-date reservations are not permitted!", "error");
         return;
       }
 
@@ -3131,7 +3550,7 @@
       const busTime = document.getElementById("busTimeInput").value;
 
       const conflicts = checkSeatConflict(jDate, busName, busTime, seatTokens);
-      if (conflicts.length > 0) { alert(`Seat(s) ${conflicts.join(", ")} pehle se booked ya permanent blocked hain!`); return; }
+      if (conflicts.length > 0) { showToast(`Seat(s) ${conflicts.join(", ")} already booked or blocked!`, "error"); return; }
 
       const fare = parseFloat(document.getElementById("fareInput").value) || 0;
       const payMode = document.getElementById("paymentModeInput").value;
@@ -3145,7 +3564,7 @@
         splitUpi = parseFloat(document.getElementById("splitUpiInput").value) || 0;
 
         if (splitCash + splitUpi !== fare) {
-          alert(`Split Payment Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) ka jod Total Fare (₹${fare}) ke barabar hona chahiye!`);
+          showToast(`Split Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) must match Total Fare (₹${fare})!`, "error");
           return;
         }
         splitRemark = ` [Cash: ₹${splitCash}, UPI: ₹${splitUpi}]`;
@@ -3189,14 +3608,14 @@
     }
 
     function switchTab(tabId) {
-      if (tabId === 'admin' && currentUserRole !== 'Admin') { alert("Access Denied! Sirf Admin ke liye."); return; }
+      if (tabId === 'admin' && currentUserRole !== 'Admin') { showToast("Access Denied! Admin permissions required.", "error"); return; }
       document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
       ['booking', 'register', 'memo', 'financial', 'admin'].forEach(id => {
         const btn = document.getElementById(`tab-${id}`);
-        if (btn) { btn.classList.remove('active-tab'); btn.classList.add('text-blue-200'); }
+        if (btn) { btn.classList.remove('active-tab'); }
       });
       const activeBtn = document.getElementById(`tab-${tabId}`);
-      if (activeBtn) { activeBtn.classList.remove('text-blue-200'); activeBtn.classList.add('active-tab'); }
+      if (activeBtn) { activeBtn.classList.add('active-tab'); }
       const content = document.getElementById(`content-${tabId}`);
       if (content) content.classList.remove("hidden");
 
@@ -3208,7 +3627,7 @@
 
     function downloadA6TicketPDF() {
       if (!activePrintingTicket) {
-        alert("Pehle koi ticket chunein!");
+        showToast("Please choose ticket first!", "info");
         return;
       }
       
