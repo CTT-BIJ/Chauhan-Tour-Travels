@@ -51,7 +51,8 @@
         margin: 0 !important; padding: 0 !important; display: block !important; 
         background: white !important; color: black !important; 
       }
-      @page { size: A5; margin: 4mm; }
+      @page { size: A5; margin: 3mm; }
+	  body, html { height: 100%; overflow: hidden; }
     }
     .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -2127,16 +2128,26 @@
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const yyyy = today.getFullYear();
       const todayStr = `${yyyy}-${mm}-${dd}`;
+      
       document.getElementById("bookingDateInput").value = `${dd}-${mm}-${yyyy}`;
       const jDateInput = document.getElementById("journeyDateInput");
-      jDateInput.value = todayStr;
-      jDateInput.min = todayStr;
-      // Register initially includes all journey dates.
+      if (jDateInput) {
+        jDateInput.value = todayStr;
+        jDateInput.min = todayStr;
+      }
+      
+      // Live Register filter date ko default aaj ki date set karein
+      const filterJourneyDateEl = document.getElementById("filterJourneyDate");
+      if (filterJourneyDateEl) {
+        filterJourneyDateEl.value = todayStr;
+      }
+
       document.getElementById("memoDateInput").value = todayStr;
       document.getElementById("summaryDatePicker").value = todayStr;
       if (document.getElementById("filterUpcomingDate")) document.getElementById("filterUpcomingDate").value = todayStr;
       if (document.getElementById("filterExpenseDate")) document.getElementById("filterExpenseDate").value = todayStr;
       if (document.getElementById("filterSettlementDate")) document.getElementById("filterSettlementDate").value = todayStr;
+      
       document.getElementById("bookedByInput").value = currentLoggedInStaff;
       document.getElementById("displayTicketNo").innerText = getNextTicketNumber();
     }
@@ -2467,7 +2478,7 @@
           </div>
         </div>
         <div class="flex justify-between pt-6 text-[11px] font-bold text-amber-900">
-          <span>हस्ताक्षर बुकिंग क्लर्क: ____________</span>
+          <span>हस्ताक्षर: ____________</span>
         </div>
       `;
     }
@@ -2476,12 +2487,29 @@
       const d = document.getElementById("voucherDriverInput").value.trim();
       const v = document.getElementById("voucherVehicleInput").value.trim();
       if (!d || !v) { showToast("Driver Name and Vehicle No. are required!", "error"); return; }
-      const tripBookings = bookings.filter(b => b.status === "CONFIRMED" && b.paymentMode === "Credit");
-      if (tripBookings.length > 0) { openCreditAlertModal(tripBookings); return; }
+      
+      // Selected Bus aur Time/Route get karein
+      const busName = document.getElementById("memoBusSelect").value.trim();
+      const selectedTime = document.getElementById("memoRouteSelect")?.value.trim() || "";
+      const memoDate = normalizeDate(document.getElementById("memoDateInput").value);
+
+      // Sirf usi particular bus, date aur time ki credit (pending) bookings filter karein
+      const tripCreditBookings = bookings.filter(b => 
+        b.status === "CONFIRMED" && 
+        b.paymentMode === "Credit" &&
+        b.busName.toLowerCase().trim() === busName.toLowerCase().trim() &&
+        normalizeDate(b.journeyDate) === memoDate &&
+        (!selectedTime || b.busTime.trim() === selectedTime)
+      );
+
+      if (tripCreditBookings.length > 0) { 
+        openCreditAlertModal(tripCreditBookings); 
+        return; 
+      }
       
       const memoContainer = document.getElementById("memoContainer");
       if (!memoContainer || !memoContainer.innerHTML.trim()) { showToast("Generate voucher preview first!", "info"); return; }
-      document.getElementById("print-area").innerHTML = `<div style="max-width: 148mm; margin: 0 auto; padding: 12px;">${memoContainer.innerHTML}</div>`;
+      document.getElementById("print-area").innerHTML = `<div style="max-width: 148mm; margin: 0 auto; padding: 8px;">${memoContainer.innerHTML}</div>`;
       setTimeout(() => { window.print(); }, 150);
     }
 
@@ -2940,6 +2968,7 @@
         addButton(actions,'Cancel booking','fa-ban',()=>openCancelModal(b.ticketNo),cancelled,'bg-red-50 text-red-700');
         addButton(row.querySelector('[data-reminder]'),'Send upcoming journey reminder','fa-bell',()=>sendPassengerReminderWhatsApp(b.ticketNo),state!=='UPCOMING','bg-emerald-100 text-emerald-800');
         tbody.appendChild(row);
+		
       });
     }
 
@@ -3155,10 +3184,10 @@
       const PHONE     = String.fromCodePoint(0x260E);
       const LINE      = "━━━━━━━━━━━━━━━━━━━━";
 
-      let msg = BUS + " *CHAUHAN TOUR & TRAVELS* " + BUS + "\n";
+      let msg = BUS + " 🚌*CHAUHAN TOUR & TRAVELS*🚌 " + BUS + "\n";
       msg += PIN + " *New Bus Stand, Bijapur (C.G.)*\n";
       msg += LINE + "\n";
-      msg += TICKET + " BOOKING CONFIRMATION SLIP " + CHECK + "\n";
+      msg += TICKET + " ✅ E-TICKET CONFIRMED " + CHECK + "\n";
       msg += PRAY + " Dear *" + b.passengerName + "* Ji,\n";
       msg += CELEBRATE + " Your bus seat reservation has been CONFIRMED SUCCESSFULLY! by *Chauhan Tour & Travels* in association with *" + b.busName + "*. " + BUS + "\n";
       msg += LINE + "\n";
@@ -3601,7 +3630,7 @@ function sendPassengerReminderWhatsApp(ticketNo) {
   const LINE   = "━━━━━━━━━━━━━━━━━━━━";
 
   let msg = BELL + " *यात्रा रिमाइंडर (JOURNEY REMINDER)* " + BELL + "\n";
-  msg += BUS + " *CHAUHAN TOUR & TRAVELS, BIJAPUR*\n";
+  msg += BUS + " 🚌*CHAUHAN TOUR & TRAVELS, BIJAPUR*🚌\n";
   msg += LINE + "\n";
   msg += PRAY + " आदरणीय *" + b.passengerName + "* जी,\n";
   msg += "आपकी आगामी यात्रा का विवरण नीचे दिया गया है।\n\n";
@@ -3716,7 +3745,7 @@ function sendDayEndReportWhatsApp() {
   const LINE   = "━━━━━━━━━━━━━━━━━━━━";
 
   let msg = REPORT + " *दैनिक गल्ला एवं क्लोजिंग रिपोर्ट* " + REPORT + "\n";
-  msg += BUS + " *CHAUHAN TOUR & TRAVELS, BIJAPUR*\n";
+  msg += BUS + " 🚌*CHAUHAN TOUR & TRAVELS, BIJAPUR*🚌\n";
   msg += PIN + " New Bus Stand, Bijapur (C.G.)\n";
   msg += LINE + "\n";
   msg += "📅 रिपोर्ट दिनांक: *" + d.date + "*\n";
@@ -3780,6 +3809,230 @@ function printDayEndSummary() {
       </div>
     </div>
   `;
+  // ==========================================
+// 1. AUTOMATED A6 PDF TICKET GENERATOR & DOWNLOAD
+// ==========================================
+function downloadAutomatedPDFTicket(ticketNo) {
+  const b = bookings.find(x => x.ticketNo === ticketNo);
+  if (!b) {
+    showToast("Ticket record nahi mila!", "error");
+    return;
+  }
+
+  // Temporary print area container me ticket format load karein
+  const area = document.getElementById('print-area');
+  area.style.display = 'block';
+  
+  const masterKey = `${b.busName}_${b.busTime}`;
+  const serviceObj = BUS_MASTER_ROUTES[masterKey] || { serviceName: b.busName };
+  const subTitleText = `Ticket Details For ${b.passengerName} From ${b.fromCity} To ${b.toCity} On service ${serviceObj.serviceName} @ ${b.busTime}.`;
+
+  area.innerHTML = `
+    <div style="font-family:Arial,sans-serif; width:136mm; height:93mm; padding:6mm; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; color:#111; font-size:11px; background:white;">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3a8a; padding-bottom:6px;">
+          <div>
+            <h2 style="margin:0; font-size:14px; font-weight:900; color:#1e3a8a;">CHAUHAN TOUR & TRAVELS</h2>
+            <div style="font-size:9px; color:#555;">New Bus Stand, Bijapur (C.G.) • Helpline: 094079 96570, 093406 69984</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="background:#1e3a8a; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px;">CONFIRMED TICKET</span>
+            <div style="font-size:10px; font-family:monospace; margin-top:2px;">Ticket No: <b>${b.ticketNo}</b></div>
+          </div>
+        </div>
+        <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:4px; padding:6px 8px; margin-top:8px; font-size:11px; font-weight:bold; color:#78350f;">
+          ${subTitleText}
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+        <div>
+          <div><b>Passenger Name:</b> ${b.passengerName}</div>
+          <div><b>Mobile No:</b> ${b.mobile}</div>
+          <div><b>Boarding From:</b> ${b.fromCity}</div>
+          <div><b>Destination To:</b> ${b.toCity}</div>
+        </div>
+        <div style="border-left:1px solid #cbd5e1; padding-left:8px;">
+          <div><b>Journey Date:</b> ${b.journeyDate}</div>
+          <div><b>Departure Time:</b> ${b.busTime}</div>
+          <div><b>Seat Number(s):</b> <span style="color:#1d4ed8; font-weight:900; font-size:13px;">${b.seatNo}</span></div>
+          <div><b>Booked By:</b> ${b.bookedBy}</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid #cbd5e1; padding-top:6px;">
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px;">
+          <span>Payment Mode: <span style="text-transform:uppercase; color:#047857;">${b.paymentMode}</span></span>
+          <span>Total Fare: <span style="color:#1e40af; font-size:14px; font-weight:900;">₹${Number(b.fare||0).toLocaleString('en-IN')}</span></span>
+        </div>
+        <div style="font-size:8px; color:#666; text-align:center; border-top:1px dashed #cbd5e1; margin-top:4px; padding-top:3px; display:flex; justify-content:space-between;">
+          <span>* Kripya yatri bus departure time se 15 minute pehle boarding point par pahunchein.</span>
+          <b>Passenger Copy / Counter Copy</b>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const options = {
+    margin:       0,
+    filename:     `Chauhan_Ticket_${b.ticketNo}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a6', orientation: 'landscape' }
+  };
+
+  html2pdf().from(area).set(options).save().then(() => {
+    area.style.display = 'none';
+    showToast(`PDF Ticket generated for ${b.ticketNo}!`, "success");
+  });
+}
+
+
+// ==========================================
+// 2. INSTANT WHATSAPP TICKET DISPATCH
+// ==========================================
+function sendAutomatedWhatsAppTicket(ticketNo) {
+  const b = bookings.find(x => x.ticketNo === ticketNo);
+  if (!b) return;
+
+  const cleanMobile = String(b.mobile).replace(/[^0-9]/g, '');
+
+  const BUS       = String.fromCodePoint(0x1F68C);
+  const PIN       = String.fromCodePoint(0x1F4CD);
+  const TICKET    = String.fromCodePoint(0x1F3AB);
+  const CHECK     = String.fromCodePoint(0x2705);
+  const PRAY      = String.fromCodePoint(0x1F64F);
+  const CELEBRATE = String.fromCodePoint(0x1F389);
+  const RECEIPT   = String.fromCodePoint(0x1F9FE);
+  const CALENDAR  = String.fromCodePoint(0x1F4C5);
+  const MONEY     = String.fromCodePoint(0x1F4B0);
+  const MOBILE    = String.fromCodePoint(0x1F4F2);
+  const CLOCK     = String.fromCodePoint(0x23F0);
+  const STAR      = String.fromCodePoint(0x1F31F);
+  const SPARKLE   = String.fromCodePoint(0x2728);
+  const ROSE      = String.fromCodePoint(0x1F339);
+  const PHONE     = String.fromCodePoint(0x260E);
+  const LINE      = "━━━━━━━━━━━━━━━━━━━━";
+
+  let msg = BUS + " 🚌*CHAUHAN TOUR & TRAVELS*🚌 " + BUS + "\n";
+  msg += PIN + " *New Bus Stand, Bijapur (C.G.)*\n";
+  msg += LINE + "\n";
+  msg += TICKET + " E-TICKET CONFIRMATION " + CHECK + "\n";
+  msg += PRAY + " Dear *" + b.passengerName + "* Ji,\n";
+  msg += CELEBRATE + " Your seat booking is confirmed by *Chauhan Tour & Travels* via *" + b.busName + "*. " + BUS + "\n";
+  msg += LINE + "\n";
+  msg += RECEIPT + " JOURNEY SUMMARY\n";
+  msg += "• Ticket No: *" + b.ticketNo + "*\n";
+  msg += "• Date: *" + b.journeyDate + "* (" + b.busTime + ")\n";
+  msg += "• Route: *" + b.fromCity + " ➔ " + b.toCity + "*\n";
+  msg += "• Seat(s): *" + b.seatNo + "*\n";
+  msg += "• Fare: *₹" + b.fare + "* (" + String(b.paymentMode).toUpperCase() + ")\n";
+  msg += LINE + "\n";
+  msg += CLOCK + " *Instructions:*\n";
+  msg += "1. Please report 15 mins prior to departure.\n";
+  msg += "2. Carry valid Government Photo ID.\n";
+  msg += LINE + "\n";
+  msg += PHONE + " Counter Helplines:\n";
+  msg += "☎ 094079 96570 | 093406 69984\n";
+  msg += PRAY + " Have a safe & comfortable journey! " + ROSE;
+
+  const directUrl = `https://api.whatsapp.com/send?phone=91${cleanMobile}&text=${encodeURIComponent(msg)}`;
+  window.open(directUrl, '_blank');
+}
+
+
+// ==========================================
+// 3. JOURNEY REMINDER DISPATCHER
+// ==========================================
+function sendAutomatedJourneyReminder(ticketNo) {
+  const b = bookings.find(x => x.ticketNo === ticketNo);
+  if (!b || b.status === 'CANCELLED') {
+    showToast("Valid confirmed ticket required!", "error");
+    return;
+  }
+
+  const cleanMobile = String(b.mobile).replace(/[^0-9]/g, '');
+
+  const BUS   = String.fromCodePoint(0x1F68C);
+  const PIN   = String.fromCodePoint(0x1F4CD);
+  const BELL  = String.fromCodePoint(0x1F514);
+  const CLOCK = String.fromCodePoint(0x23F0);
+  const PRAY  = String.fromCodePoint(0x1F64F);
+  const LINE  = "━━━━━━━━━━━━━━━━━━━━";
+
+  let msg = BELL + " *JOURNEY REMINDER * " + BELL + "\n";
+  msg += BUS + "🚌 *Chauhan Tour & Travels, Bijapur🚌*\n";
+  msg += LINE + "\n";
+  msg += PRAY + " Namaste *" + b.passengerName + "* Ji,\n";
+  msg += "Aapki bus yatra ka samay ho raha hai:\n\n";
+  msg += "• Journey Date: *" + b.journeyDate + "*\n";
+  msg += "• Bus Service: *" + b.busName + "*\n";
+  msg += "• Route: *" + b.fromCity + " ➔ " + b.toCity + "*\n";
+  msg += "• Departure Time: *" + b.busTime + "*\n";
+  msg += "• Assigned Seat: *" + b.seatNo + "* (Tkt: " + b.ticketNo + ")\n";
+  msg += LINE + "\n";
+  msg += CLOCK + " *Kripya samay par boarding point par pahunchein!*\n";
+  msg += "☎ Helpline: 094079 96570, 093406 69984\n";
+  msg += PRAY + " Aapki yatra mangalmay ho!";
+
+  const url = `https://api.whatsapp.com/send?phone=91${cleanMobile}&text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+// ==========================================
+// DIGITAL E-TICKET GENERATOR & VIEW
+// ==========================================
+function openETicketModal(ticketNo) {
+  const b = bookings.find(x => x.ticketNo === ticketNo);
+  if (!b) return;
+
+  const masterKey = `${b.busName}_${b.busTime}`;
+  const serviceObj = BUS_MASTER_ROUTES[masterKey] || { serviceName: b.busName };
+
+  // Modal ya Print area mein Digital E-Ticket ka HTML render karna
+  const area = document.getElementById('print-area');
+  area.style.display = 'block';
+
+  area.innerHTML = `
+    <div style="font-family:'Plus Jakarta Sans', Arial, sans-serif; max-width:400px; margin:20px auto; background:#ffffff; border:2px solid #2563eb; border-radius:16px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.1); color:#1e293b;">
+      <div style="text-align:center; border-bottom:2px dashed #cbd5e1; padding-bottom:12px; margin-bottom:12px;">
+        <h2 style="margin:0; font-size:18px; font-weight:900; color:#1e3a8a;">CHAUHAN TOUR & TRAVELS</h2>
+        <div style="font-size:10px; color:#64748b; font-weight:600;">New Bus Stand, Bijapur (C.G.) • Helpline: 09407996570</div>
+        <div style="margin-top:8px; display:inline-block; background:#dbeafe; color:#1e40af; font-size:10px; font-weight:bold; padding:3px 10px; border-radius:20px;">DIGITAL E-BOARDING PASS</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px; background:#f8fafc; padding:8px 12px; border-radius:8px;">
+        <div><b>Ticket No:</b> <span style="color:#2563eb; font-family:monospace; font-weight:bold;">${b.ticketNo}</span></div>
+        <div><b>Date:</b> ${b.journeyDate}</div>
+      </div>
+
+      <div style="font-size:12px; space-y:6px; margin-bottom:12px; padding:0 4px;">
+        <div style="margin-bottom:6px;"><b>Passenger:</b> <span style="font-size:14px; color:#0f172a; font-weight:bold;">${b.passengerName}</span> (${b.mobile})</div>
+        <div style="margin-bottom:6px;"><b>Bus Service:</b> ${b.busName} (${b.busTime})</div>
+        <div style="margin-bottom:6px;"><b>Route:</b> ${b.fromCity.toUpperCase()} ➔ ${b.toCity.toUpperCase()}</div>
+        <div style="margin-bottom:6px;"><b>Assigned Seat(s):</b> <span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-weight:900; font-size:13px;">${b.seatNo}</span></div>
+      </div>
+
+      <div style="border-top:1px dashed #cbd5e1; padding-top:10px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+        <div>
+          <div style="color:#64748b; font-size:10px;">Total Fare</div>
+          <div style="font-size:16px; font-weight:900; color:#059669;">₹${Number(b.fare || 0).toLocaleString('en-IN')}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#64748b; font-size:10px;">Payment Mode</div>
+          <div style="font-weight:bold; text-transform:uppercase; color:#334155;">${b.paymentMode}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:15px; background:#f1f5f9; padding:8px; border-radius:8px; text-align:center; font-size:9px; color:#475569;">
+        * Kripya yatri departure time se 15 minute pehle boarding point par rahein. Safe Journey! 🙏
+      </div>
+    </div>
+  `;
+
+  // PDF download ya direct print/share trigger karne ke liye options
+  setTimeout(() => {
+    window.print();
+    area.style.display = 'none';
+  }, 200);
+}
 
   setTimeout(() => { window.print(); }, 150);
 }
