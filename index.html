@@ -1,3 +1,21 @@
+# Pasted text
+
+Pasted: 2026-11-03T10:53:14.294Z
+
+---
+
+# Pasted text
+
+Pasted: 2026-11-03T10:45:45.285Z
+
+---
+
+# Pasted text
+
+Pasted: 2026-11-03T10:05:21.827Z
+
+---
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -5,7 +23,7 @@
 <meta charset="utf-8"/>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Chauhan Tour &amp; Travels - Booking Counter Portal</title>
+<title>Chauhan Tour &amp; Travels - Booking Counter Portal v68</title>
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Google Fonts: Outfit, Plus Jakarta Sans, Noto Sans Devanagari -->
@@ -158,7 +176,7 @@
 </div>
 <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
 <span>Default PIN: <strong class="text-slate-600">1234</strong></span>
-<span class="text-blue-600 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Protected POS</span>
+<span class="text-blue-600 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Local PIN</span>
 </div>
 </div>
 <button class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-blue-500/25 transition cursor-pointer flex items-center justify-center gap-2 mt-2" type="submit">
@@ -849,7 +867,7 @@
 </div>
 <div>
 <label class="block font-semibold text-slate-600 mb-1">PIN Code (4-Digits) <span class="text-red-500">*</span></label>
-<input class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium" id="newStaffPin" placeholder="PIN e.g. 1234" required="" type="password"/>
+<input class="w-full border border-slate-300 rounded-xl px-3 py-2 font-medium" maxlength="4" minlength="4" pattern="[0-9]{4}" id="newStaffPin" placeholder="PIN e.g. 1234" required="" type="password"/>
 </div>
 </div>
 <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl shadow transition cursor-pointer" id="btnSaveStaff" type="submit">Save Staff</button>
@@ -899,7 +917,7 @@
 </div>
 <div>
 <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Departure Time</label>
-<input class="w-full border border-slate-300 rounded-lg px-2 py-1.5 font-medium" id="routeTimeInput" placeholder="e.g. 08:30 PM" type="text"/>
+<input class="w-full border border-slate-300 rounded-lg px-2 py-1.5 font-medium" id="routeTimeInput" placeholder="e.g. 08:00 PM" type="text" value="08:00 PM"/>
 </div>
 <div>
 <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Return Time</label>
@@ -916,8 +934,23 @@
 <input class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium" id="routeReturnServiceNameInput" placeholder="e.g. Ramrath Return" type="text"/>
 </div>
 <div>
+<label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Via / Stop</label>
+<input class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium" id="routeViaInput" list="routeViaCitySuggestions" placeholder="City select karein; multiple stops: comma / slash" type="text"/>
+<datalist id="routeViaCitySuggestions"></datalist>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div>
+<label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Origin</label>
+<select class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium" id="routeOriginSelect"></select>
+</div>
+<div>
+<label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Destination</label>
+<select class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium" id="routeDestinationSelect"></select>
+</div>
+<div>
 <label class="block text-[10px] text-slate-500 mb-0.5 font-semibold">Route Display</label>
-<input class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium uppercase" id="routeCleanRouteInput" placeholder="BIJAPUR TO RAIPUR" type="text"/>
+<div class="text-[10px] text-slate-400 mt-1">Origin, Via aur Departure select karke save karein</div>
 </div>
 </div>
 <button class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl shadow transition cursor-pointer" id="btnSaveMasterRoute" onclick="handleAddMasterRoute()" type="button">
@@ -1438,19 +1471,9 @@
     }
 
     function isTripDepartedToday(timeStr, targetDateStr) {
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const todayIso = `${yyyy}-${mm}-${dd}`;
-
-      if (targetDateStr !== todayIso) return false;
-
-      const tripMinutes = parseTimeToMinutes(timeStr);
-      if (tripMinutes < 0) return false;
-
-      const currentMinutes = (now.getHours() * 60) + now.getMinutes();
-      return tripMinutes <= currentMinutes;
+      const current=getIndiaNowParts();
+      const minutes=parseTimeToMinutes(timeStr);
+      return normalizeDate(targetDateStr)===current.date && minutes>=0 && minutes<=current.minutes;
     }
 
     function updateLastBackupTimeDisplay(timeStr) {
@@ -1471,7 +1494,7 @@
       const toast = document.createElement('div');
       const bg = type === 'error' ? 'bg-red-600' : type === 'info' ? 'bg-blue-600' : 'bg-emerald-600';
       toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center gap-2.5 pointer-events-auto`;
-      toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'} text-sm"></i> <span>${message}</span>`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'} text-sm"></i> <span>${escapeHtml(message)}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.remove('translate-y-3', 'opacity-0'), 10);
       setTimeout(() => {
@@ -1496,7 +1519,7 @@
     }
 
     function populateRouteDriverAndVehicleHistory() {
-      const busName = document.getElementById("memoBusSelect")?.value.trim();
+      const busName = document.getElementById("memoBusSelect")?.value.trim() || "";
       const routeSelect = document.getElementById("memoRouteSelect");
       const selectedTime = routeSelect ? routeSelect.value.trim() : "";
       const historyKey = `${busName}_${selectedTime}`;
@@ -1621,7 +1644,10 @@
       startLiveClock();
       renderAdminCityTags();
       populateAdminOperatorSelects();
+      populateRouteCitySelects();
+      refreshViaCitySuggestions();
       populateLayoutTripSelect();
+      updateDestinationsAndTimes();
       updateLastBackupTimeDisplay();
 
       const upiInput = document.getElementById("agencyUpiInput");
@@ -1630,6 +1656,7 @@
     });
 
     function handleSaveAgencyUpi() {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       const val = document.getElementById("agencyUpiInput").value.trim();
       if (!val) { showToast("UPI ID cannot be blank!", "error"); return; }
       agencyUpiId = val;
@@ -1669,7 +1696,7 @@
       updateLastBackupTimeDisplay(timeString);
 
       const backupData = {
-        version: "v65",
+        version: "v68",
         exportDate: now.toISOString(),
         agencyUpiId, bookings, expenses, settlements, staffList, busOperators, MASTER_CITIES, BUS_MASTER_ROUTES, customLayouts, tripDriverHistory
       };
@@ -1684,28 +1711,50 @@
     }
 
     function importJSONBackup(event) {
-      if (currentUserRole !== 'Admin') { showToast("Access Denied! Only Admin can restore.", "error"); return; }
-      const file = event.target.files[0];
+      if (currentUserRole !== 'Admin') { showToast("Only Admin can restore.", "error"); return; }
+      const input = event.target;
+      const file = input.files[0];
       if (!file) return;
+      if (file.size > 25 * 1024 * 1024) { showToast("Backup exceeds 25 MB.", "error"); input.value=''; return; }
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = () => {
+        const oldValues = new Map();
         try {
-          const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) { bookings = imported; }
-          else if (typeof imported === 'object' && imported !== null) {
-            bookings = imported.bookings || bookings;
-            expenses = imported.expenses || expenses;
-            settlements = imported.settlements || settlements;
-            if (imported.agencyUpiId) agencyUpiId = imported.agencyUpiId;
+          const data = JSON.parse(reader.result);
+          const source = Array.isArray(data) ? {bookings:data} : data;
+          if (!source || typeof source !== 'object' || !Array.isArray(source.bookings)) throw Error('Bookings array missing.');
+          const mappings = [
+            ['bookings',STORAGE_KEY,'array'], ['expenses',EXPENSE_STORAGE_KEY,'array'],
+            ['settlements',SETTLEMENT_STORAGE_KEY,'array'], ['staffList',STAFF_STORAGE_KEY,'array'],
+            ['busOperators',BUS_OPERATORS_KEY,'array'], ['MASTER_CITIES',CITY_STORAGE_KEY,'array'],
+            ['BUS_MASTER_ROUTES',ROUTE_STORAGE_KEY,'object'], ['customLayouts',CUSTOM_LAYOUT_KEY,'object'],
+            ['tripDriverHistory',TRIP_HISTORY_KEY,'object'], ['agencyUpiId',UPI_ID_STORAGE_KEY,'string']
+          ];
+          const writes = [];
+          for (const [field,key,type] of mappings) {
+            if (!(field in source)) continue;
+            const value=source[field];
+            if (type==='array' ? !Array.isArray(value) : type==='object' ? !value || typeof value!=='object' || Array.isArray(value) : typeof value!=='string') throw Error('Invalid '+field);
+            writes.push([key,type==='string'?value:JSON.stringify(value)]);
           }
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-          localStorage.setItem(EXPENSE_STORAGE_KEY, JSON.stringify(expenses));
-          localStorage.setItem(SETTLEMENT_STORAGE_KEY, JSON.stringify(settlements));
+          const ids = new Set();
+          for (const record of source.bookings) {
+            if (!record || typeof record.ticketNo!=='string' || ids.has(record.ticketNo) || !Number.isFinite(Number(record.fare)) || Number(record.fare)<0) throw Error('Invalid or duplicate ticket record.');
+            ids.add(record.ticketNo);
+          }
+          if (!confirm('Restore '+source.bookings.length+' tickets? Included settings and records will replace current data. Download a backup first.')) return;
+          for (const [key,value] of writes) {
+            oldValues.set(key, localStorage.getItem(key));
+            localStorage.setItem(key,value);
+          }
           location.reload();
-        } catch (err) { showToast("Invalid backup JSON file!", "error"); }
+        } catch(err) {
+          for (const [key,value] of oldValues) { try { value===null ? localStorage.removeItem(key) : localStorage.setItem(key,value); } catch(_) {} }
+          showToast('Restore failed: '+err.message, 'error');
+        } finally { input.value=''; }
       };
+      reader.onerror = () => { showToast('Could not read backup.', 'error'); input.value=''; };
       reader.readAsText(file);
-      event.target.value = "";
     }
 
     function loadBusOperators() {
@@ -1715,11 +1764,13 @@
       const settleBus = document.getElementById("settleOperatorSelect");
       [busSelect, filterBus, memoBus, settleBus].forEach(sel => {
         if (!sel) return;
+        const previous = sel.value;
         sel.innerHTML = "";
         if (sel === filterBus) sel.innerHTML = `<option value="ALL">All Buses</option>`;
         busOperators.forEach(op => {
           const opt = document.createElement("option"); opt.value = op; opt.textContent = op; sel.appendChild(opt);
         });
+        if (Array.from(sel.options).some(opt => opt.value === previous)) sel.value = previous;
       });
     }
 
@@ -1787,12 +1838,14 @@
     }
 
     function handleAddNewStaff(e) {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       e.preventDefault();
       const name = document.getElementById("newStaffName").value.trim();
       const role = document.getElementById("newStaffRole").value.trim() || "Staff";
       const pin = document.getElementById("newStaffPin").value.trim();
       const selectedExisting = document.getElementById("adminSelectStaff").value;
-      if (!name || !pin) return;
+      if (!name || !/^[0-9]{4}$/.test(pin)) { showToast("Enter a 4-digit PIN.", "error"); return; }
+      if (staffList.some(s => s.name.toLowerCase() === name.toLowerCase() && s.name !== selectedExisting)) { showToast("Staff name already exists.", "error"); return; }
       if (selectedExisting) {
         const found = staffList.find(s => s.name === selectedExisting);
         if (found) { found.name = name; found.role = role; found.pin = pin; }
@@ -1806,6 +1859,7 @@
     }
 
     function handleDeleteStaff() {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       const selectedName = document.getElementById("adminSelectStaff").value;
       if (!selectedName || selectedName === "Admin") { showToast("Main Admin cannot be deleted!", "error"); return; }
       staffList = staffList.filter(s => s.name !== selectedName);
@@ -1828,20 +1882,22 @@
     }
 
     function handleAddCity() {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       const val = document.getElementById("newCityInput").value.trim();
       if (!val || MASTER_CITIES.some(c => c.toLowerCase() === val.toLowerCase())) return;
       MASTER_CITIES.push(val);
       localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES));
       document.getElementById("newCityInput").value = "";
-      renderAdminCityTags(); populateCities();
+      renderAdminCityTags(); populateCities(); populateRouteCitySelects();
       showToast(`City added: ${val}`, "success");
     }
 
     function handleDeleteCity(index) {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       if (MASTER_CITIES.length <= 2) { showToast("Minimum 2 cities required!", "error"); return; }
       MASTER_CITIES.splice(index, 1);
       localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(MASTER_CITIES));
-      renderAdminCityTags(); populateCities();
+      renderAdminCityTags(); populateCities(); populateRouteCitySelects();
       showToast("City removed.", "info");
     }
 
@@ -1858,21 +1914,23 @@
     }
 
     function handleAddOperator() {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       const opName = document.getElementById("newOperatorInput").value.trim();
       if (!opName || busOperators.some(op => op.toLowerCase() === opName.toLowerCase())) return;
       busOperators.push(opName);
       localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
       document.getElementById("newOperatorInput").value = "";
-      loadBusOperators(); populateAdminOperatorSelects();
+      loadBusOperators(); populateAdminOperatorSelects(); updateDestinationsAndTimes(); updateMemoRoutes();
       showToast(`Bus operator added: ${opName}`, "success");
     }
 
     function handleDeleteOperator(index) {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       if (busOperators.length <= 1) { showToast("Min 1 operator required!", "error"); return; }
       const opName = busOperators[index];
       busOperators.splice(index, 1);
       localStorage.setItem(BUS_OPERATORS_KEY, JSON.stringify(busOperators));
-      loadBusOperators(); populateAdminOperatorSelects();
+      loadBusOperators(); populateAdminOperatorSelects(); updateDestinationsAndTimes(); updateMemoRoutes();
       showToast(`Operator ${opName} deleted.`, "info");
     }
 
@@ -1884,23 +1942,30 @@
       document.getElementById("routeReturnTimeInput").value = "";
       document.getElementById("routeServiceNameInput").value = "";
       document.getElementById("routeReturnServiceNameInput").value = "";
-      document.getElementById("routeCleanRouteInput").value = "";
+      document.getElementById("routeViaInput").value = "";
+      document.getElementById("routeOriginSelect").value = MASTER_CITIES[0] || "";
+      document.getElementById("routeDestinationSelect").value = MASTER_CITIES[1] || MASTER_CITIES[0] || "";
+      syncRouteDisplayFromCities();
     }
 
     function editMasterRoute(key) {
       const item = BUS_MASTER_ROUTES[key];
       if (!item) return;
       editingRouteKey = key;
-      const parts = key.split("_");
-      const operator = parts[0];
-      const time = parts[1] || "";
+      const splitIndex = key.lastIndexOf("_");
+      const operator = key.slice(0, splitIndex);
+      const time = key.slice(splitIndex + 1);
 
       document.getElementById("routeOperatorSelect").value = operator;
       document.getElementById("routeTimeInput").value = time;
       document.getElementById("routeReturnTimeInput").value = item.returnTime || "";
       document.getElementById("routeServiceNameInput").value = item.serviceName || "";
       document.getElementById("routeReturnServiceNameInput").value = item.returnServiceName || "";
-      document.getElementById("routeCleanRouteInput").value = item.fullRouteDisplay || "";
+      document.getElementById("routeViaInput").value = splitRouteCities(item.viaCities || item.viaCity).join(" / ");
+      const groups = routeCityGroups(item);
+      document.getElementById("routeOriginSelect").value = canonicalCity(item.originCity || groups[0]?.[0] || "");
+      document.getElementById("routeDestinationSelect").value = canonicalCity(item.destinationCity || groups[groups.length - 1]?.[0] || "");
+      syncRouteDisplayFromCities();
 
       document.getElementById("routeFormHeading").innerText = `Editing Trip: ${operator} (${time})`;
       document.getElementById("btnSaveMasterRoute").innerText = "Update Route & Schedule";
@@ -1908,37 +1973,56 @@
     }
 
     function handleAddMasterRoute() {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       const operator = document.getElementById("routeOperatorSelect").value;
-      const time = document.getElementById("routeTimeInput").value.trim();
-      const returnTime = document.getElementById("routeReturnTimeInput").value.trim();
+      const time = normalizeScheduleTime(document.getElementById("routeTimeInput").value);
+      const returnRaw = document.getElementById("routeReturnTimeInput").value.trim();
+      const returnTime = normalizeScheduleTime(returnRaw);
       const serviceName = document.getElementById("routeServiceNameInput").value.trim() || operator;
       const returnServiceName = document.getElementById("routeReturnServiceNameInput").value.trim() || serviceName;
-      const cleanRoute = document.getElementById("routeCleanRouteInput").value.trim().toUpperCase();
-
-      if (!operator || !time || !cleanRoute) {
-        showToast("Operator, Departure Time and Route Title are required!", "error");
-        return;
+      const origin = canonicalCity(document.getElementById("routeOriginSelect").value);
+      const destination = canonicalCity(document.getElementById("routeDestinationSelect").value);
+      const viaCities = splitRouteCities(document.getElementById("routeViaInput").value);
+      if (!operator || !time || !origin || !destination || cityKey(origin) === cityKey(destination)) {
+        showToast("Operator, alag From–To aur valid time (08:00 PM / 20:00) required.", "error"); return;
       }
-
+      if (returnRaw && returnRaw.toUpperCase() !== "N/A" && !returnTime) {
+        showToast("Return Time invalid. Use 06:00 AM / 18:00, ya blank rakhein.", "error"); return;
+      }
+      if (viaCities.some(city => !MASTER_CITIES.some(saved => cityKey(saved) === cityKey(city)))) {
+        showToast("Via cities pehle City Master mein add karein. Multiple stops comma se separate karein.", "error"); return;
+      }
+      const stops = [origin, ...viaCities, destination].map(cityKey);
+      if (new Set(stops).size !== stops.length) {
+        showToast("Origin, Via aur Destination mein duplicate city nahi honi chahiye.", "error"); return;
+      }
       const newKey = `${operator}_${time}`;
-      if (editingRouteKey && editingRouteKey !== newKey) {
-        delete BUS_MASTER_ROUTES[editingRouteKey];
-      }
-
+      if (BUS_MASTER_ROUTES[newKey] && editingRouteKey !== newKey &&
+          !confirm("Is operator aur time par route already hai. Replace karein? Alag service ke liye alag time rakhein.")) return;
+      const existing = BUS_MASTER_ROUTES[editingRouteKey || newKey] || {};
       BUS_MASTER_ROUTES[newKey] = {
-        serviceName, returnServiceName,
-        fullRouteDisplay: cleanRoute,
+        ...existing, serviceName, returnServiceName, viaCity: viaCities.join(" / "), viaCities,
+        originCity: origin, destinationCity: destination,
+        fullRouteDisplay: `${origin.toUpperCase()} TO ${destination.toUpperCase()}${viaCities.length ? " VIA " + viaCities.join(" / ").toUpperCase() : ""}`,
         returnTime: returnTime || "N/A"
       };
-
+      if (editingRouteKey && editingRouteKey !== newKey) {
+        if (customLayouts[editingRouteKey]) {
+          customLayouts[newKey] = customLayouts[editingRouteKey];
+          delete customLayouts[editingRouteKey];
+          localStorage.setItem(CUSTOM_LAYOUT_KEY, JSON.stringify(customLayouts));
+        }
+        delete BUS_MASTER_ROUTES[editingRouteKey];
+      }
       localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES));
+      document.getElementById("busNameInput").value = operator;
       resetRouteForm();
       renderAdminRoutesList();
       populateLayoutTripSelect();
       updateDestinationsAndTimes();
       updateMemoRoutes();
       saveToCloudDatabase();
-      showToast(`Route saved for ${newKey}!`, "success");
+      showToast(`Service saved: ${serviceName} (${time}). New Booking mein matching From–To select karein.`, "success");
     }
 
     function renderAdminRoutesList() {
@@ -1957,7 +2041,7 @@
         row.innerHTML = `
           <div>
             <b>${key.replace('_', ' • ')}</b> (${item.serviceName})
-            <div class="text-blue-700 font-bold">${item.fullRouteDisplay}</div>
+            <div class="text-blue-700 font-bold">${item.originCity && item.destinationCity ? `${item.originCity} → ${item.destinationCity}` : item.fullRouteDisplay}</div>
             <div class="text-slate-500 text-[10px]">Return: <b class="text-emerald-700">${item.returnTime || 'N/A'}</b> (${item.returnServiceName || '-'})</div>
           </div>
           <div class="flex items-center gap-1.5">
@@ -1970,6 +2054,7 @@
     }
 
     function deleteMasterRoute(key) {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       if (confirm(`Route ${key} ko delete karna chahte hain?`)) {
         delete BUS_MASTER_ROUTES[key];
         localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(BUS_MASTER_ROUTES));
@@ -1990,6 +2075,39 @@
       renderAdminRoutesList();
       populateLayoutTripSelect();
     }
+    function populateRouteCitySelects() {
+      const origin = document.getElementById("routeOriginSelect");
+      const destination = document.getElementById("routeDestinationSelect");
+      if (!origin || !destination) return;
+      const prevOrigin = origin.value;
+      const prevDest = destination.value;
+      origin.innerHTML = "";
+      destination.innerHTML = "";
+      MASTER_CITIES.forEach(city => {
+        origin.appendChild(new Option(city, city));
+        destination.appendChild(new Option(city, city));
+      });
+      if (prevOrigin) origin.value = prevOrigin;
+      if (prevDest) destination.value = prevDest;
+      else if (MASTER_CITIES.length > 1) destination.value = MASTER_CITIES[1];
+      refreshViaCitySuggestions();
+      syncRouteDisplayFromCities();
+    }
+
+    function syncRouteDisplayFromCities() {
+      const origin = document.getElementById("routeOriginSelect")?.value || "";
+      const destination = document.getElementById("routeDestinationSelect")?.value || "";
+      const via = document.getElementById("routeViaInput")?.value || "";
+      const title = document.getElementById("routeCleanRouteInput");
+      if (title) {
+        title.value = origin && destination
+          ? (via ? `${origin.toUpperCase()} TO ${destination.toUpperCase()} VIA ${via.toUpperCase()}`
+                 : `${origin.toUpperCase()} TO ${destination.toUpperCase()}`)
+          : "";
+      }
+    }
+
+
 
     function populateLayoutTripSelect() {
       const lSelect = document.getElementById("layoutTripSelect");
@@ -2040,6 +2158,7 @@
     }
 
     function handleSaveCustomLayout() {
+      if (currentUserRole !== "Admin") { showToast("Admin access required.", "error"); return; }
       const tripKey = document.getElementById("layoutTripSelect").value;
       const textareaVal = document.getElementById("customLayoutTextarea").value.trim();
       const imageInput = document.getElementById("layoutImageInput");
@@ -2124,9 +2243,7 @@
 
     function setDefaults() {
       const today = new Date();
-      const dd = String(today.getDate()).padStart(2, '0');
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const yyyy = today.getFullYear();
+      const [yyyy, mm, dd] = getIndiaNowParts().date.split('-');
       const todayStr = `${yyyy}-${mm}-${dd}`;
       
       document.getElementById("bookingDateInput").value = `${dd}-${mm}-${yyyy}`;
@@ -2203,98 +2320,120 @@
     }
 
     // UPDATED: Strict Outbound vs Inbound Schedule Isolation & Next-Bus Auto-Selection
+
+    // Shared schedule helpers: arbitrary cities, saved Via stops and validated times.
+    function cityKey(value) {
+      return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+    function canonicalCity(value) {
+      const clean = String(value || "").trim();
+      return MASTER_CITIES.find(city => cityKey(city) === cityKey(clean)) || clean;
+    }
+    function splitRouteCities(value) {
+      const values = Array.isArray(value) ? value : String(value || "").split(/\s*(?:,|\/|;|\||→|>|(?:\bVIA\b))\s*/i);
+      return values.map(canonicalCity).filter(Boolean);
+    }
+    function routeCityGroups(info) {
+      if (info.originCity && info.destinationCity) {
+        const via = splitRouteCities(info.viaCities || info.viaStops || info.viaCity);
+        return [
+          splitRouteCities(info.originCity),
+          ...via.filter(city => cityKey(city) !== cityKey(info.originCity) && cityKey(city) !== cityKey(info.destinationCity)).map(city => [city]),
+          splitRouteCities(info.destinationCity)
+        ];
+      }
+      const display = String(info.fullRouteDisplay || "");
+      const main = display.split(/\s+VIA\s+/i)[0].split(/\s+TO\s+/i);
+      if (main.length !== 2) return [];
+      const viaText = display.split(/\s+VIA\s+/i)[1] || info.viaCity || "";
+      return [splitRouteCities(main[0]), ...splitRouteCities(viaText).map(city => [city]), splitRouteCities(main[1])];
+    }
+    function routeMatchesCities(info, from, to) {
+      if (!from || !to || cityKey(from) === cityKey(to)) return false;
+      const groups = routeCityGroups(info);
+      const originIndex = groups.findIndex(group => group.some(city => cityKey(city) === cityKey(from)));
+      return originIndex >= 0 && groups.some((group, index) =>
+        index > originIndex && group.some(city => cityKey(city) === cityKey(to)));
+    }
+    function voucherRouteLabel(info) {
+      const groups = routeCityGroups(info || {});
+      if (groups.length >= 2) {
+        return `${groups[0].join(" / ").toUpperCase()} TO ${groups[groups.length - 1].join(" / ").toUpperCase()}`;
+      }
+      return String(info?.fullRouteDisplay || "").split(/\s+VIA\s+/i)[0];
+    }
+    function normalizeScheduleTime(value) {
+      const clean = String(value || "").trim().toUpperCase().replace(/\./g, "");
+      const match = clean.match(/^(\d{1,2})(?::(\d{1,2}))?\s*(AM|PM)?$/);
+      if (!match) return "";
+      let hour = Number(match[1]), minute = Number(match[2] || 0);
+      const meridian = match[3];
+      if (minute > 59 || (meridian ? hour < 1 || hour > 12 : hour > 23)) return "";
+      if (meridian === "AM" && hour === 12) hour = 0;
+      if (meridian === "PM" && hour < 12) hour += 12;
+      return `${String(hour % 12 || 12).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"}`;
+    }
+    function getOperatorSchedules(operator) {
+      const prefix = operator + "_";
+      const schedules = Object.entries(BUS_MASTER_ROUTES)
+        .filter(([key]) => key.startsWith(prefix))
+        .map(([key, info]) => ({key, time: key.slice(prefix.length), info}));
+      // A configured return time is a reverse schedule unless an explicit return route exists.
+      const explicitMinutes = new Set(schedules.map(trip => parseTimeToMinutes(trip.time)));
+      const returns = schedules.flatMap(trip => {
+        const time = normalizeScheduleTime(trip.info.returnTime);
+        const groups = routeCityGroups(trip.info);
+        if (!time || explicitMinutes.has(parseTimeToMinutes(time)) || groups.length < 2) return [];
+        const reversed = groups.slice().reverse();
+        return [{
+          key: operator + "_" + time, time,
+          info: {
+            serviceName: trip.info.returnServiceName || trip.info.serviceName || operator,
+            fullRouteDisplay: `${reversed[0].join(" / ")} TO ${reversed[reversed.length - 1].join(" / ")}`
+              + (reversed.length > 2 ? ` VIA ${reversed.slice(1, -1).flat().join(" / ")}` : "")
+          }
+        }];
+      });
+      return schedules.concat(returns);
+    }
+    function refreshViaCitySuggestions() {
+      const list = document.getElementById("routeViaCitySuggestions");
+      if (!list) return;
+      list.replaceChildren();
+      MASTER_CITIES.forEach(city => list.appendChild(new Option(city, city)));
+    }
+
     function updateDestinationsAndTimes() {
       const busName = document.getElementById("busNameInput")?.value || "";
-      const fromCity = (document.getElementById("fromCityInput")?.value || "").toLowerCase().trim();
-      const journeyDate = document.getElementById("journeyDateInput")?.value || "";
-      const allowDeparted = document.getElementById("allowDepartedToggle")?.checked || false;
-      const timeSelect = document.getElementById("busTimeInput");
-      if (!timeSelect) return;
-      timeSelect.innerHTML = "";
-
-      // बस्तर संभाग के स्थानीय स्टेशन (जहाँ से जाने वाली गाड़ियाँ चलती हैं)
-      const localOrigins = ["bijapur", "bhairamgarh", "bhopalpatnam", "geedam", "jagdalpur", "madded", "patnam"];
-      const isOutbound = localOrigins.includes(fromCity);
-
-      let rawTimes = [];
-
-      // 1. मास्टर रूट में से केवल दिशा के आधार पर समय फ़िल्टर करें
-      Object.keys(BUS_MASTER_ROUTES).forEach(k => {
-        if (k.startsWith(busName + "_")) {
-          const routeObj = BUS_MASTER_ROUTES[k];
-          const routeText = (routeObj.fullRouteDisplay || "").toLowerCase();
-          const depTime = k.replace(busName + "_", "").trim();
-
-          // जाने वाली गाड़ियाँ (Outbound: Bijapur -> Raipur / Bilaspur / Hyderabad)
-          if (isOutbound && (routeText.startsWith("bijapur") || routeText.includes("to raipur") || routeText.includes("to bilaspur") || routeText.includes("to hyderabad"))) {
-            if (depTime && depTime !== "N/A") rawTimes.push(depTime);
-          }
-          // आने वाली गाड़ियाँ (Inbound / Return: Raipur / Bilaspur / Durg -> Bijapur)
-          else if (!isOutbound && (routeText.includes("to bijapur") || routeText.includes("to bhopalpatnam") || routeText.includes("to kondagaon"))) {
-            if (depTime && depTime !== "N/A") rawTimes.push(depTime);
-          }
-        }
+      const from = document.getElementById("fromCityInput")?.value || "";
+      const to = document.getElementById("toCityInput")?.value || "";
+      const date = document.getElementById("journeyDateInput")?.value || "";
+      const force = document.getElementById("allowDepartedToggle")?.checked || false;
+      const select = document.getElementById("busTimeInput");
+      if (!select) return;
+      const previous = select.value;
+      select.replaceChildren();
+      const matched = getOperatorSchedules(busName)
+        .filter(trip => normalizeScheduleTime(trip.time) && routeMatchesCities(trip.info, from, to))
+        .sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time));
+      const seen = new Set();
+      matched.forEach(trip => {
+        if (seen.has(trip.time)) return;
+        seen.add(trip.time);
+        const departed = isTripDepartedToday(trip.time, date);
+        const opt = new Option(`${trip.time} — ${trip.info.serviceName || busName}${departed ? " [रवाना — Force Allow required]" : ""}`, trip.time);
+        opt.disabled = departed && !force;
+        select.appendChild(opt);
       });
-
-      // 2. ऑपरेटर के डिफ़ॉल्ट टाइमिंग (आने और जाने का समय अलग-अलग)
-      if (!rawTimes.length) {
-        if (busName === "Manish Travels") {
-          rawTimes = isOutbound 
-            ? ["04:05 AM", "07:05 PM", "07:55 PM", "09:10 PM"] 
-            : ["08:25 AM", "06:45 PM", "09:30 PM", "10:25 PM"];
-        } else if (busName === "Rajdhani Travels") {
-          rawTimes = isOutbound 
-            ? ["05:30 PM", "06:25 PM"] 
-            : ["05:00 PM", "06:30 PM"];
-        } else if (busName === "Bastar Travels") {
-          rawTimes = isOutbound 
-            ? ["11:30 PM"] 
-            : ["08:30 PM"];
-        } else if (busName === "Harsh Travels") {
-          rawTimes = isOutbound 
-            ? ["08:45 PM"] 
-            : ["08:10 PM"];
-        } else {
-          rawTimes = ["08:00 PM"];
-        }
-      }
-
-      // समय अनुसार सही क्रम (Sort)
-      const uniqueTimes = [...new Set(rawTimes)].sort((a, b) => parseTimeToMinutes(a) - parseTimeToMinutes(b));
-      let firstValidUpcomingTime = null;
-
-      uniqueTimes.forEach(t => {
-        const departed = isTripDepartedToday(t, journeyDate);
-        
-        // यदि गाड़ी छूट चुकी है और 'Force Allow' चालू नहीं है, तो उसे ड्रॉपडाउन से हटा दें
-        if (departed && !allowDeparted) {
-          return;
-        }
-
-        const opt = document.createElement("option");
-        opt.value = t;
-
-        if (departed) {
-          opt.textContent = `⚠️ [रवाना] ${t} (इमरजेंसी बुकिंग)`;
-          opt.classList.add("text-amber-800", "font-bold");
-        } else {
-          opt.textContent = t;
-          if (!firstValidUpcomingTime) firstValidUpcomingTime = t;
-        }
-        timeSelect.appendChild(opt);
-      });
-
-      // यदि आज की सभी गाड़ियाँ रवाना हो चुकी हैं
-      if (timeSelect.options.length === 0) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "⚠️ आज की सभी गाड़ियाँ रवाना हो चुकी हैं (Force Allow चेक करें)";
-        timeSelect.appendChild(opt);
-      } else if (firstValidUpcomingTime) {
-        // अगली उपलब्ध बस स्वतः सेलेक्ट होगी
-        timeSelect.value = firstValidUpcomingTime;
+      const available = Array.from(select.options).filter(opt => !opt.disabled);
+      if (!matched.length || !available.length) {
+        const opt = new Option(!matched.length
+          ? "Is From–To ke liye saved route/time nahi hai"
+          : "Sab matching buses ravana: date badlein / verify karke Force Allow", "");
+        select.insertBefore(opt, select.firstChild);
+        select.value = "";
       } else {
-        timeSelect.selectedIndex = 0;
+        select.value = available.some(opt => opt.value === previous) ? previous : available[0].value;
       }
     }
 
@@ -2348,7 +2487,7 @@
       departureTimes.forEach(time => {
         const key = `${busName}_${time}`;
         const info = BUS_MASTER_ROUTES[key] || { serviceName: `${busName} Service`, fullRouteDisplay: "BIJAPUR TO DESTINATION" };
-        const opt = document.createElement("option"); opt.value = time; opt.textContent = `${info.serviceName} (${time}) - ${info.fullRouteDisplay}`; routeSelect.appendChild(opt);
+        const opt = document.createElement("option"); opt.value = time; opt.textContent = `${info.serviceName} (${time}) - ${voucherRouteLabel(info)}`; routeSelect.appendChild(opt);
       });
       onRouteSelectionChange();
     }
@@ -2396,7 +2535,7 @@
       const masterKey = `${busName}_${selectedTime}`;
       let detectedRoute = "";
       if (BUS_MASTER_ROUTES[masterKey] && BUS_MASTER_ROUTES[masterKey].fullRouteDisplay) {
-        detectedRoute = BUS_MASTER_ROUTES[masterKey].fullRouteDisplay;
+        detectedRoute = voucherRouteLabel(BUS_MASTER_ROUTES[masterKey]);
       } else if (tripBookings.length > 0) {
         detectedRoute = `${tripBookings[0].fromCity.toUpperCase()} TO ${tripBookings[0].toCity.toUpperCase()}`;
       } else {
@@ -2428,7 +2567,7 @@
         </div>
         <div class="text-xs mb-2 font-semibold text-slate-800">
           <div>बस सेवा: <span class="font-bold underline text-amber-950">${busName}</span> (${selectedTime || 'General'})</div>
-          <div>मुख्य रूट: <span class="font-bold text-blue-900">${detectedRoute}</span></div>
+          <div>मुख्य रूट: <span class="font-bold text-blue-900">${escapeHtml(detectedRoute)}</span></div>
           <div class="flex justify-between mt-1 text-[11px]">
             <span>वाहन क्र.: <b>${vehicleNo}</b></span>
             <span>चालक: <b>${driverName}</b></span>
@@ -2627,8 +2766,15 @@
 
     function handleSettlementSubmit(e) {
       if (e) e.preventDefault();
+      const cash=Number(document.getElementById('settleCashInput').value);
+      const upi=Number(document.getElementById('settleUpiInput').value);
+      if (!Number.isFinite(cash) || !Number.isFinite(upi) || cash<0 || upi<0 || cash+upi<=0) {
+        showToast('Enter a valid positive settlement amount.', 'error'); return false;
+      }
       settlements.push({
         id: 'SET-' + Date.now(),
+        route: document.getElementById('settleRouteInput').value.trim(),
+        vehicle: document.getElementById('settleVehicleInput').value.trim().toUpperCase(),
         operator: document.getElementById("settleOperatorSelect").value,
         driver: document.getElementById("settleDriverInput").value.trim(),
         date: document.getElementById("settleDateInput").value,
@@ -2641,7 +2787,7 @@
     }
 
     function openExpenseModal() {
-      document.getElementById("expenseDateInput").value = document.getElementById("filterExpenseDate").value || new Date().toISOString().split("T")[0];
+      document.getElementById("expenseDateInput").value = document.getElementById("filterExpenseDate").value || getIndiaNowParts().date;
       document.getElementById("expenseModal").classList.remove("hidden");
     }
 
@@ -2690,7 +2836,7 @@
     }
 
     function resetUpcomingFilter() {
-      document.getElementById("filterUpcomingDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("filterUpcomingDate").value = getIndiaNowParts().date;
       renderOperatorBreakdownAndUpcoming();
     }
 
@@ -2722,7 +2868,7 @@
       if (upcomingBody) {
         upcomingBody.innerHTML = "";
         const rawDate = document.getElementById("filterUpcomingDate")?.value;
-        const filterFromDate = rawDate ? normalizeDate(rawDate) : normalizeDate(new Date().toISOString().split("T")[0]);
+        const filterFromDate = rawDate ? normalizeDate(rawDate) : normalizeDate(getIndiaNowParts().date);
 
         const upcomingBookings = bookings.filter(b => {
           if (b.status !== "CONFIRMED") return false;
@@ -2829,7 +2975,7 @@
 
     function submitCreditClearPayment() {
       if (!activeClearingCreditTicket) return;
-      const b = activeClearingCreditTicket;
+      const b = {...activeClearingCreditTicket};
       const mode = document.getElementById("ccPaymentMode").value;
       const total = Number(b.fare) || 0;
 
@@ -2840,7 +2986,7 @@
         splitCash = parseFloat(document.getElementById("ccSplitCash").value) || 0;
         splitUpi = parseFloat(document.getElementById("ccSplitUpi").value) || 0;
 
-        if (splitCash + splitUpi !== total) {
+        if (splitCash < 0 || splitUpi < 0 || Math.abs(splitCash + splitUpi - total) > 0.005) {
           showToast(`Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) must equal Total Fare (₹${total})!`, "error");
           return;
         }
@@ -2857,7 +3003,7 @@
         pendingUPIBooking = b;
         openUPIModal(b);
       } else {
-        saveBookings();
+        saveFinalBooking(b);
         showToast(`Ticket ${b.ticketNo} payment received!`, "success");
       }
     }
@@ -2942,8 +3088,8 @@
         row.className='journey-'+classes[state];
         row.innerHTML=`
           <td class="py-3 px-4 font-bold whitespace-nowrap text-blue-700">${escapeHtml(b.ticketNo)}</td>
-          <td class="py-3 px-3 whitespace-nowrap">${escapeHtml(b.journeyDate || '')}</td>
           <td class="py-3 px-3"><span class="journey-badge ${classes[state]}">${names[state]}</span></td>
+          <td class="py-3 px-3 whitespace-nowrap">${escapeHtml(b.journeyDate || '')}</td>
           <td class="py-3 px-3"><div class="font-bold text-slate-900">${escapeHtml(b.busName || '')}</div><div class="text-[10px] text-slate-600">${escapeHtml(b.fromCity || '')} → ${escapeHtml(b.toCity || '')}</div></td>
           <td class="py-3 px-2 whitespace-nowrap font-mono">${escapeHtml(b.busTime || '')}</td>
           <td class="py-3 px-2 font-bold">${escapeHtml(b.seatNo || '')}</td>
@@ -2973,11 +3119,24 @@
     }
 
     function saveFinalBooking(booking) {
-      if (booking && !bookings.some(b => b.ticketNo === booking.ticketNo)) bookings.push(booking);
-      if (booking && booking.paymentMode === 'UPI') booking.paymentReceived = true;
+      if (!booking) return;
+      const previous = bookings.find(x => x.ticketNo === booking.ticketNo);
+      const excluded = editingTicketNo;
+      editingTicketNo = booking.ticketNo;
+      const conflicts = checkSeatConflict(booking.journeyDate, booking.busName, booking.busTime, splitSeats(booking.seatNo));
+      editingTicketNo = excluded;
+      if (conflicts.length) {
+        showToast('Seat conflict: '+conflicts.join(', ')+'. Verify payment/refund before retrying.', 'error');
+        return;
+      }
+      const finalRecord = {...previous, ...booking};
+      if (previous) finalRecord.bookedBy = previous.bookedBy;
+      const idx = bookings.findIndex(x => x.ticketNo === booking.ticketNo);
+      if (idx >= 0) bookings[idx] = finalRecord;
+      else bookings.push(finalRecord);
       saveBookings();
       resetBookingForm();
-      showToast(`Ticket ${booking?.ticketNo || ''} saved successfully!`, 'success');
+      showToast('Ticket '+booking.ticketNo+' saved!', 'success');
       openTicketModal(booking.ticketNo);
     }
 
@@ -2991,7 +3150,7 @@
       if (bookedBy) bookedBy.value = currentLoggedInStaff;
       if (document.getElementById('bookingDateInput')) document.getElementById('bookingDateInput').value = new Date().toLocaleDateString('en-GB');
       
-      const today = new Date().toISOString().slice(0,10);
+      const today = getIndiaNowParts().date;
       const jDateInput = document.getElementById('journeyDateInput');
       if (jDateInput) {
         jDateInput.value = today;
@@ -3022,7 +3181,7 @@
       const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\r\n');
       const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob); const a = document.createElement('a');
-      a.href = url; a.download = `Chauhan_Travels_Bookings_${new Date().toISOString().slice(0,10)}.csv`;
+      a.href = url; a.download = `Chauhan_Travels_Bookings_${getIndiaNowParts().date}.csv`;
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
@@ -3038,6 +3197,8 @@
       document.getElementById('fromCityInput').value = b.fromCity || '';
       onOriginChange();
       document.getElementById('toCityInput').value = b.toCity || '';
+      if (isTripDepartedToday(b.busTime, b.journeyDate)) document.getElementById('allowDepartedToggle').checked = true;
+      updateDestinationsAndTimes();
       document.getElementById('busTimeInput').value = b.busTime || '';
       document.getElementById('seatInput').value = b.seatNo || '';
       document.getElementById('passengerNameInput').value = b.passengerName || '';
@@ -3235,12 +3396,12 @@
     function openUPIModal(booking) {
       if (!booking) return;
       pendingUPIBooking = booking;
-      const amount = Number(booking.fare)||0;
+      const amount = booking.paymentMode === 'Split (Cash + UPI)' ? Number(booking.splitUpiAmount)||0 : Number(booking.fare)||0;
       const name = 'Chauhan Tour & Travels';
       const upiUrl = `upi://pay?pa=${encodeURIComponent(agencyUpiId)}&pn=${encodeURIComponent(name)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Ticket '+booking.ticketNo)}`;
       document.getElementById('upiModalAmount').innerText = `₹${amount.toLocaleString('en-IN')}`;
       document.getElementById('upiQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
-      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nTicket: ${booking.ticketNo}\nPlease confirm payment on customer screen.`;
+      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nTicket: ${booking.ticketNo}\nVerify receipt in the counter bank/UPI app before confirming. QR scan is not payment verification.`;
       document.getElementById('upiModal').classList.remove('hidden');
     }
 
@@ -3261,7 +3422,7 @@
     }
 
     function renderCollectionStats() {
-      const selectedDate = normalizeDate(document.getElementById('summaryDatePicker')?.value || new Date().toISOString().slice(0,10));
+      const selectedDate = normalizeDate(document.getElementById('summaryDatePicker')?.value || getIndiaNowParts().date);
       const list = bookings.filter(b => isShowAllPaymentsActive || !selectedDate || normalizeDate(b.bookingDate || b.journeyDate) === selectedDate);
       let cash=0, upi=0, credit=0, gross=0;
       list.filter(b => (b.status||'CONFIRMED') === 'CONFIRMED').forEach(b => {
@@ -3275,7 +3436,7 @@
       const settlementsTotal = settlements.filter(x => isShowAllPaymentsActive || !selectedDate || normalizeDate(x.date)===selectedDate).reduce((a,x)=>a+(Number(x.cashPaid)||0),0);
       const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.innerText='₹'+Math.round(value).toLocaleString('en-IN');};
       setText('statCash',cash); setText('statUPI',upi); setText('statCredit',credit); setText('statTotal',gross); setText('statNetDrawer',cash-expensesTotal-settlementsTotal);
-      const today= new Date().toISOString().slice(0,10);
+      const today= getIndiaNowParts().date;
       const todayBookings=bookings.filter(b => (b.status||'CONFIRMED')==='CONFIRMED' && normalizeDate(b.bookingDate||b.journeyDate)===today);
       const countEl=document.getElementById('quickTodayCount'); if(countEl) countEl.innerText=todayBookings.length;
       const collectionEl=document.getElementById('quickTodayCollection'); if(collectionEl) collectionEl.innerText='₹'+todayBookings.reduce((sum,b)=>sum+(Number(b.fare)||0),0).toLocaleString('en-IN');
@@ -3445,7 +3606,7 @@
       if (!seatTokens.length) { showToast("Please assign at least one seat!", "error"); return; }
 
       const jDate = document.getElementById("journeyDateInput").value;
-      const todayStr = new Date().toISOString().slice(0,10);
+      const todayStr = getIndiaNowParts().date;
       if (jDate < todayStr) {
         showToast("Error: Back-date reservations are not permitted!", "error");
         return;
@@ -3454,12 +3615,19 @@
       const busName = document.getElementById("busNameInput").value;
       const busTime = document.getElementById("busTimeInput").value;
 
+      if (!busTime || !busName) { showToast("Select a valid bus and departure time.", "error"); return; }
+      if (new Set(seatTokens).size !== seatTokens.length) { showToast("Duplicate seat number entered!", "error"); return; }
+      const layout = getActiveLayout(busName, busTime);
+      const validSeats = new Set((layout.rows || []).flatMap(r => [...r.left, ...r.right]).filter(Boolean));
+      if (!layout.imageUri && seatTokens.some(s => !validSeats.has(s))) { showToast("Seat number is not in this bus layout.", "error"); return; }
+      if (isTripDepartedToday(busTime,jDate) && !document.getElementById("allowDepartedToggle").checked) { showToast("Bus departed. Check Force Allow only after verification.", "error"); return; }
       const conflicts = checkSeatConflict(jDate, busName, busTime, seatTokens);
       if (conflicts.length > 0) { showToast(`Seat(s) ${conflicts.join(", ")} already booked or blocked!`, "error"); return; }
 
       const fare = parseFloat(document.getElementById("fareInput").value) || 0;
       const payMode = document.getElementById("paymentModeInput").value;
 
+      if (!Number.isFinite(fare) || fare <= 0) { showToast("Fare must be greater than zero.", "error"); return; }
       let splitCash = 0;
       let splitUpi = 0;
       let splitRemark = "";
@@ -3468,7 +3636,7 @@
         splitCash = parseFloat(document.getElementById("splitCashInput").value) || 0;
         splitUpi = parseFloat(document.getElementById("splitUpiInput").value) || 0;
 
-        if (splitCash + splitUpi !== fare) {
+        if (splitCash < 0 || splitUpi < 0 || Math.abs(splitCash + splitUpi - fare) > 0.005) {
           showToast(`Split Error: Cash (₹${splitCash}) + UPI (₹${splitUpi}) must match Total Fare (₹${fare})!`, "error");
           return;
         }
@@ -3497,15 +3665,6 @@
         remark: document.getElementById("remarkInput").value.trim() + splitRemark + overrideRemark,
         status: "CONFIRMED"
       };
-
-      if (editingTicketNo) {
-        const idx = bookings.findIndex(b => b.ticketNo === editingTicketNo);
-        if (idx !== -1) bookings[idx] = newBooking;
-        editingTicketNo = null;
-        document.getElementById("saveBtnText").innerText = "Save Reservation";
-      } else {
-        bookings.push(newBooking);
-      }
 
       if (payMode === "UPI" || (payMode === "Split (Cash + UPI)" && splitUpi > 0)) {
         pendingUPIBooking = newBooking;
@@ -3657,7 +3816,7 @@ function sendPassengerReminderWhatsApp(ticketNo) {
 // 2. डे-एंड कैश क्लोजिंग रिपोर्ट (DAY-END REPORT ENGINE)
 // ==========================================
 function generateDayEndData() {
-  const selectedDate = normalizeDate(document.getElementById('summaryDatePicker')?.value || new Date().toISOString().slice(0, 10));
+  const selectedDate = normalizeDate(document.getElementById('summaryDatePicker')?.value || getIndiaNowParts().date);
   
   // आज की बुकिंग्स
   const dayBookings = bookings.filter(b => normalizeDate(b.bookingDate || b.journeyDate) === selectedDate && b.status === "CONFIRMED");
@@ -3809,6 +3968,10 @@ function printDayEndSummary() {
       </div>
     </div>
   `;
+  setPrintPaper('a5');
+  setTimeout(() => window.print(), 150);
+}
+
   // ==========================================
 // 1. AUTOMATED A6 PDF TICKET GENERATOR & DOWNLOAD
 // ==========================================
@@ -4034,15 +4197,154 @@ function openETicketModal(ticketNo) {
   }, 200);
 }
 
-  setTimeout(() => { window.print(); }, 150);
-}
-
-
     window.addEventListener('DOMContentLoaded', () => {
       setInterval(() => {
         if (!document.getElementById('content-register').classList.contains('hidden')) renderBookingsTable();
       }, 30000);
     });
+
+// v68: shared ticket layout, print sizing, pending-payment cancellation and backup reminder.
+function setPrintPaper(paper) {
+  let style = document.getElementById('dynamicPrintPaper');
+  if (!style) { style=document.createElement('style'); style.id='dynamicPrintPaper'; document.head.appendChild(style); }
+  style.textContent = '@media print { @page { size: '+(paper==='a6'?'148mm 105mm':'A5')+'; margin: '+(paper==='a6'?'0':'3mm')+'; } html,body { height:auto!important; overflow:visible!important; } #print-area {width:'+(paper==='a6'?'148mm':'100%')+'!important;} }';
+}
+function buildTicketHTML(raw) {
+  const b = Object.fromEntries(Object.entries(raw).map(([k,v])=>[k,escapeHtml(v)]));
+  const serviceObj = BUS_MASTER_ROUTES[`${raw.busName}_${raw.busTime}`] || {serviceName:raw.busName};
+  const subTitleText = escapeHtml(`Ticket Details For ${raw.passengerName} From ${raw.fromCity} To ${raw.toCity} On service ${serviceObj.serviceName} @ ${raw.busTime}.`);
+  return `
+        <div style="font-family:Arial,sans-serif; width:148mm; height:104.5mm; padding:6mm; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; color:#111; font-size:11px; background:white;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3a8a; padding-bottom:6px;">
+              <div>
+                <h2 style="margin:0; font-size:14px; font-weight:900; color:#1e3a8a;">CHAUHAN TOUR & TRAVELS</h2>
+                <div style="font-size:9px; color:#555;">New Bus Stand, Bijapur (C.G.) • Helpline: 094079 96570, 093406 69984</div>
+              </div>
+              <div style="text-align:right;">
+                <span style="background:#1e3a8a; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px;">${escapeHtml(raw.status || 'CONFIRMED')} TICKET</span>
+                <div style="font-size:10px; font-family:monospace; margin-top:2px;">Ticket No: <b>${b.ticketNo}</b></div>
+              </div>
+            </div>
+            <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:4px; padding:6px 8px; margin-top:8px; font-size:11px; font-weight:bold; color:#78350f;">
+              ${subTitleText}
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:8px;">
+            <div>
+              <div><b>Passenger Name:</b> ${b.passengerName}</div>
+              <div><b>Mobile No:</b> ${b.mobile}</div>
+              <div><b>Boarding From:</b> ${b.fromCity}</div>
+              <div><b>Destination To:</b> ${b.toCity}</div>
+            </div>
+            <div style="border-left:1px solid #cbd5e1; padding-left:8px;">
+              <div><b>Journey Date:</b> ${b.journeyDate}</div>
+              <div><b>Departure Time:</b> ${b.busTime}</div>
+              <div><b>Seat Number(s):</b> <span style="color:#1d4ed8; font-weight:900; font-size:13px;">${b.seatNo}</span></div>
+              <div><b>Booked By:</b> ${b.bookedBy}</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #cbd5e1; padding-top:6px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px;">
+              <span>Payment Mode: <span style="text-transform:uppercase; color:#047857;">${b.paymentMode}</span></span>
+              <span>Total Fare: <span style="color:#1e40af; font-size:14px; font-weight:900;">₹${Number(b.fare||0).toLocaleString('en-IN')}</span></span>
+            </div>
+            <div style="font-size:8px; color:#666; text-align:center; border-top:1px dashed #cbd5e1; margin-top:4px; padding-top:3px; display:flex; justify-content:space-between;">
+              <span>* Kripya yatri bus departure time se 15 minute pehle boarding point par pahunchein.</span>
+              <b>Passenger Copy / Counter Copy</b>
+            </div>
+          </div>
+        </div>
+      `;
+}
+function executePrintAction(b) {
+  setPrintPaper('a6');
+  document.getElementById('print-area').innerHTML=buildTicketHTML(b);
+  setTimeout(()=>window.print(),150);
+}
+function executePrintActionForPDF(b) { document.getElementById('print-area').innerHTML=buildTicketHTML(b); }
+let ticketPdfBusy = false;
+async function downloadAutomatedPDFTicket(ticketNo) {
+  const booking=bookings.find(b=>b.ticketNo===ticketNo);
+  if (!booking || ticketPdfBusy) return;
+  if (typeof html2pdf!=='function') { showToast('PDF library unavailable. Connect to internet or use Print.', 'error'); return; }
+  ticketPdfBusy=true;
+  const capture=document.createElement('div');
+  capture.style.cssText='position:fixed;left:0;top:0;width:148mm;background:white;z-index:-1;pointer-events:none;';
+  capture.innerHTML=buildTicketHTML(booking);
+  document.body.appendChild(capture);
+  try {
+    if(document.fonts) await document.fonts.ready;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    await html2pdf().set({
+      margin:0, filename:`Chauhan_Ticket_${booking.ticketNo.replace(/[^a-zA-Z0-9_-]/g,'_')}.pdf`,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,
+        onclone:doc=>{doc.querySelectorAll('div').forEach(el=>{if(el.style.zIndex==='-1')el.style.zIndex='1';});}},
+      jsPDF:{unit:'mm',format:[148,105],orientation:'landscape'}
+    }).from(capture.firstElementChild).save();
+    showToast('PDF download requested.', 'success');
+  } catch(err) { showToast('PDF failed. Please use Print ticket.', 'error'); console.error(err); }
+  finally { capture.remove(); ticketPdfBusy=false; }
+}
+function downloadA6TicketPDF() { if(activePrintingTicket) return downloadAutomatedPDFTicket(activePrintingTicket.ticketNo); }
+function cancelPendingUPIPayment() {
+  pendingUPIBooking=null;
+  document.getElementById('upiModal').classList.add('hidden');
+  showToast('Payment confirmation cancelled. Reservation changes were not saved.', 'info');
+}
+const printMemoOriginal=printCurrentMemo;
+printCurrentMemo=function() {setPrintPaper('a5'); renderChauhanMemo(); return printMemoOriginal();};
+const printCreditOriginal=proceedPrintAfterCreditWarning;
+proceedPrintAfterCreditWarning=function(){setPrintPaper('a5');return printCreditOriginal();};
+const renderLayoutOriginal=renderSelectedLayout;
+renderSelectedLayout=function(bus,time,date) {
+  const layout=getActiveLayout(bus,time);
+  if(layout.imageUri) {
+    const container=document.getElementById('dynamicSeatMapContainer');
+    container.replaceChildren();
+    const image=document.createElement('img');
+    image.src=layout.imageUri;image.alt='Uploaded bus seat layout';image.style.maxWidth='100%';
+    const note=document.createElement('p');note.textContent='Image is reference only. Close this map and type seat numbers in the form; verify availability before saving.';
+    container.append(image,note);
+    return;
+  }
+  return renderLayoutOriginal(bus,time,date);
+};
+function updateBackupReminder() {
+  const label=document.getElementById('backupReminderV68');
+  if(!label)return;
+  const timestamp=Number(localStorage.getItem('chauhan_backup_epoch_v68')||0);
+  label.textContent=timestamp && Date.now()-timestamp<86400000 ? 'Recent backup downloaded — store it safely.' : 'Backup reminder: download a JSON backup today.';
+}
+const backupOriginal=exportJSONBackup;
+exportJSONBackup=function(){
+  backupOriginal();
+  localStorage.setItem('chauhan_backup_epoch_v68',String(Date.now()));
+  updateBackupReminder();
+};
+window.addEventListener('DOMContentLoaded',()=>{
+  const cancel=document.createElement('button');cancel.type='button';
+  cancel.textContent='Cancel / Back';cancel.className='w-full bg-slate-100 text-slate-800 font-bold py-2 rounded-xl';
+  cancel.addEventListener('click',cancelPendingUPIPayment);
+  document.querySelector('#upiModal > div').appendChild(cancel);
+  const aside=document.querySelector('#content-booking .lg\\:col-span-4');
+  if(aside) {
+    const notice=document.createElement('div');notice.className='bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs';
+    const label=document.createElement('p');label.id='backupReminderV68';label.setAttribute('role','status');
+    const button=document.createElement('button');button.type='button';button.textContent='Download JSON Backup';
+    button.className='mt-2 bg-blue-600 text-white rounded-lg px-3 py-2 font-bold';
+    button.addEventListener('click',()=>exportJSONBackup());
+    notice.append(label,button);aside.appendChild(notice);updateBackupReminder();
+  }
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape') {
+      if(!document.getElementById('ticketModal').classList.contains('hidden'))closeTicketModal();
+      if(!document.getElementById('seatModal').classList.contains('hidden'))closeSeatModal();
+    }
+  });
+});
+
   </script>
 </body>
 </html>
