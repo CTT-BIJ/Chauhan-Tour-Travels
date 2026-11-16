@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Chauhan Tour &amp; Travels &amp; Dispatch Voucher</title>
+<title>Chauhan Tour &amp; Travels — DD-MM-YYYY &amp; Dispatch Voucher</title>
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Google Fonts: Outfit, Plus Jakarta Sans, Noto Sans Devanagari -->
@@ -842,7 +842,7 @@
 <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden">
 <div class="overflow-x-auto">
 <table class="w-full text-left text-xs text-slate-700 border-collapse">
-<thead class="bg-slate-50 text-slate-600 border-b border-slate-200"><tr><th scope="col" class="p-2 align-top"><input id="filterTicket" type="text" aria-label="Filter Ticket No"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Ticket No</span></th><th scope="col" class="p-2 align-top"><select id="filterJourneyStatus" aria-label="Filter Journey Status" onchange="renderBookingsTable()" class="ct-column-filter"><option value="ALL">All</option><option value="UPCOMING">Upcoming</option><option value="ENDED">Departed</option><option value="CANCELLED">Cancelled</option><option value="UNKNOWN">Missing date/time</option></select><span class="ct-column-label">Journey Status</span></th><th scope="col" class="p-2 align-top"><input id="filterJourneyDate" type="date" aria-label="Filter Journey Date"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Journey Date</span></th><th scope="col" class="p-2 align-top"><input id="filterRoute" type="text" aria-label="Filter Bus Service / Route"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Bus Service / Route</span></th><th scope="col" class="p-2 align-top"><input id="filterTime" type="text" aria-label="Filter Time"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Time</span></th><th scope="col" class="p-2 align-top"><input id="filterSeat" type="text" aria-label="Filter Seat(s)"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Seat(s)</span></th><th scope="col" class="p-2 align-top"><input id="filterPassenger" type="text" aria-label="Filter Passenger"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Passenger</span></th><th scope="col" class="p-2 align-top"><input id="filterMobile" type="text" aria-label="Filter Mobile"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Mobile</span></th><th scope="col" class="p-2 align-top"><input id="filterFare" type="number" aria-label="Filter Fare" step="0.01" oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Fare</span></th><th scope="col" class="p-2 align-top"><select id="filterPayment" aria-label="Filter Payment" onchange="renderBookingsTable()" class="ct-column-filter"><option value="">All</option><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Split (Cash + UPI)">Split (Cash + UPI)</option><option value="Credit">Credit</option><option value="Cash + Credit">Cash + Credit</option><option value="UPI + Credit">UPI + Credit</option></select><span class="ct-column-label">Payment</span></th><th scope="col" class="p-2 align-top"><span class="ct-column-label">Actions</span></th><th scope="col" class="p-2 align-top"><span class="ct-column-label">Reminder</span></th></tr></thead>
+<thead class="bg-slate-50 text-slate-600 border-b border-slate-200"><tr><th scope="col" class="p-2 align-top"><input id="filterTicket" type="text" aria-label="Filter Ticket No"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Ticket No</span></th><th scope="col" class="p-2 align-top"><select id="filterJourneyStatus" aria-label="Filter Journey Status" onchange="renderBookingsTable()" class="ct-column-filter"><option value="ALL">All</option><option value="UPCOMING">Upcoming</option><option value="ENDED">Departed</option><option value="CANCELLED">Cancelled</option><option value="UNKNOWN">Missing date/time</option></select><span class="ct-column-label">Journey Status</span></th><th scope="col" class="p-2 align-top"><input id="filterJourneyDate" type="date" aria-label="Filter Journey Date"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Journey Date</span></th><th scope="col" class="p-2 align-top"><select id="filterRoute" aria-label="Filter Bus Name" onchange="renderBookingsTable()" class="ct-column-filter"><option value="">All Buses</option></select><span class="ct-column-label">Bus Service / Route</span></th><th scope="col" class="p-2 align-top"><input id="filterTime" type="text" aria-label="Filter Time"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Time</span></th><th scope="col" class="p-2 align-top"><input id="filterSeat" type="text" aria-label="Filter Seat(s)"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Seat(s)</span></th><th scope="col" class="p-2 align-top"><input id="filterPassenger" type="text" aria-label="Filter Passenger"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Passenger</span></th><th scope="col" class="p-2 align-top"><input id="filterMobile" type="text" aria-label="Filter Mobile"  oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Mobile</span></th><th scope="col" class="p-2 align-top"><input id="filterFare" type="number" aria-label="Filter Fare" step="0.01" oninput="renderBookingsTable()" class="ct-column-filter" placeholder="Search"><span class="ct-column-label">Fare</span></th><th scope="col" class="p-2 align-top"><select id="filterPayment" aria-label="Filter Payment" onchange="renderBookingsTable()" class="ct-column-filter"><option value="">All</option><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Split (Cash + UPI)">Split (Cash + UPI)</option><option value="Credit">Credit</option><option value="Cash + Credit">Cash + Credit</option><option value="UPI + Credit">UPI + Credit</option></select><span class="ct-column-label">Payment</span></th><th scope="col" class="p-2 align-top"><span class="ct-column-label">Actions</span></th><th scope="col" class="p-2 align-top"><span class="ct-column-label">Reminder</span></th></tr></thead>
 <tbody class="divide-y divide-slate-100 font-medium" id="bookingsTableBody"></tbody>
 </table>
 </div>
@@ -1389,7 +1389,7 @@
 <div class="bg-slate-50/70 border border-slate-200 rounded-2xl p-4 font-sans text-xs space-y-2" id="ticketModalContent"></div>
 <div class="flex flex-wrap gap-3 pt-2">
 <button id="ticketEditButton" type="button" onclick="const ticketNo=activePrintingTicket?.ticketNo; closeTicketModal(); if(ticketNo)editBooking(ticketNo);" class="bg-slate-100 text-blue-700 font-bold py-2.5 px-4 rounded-xl disabled:opacity-40">Edit Booking</button>
-<button type="button" data-ticket-print-save="true" onclick="chauhanPrintSaveA5Ticket()" class="bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl">Print / Save A5 PDF</button>
+<button type="button" data-ticket-print-save="true" onclick="chauhanPrintSaveA5Ticket()" class="bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl">Print</button>
 <button type="button" onclick="sendPassengerWelcomeWhatsApp()" class="bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-xl">WhatsApp</button>
 </div>
 </div>
@@ -1703,6 +1703,27 @@ function chauhanFormatDatesInText(value) {
 
 <script>
 
+
+
+// Ticket output names and UPI transaction notes only; stored ticket IDs stay unchanged.
+function chauhanTicketOutputTitle(booking) {
+  var b = booking || {};
+  var number = String(b.ticketNo == null ? '' : b.ticketNo).trim().replace(/^TKT[-\s]*/i, '') || 'Unknown';
+  var route = [b.fromCity, b.toCity].map(function(value) { return String(value || '').trim(); }).join('-');
+  // Remove control characters and characters not allowed in common file systems.
+  return ('Ticket No. ' + number + ', ' + route)
+    .replace(/[<>:"/\\|?*\u0000-\u001F\u007F]/g, '-')
+    .replace(/\s+/g, ' ').replace(/[. ]+$/g, '').trim();
+}
+function chauhanUPITransactionNote(booking) {
+  var b = booking || {};
+  var number = String(b.ticketNo == null ? '' : b.ticketNo).trim().replace(/^TKT[-\s]*/i, '');
+  var clean = function(value) { return String(value == null ? '' : value).replace(/[\u0000-\u001F\u007F]/g, ' ').trim(); };
+  return 'Ticket No. ' + clean(number) +
+    ' | Seat No. ' + clean(b.seatNo) +
+    ' | ' + clean(b.fromCity) + '-' + clean(b.toCity) +
+    ' | Journey Date: ' + clean(chauhanFormatDate(b.journeyDate));
+}
 
 // Offline ISO QR byte-mode encoder: version 2-L, mask 0, Ticket Number only.
 function ticketQRMatrix(ticketNumber) {
@@ -3592,7 +3613,7 @@ function readBookingArray(key) {
 
     function getRegisterBookings(applyStatus = true) {
       const date = normalizeDate(document.getElementById('filterJourneyDate')?.value || '');
-      const bus = '';
+      const bus = (document.getElementById('filterRoute')?.value || '').trim().toLowerCase();
       const search = window.chauhanHomeRegisterQuery || '';
       const contains = (id,value) => {
         const query = (document.getElementById(id)?.value || '').trim().toLowerCase();
@@ -3604,7 +3625,7 @@ function readBookingArray(key) {
         if (date && normalizeDate(b.journeyDate) !== date) return false;
         if (bus && bus !== 'all' && String(b.busName || '').trim().toLowerCase() !== bus) return false;
         if (search && ![b.ticketNo,b.passengerName,b.mobile,b.busName,b.seatNo,b.fromCity,b.toCity,b.busTime].join(' ').toLowerCase().includes(search)) return false;
-        if (!contains('filterTicket', b.ticketNo) || !contains('filterRoute', [b.busName,b.fromCity,b.toCity].join(' ')) ||
+        if (!contains('filterTicket', b.ticketNo) ||
             !contains('filterTime',b.busTime) || !contains('filterSeat',b.seatNo) ||
             !contains('filterPassenger',b.passengerName) || !contains('filterMobile',b.mobile)) return false;
         const fareFilter = document.getElementById('filterFare')?.value || '';
@@ -3629,11 +3650,11 @@ function readBookingArray(key) {
     function renderBookingsTable() {
       const tbody = document.getElementById('bookingsTableBody');
       if (!tbody) return;
-      const busSelect = document.getElementById('filterBusName');
+      const busSelect = document.getElementById('filterRoute');
       if (busSelect) {
         const previous = busSelect.value;
         const names = [...new Set([...busOperators,...bookings.map(b=>b.busName).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
-        busSelect.replaceChildren(new Option('All Bus Operators',''));
+        busSelect.replaceChildren(new Option('All Buses',''));
         names.forEach(n=>busSelect.add(new Option(n,n)));
         if (names.includes(previous)) busSelect.value=previous;
       }
@@ -3829,6 +3850,8 @@ function readBookingArray(key) {
   const booking = bookings.find(record => record.ticketNo === ticketNo);
   if (!booking) { showToast('Ticket not found.', 'info'); return; }
   activePrintingTicket = booking;
+  const heading = document.querySelector('#ticketModal h3');
+  if (heading) heading.textContent = chauhanTicketOutputTitle(booking);
   document.getElementById('ticketModalContent').innerHTML = buildTicketHTML(booking);
   const edit = document.getElementById('ticketEditButton');
   edit.disabled = booking.status === 'CANCELLED';
@@ -3930,10 +3953,11 @@ function readBookingArray(key) {
       pendingUPIBooking = booking;
       const amount = booking._upiRequestAmount !== undefined ? Number(booking._upiRequestAmount) : bookingPaymentParts(booking).upi;
       const name = 'Chauhan Tour & Travels';
-      const upiUrl = `upi://pay?pa=${encodeURIComponent(agencyUpiId)}&pn=${encodeURIComponent(name)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Ticket '+booking.ticketNo)}`;
+      const transactionNote = chauhanUPITransactionNote(booking);
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(agencyUpiId)}&pn=${encodeURIComponent(name)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
       document.getElementById('upiModalAmount').innerText = `₹${amount.toLocaleString('en-IN')}`;
       document.getElementById('upiQRImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
-      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nTicket: ${booking.ticketNo}\nVerify receipt in the counter bank/UPI app before confirming. QR scan is not payment verification.`;
+      document.getElementById('upiRemarkText').innerText = `UPI ID: ${agencyUpiId}\nRemark: ${transactionNote}\nSome UPI apps may shorten or omit remarks. Verify receipt in the counter bank/UPI app before confirming. QR scan is not payment verification.`;
       document.getElementById('upiModal').classList.remove('hidden');
     }
 
@@ -4757,6 +4781,7 @@ function homeOpenRegister(status='ALL', date='', operator='', time='') {
   clearFilters();
   document.getElementById('filterJourneyDate').value=date;
   document.getElementById('filterJourneyStatus').value=status;
+  renderBookingsTable();
   document.getElementById('filterRoute').value=operator;
   document.getElementById('filterTime').value=time;
   switchTab('register');
@@ -4953,6 +4978,7 @@ document.addEventListener('DOMContentLoaded', function() {
       doc.open();
       doc.write('<!doctype html><html><head><meta charset="utf-8"><title>Chauhan Ticket</title></head><body></body></html>');
       doc.close();
+      doc.title = chauhanTicketOutputTitle(activePrintingTicket);
       const base = doc.createElement('base'); base.href = document.baseURI; doc.head.appendChild(base);
       // Font stylesheets only: do not import portal @media print or @page rules.
       document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]')
@@ -5081,12 +5107,13 @@ document.addEventListener('DOMContentLoaded', function() {
       pdf.addImage(canvas.toDataURL('image/png'),'PNG',3,3,202,imageHeight,undefined,'FAST');
       const text = prepared.ticket.textContent;
       const number = (text.match(/\bTKT[-\s]?\d+\b/i)||['Ticket'])[0].replace(/[^a-zA-Z0-9_-]/g,'_');
-      pdf.save('Chauhan_'+number+'_A5.pdf');
+      pdf.save(prepared.doc.title + '.pdf');
     } catch(error) {console.error('Ticket PDF:',error);report(error.message || 'PDF save nahi hua.');}
     finally {if(prepared) prepared.frame.remove();busy=false;}
   }
   window.chauhanPrintA5Ticket = printTicket;
   window.chauhanSaveA5TicketPDF = saveTicketPDF;
+  window.chauhanDownloadNamedTicketPDF = saveTicketPDF;
   // Compatibility for previous Print / Save action.
   window.chauhanPrintSaveA5Ticket = printTicket;
   function updateButtons() {
@@ -5543,6 +5570,7 @@ document.addEventListener('DOMContentLoaded', function() {
       doc.open();
       doc.write('<!doctype html><html><head><meta charset="utf-8"><title>Chauhan Ticket</title></head><body></body></html>');
       doc.close();
+      doc.title = chauhanTicketOutputTitle(activePrintingTicket);
       const style = doc.createElement('style');
       style.textContent = ticketPrintStyles();
       doc.head.append(style);
@@ -5587,13 +5615,19 @@ document.addEventListener('DOMContentLoaded', function() {
     holder.style.cssText = 'display:flex;gap:10px;margin-top:10px';
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = 'Print / Save A5 PDF';
+    button.textContent = 'Print';
     button.dataset.ticketPrintSave = 'true';
     button.className = 'bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl';
     button.addEventListener('click', printNativeTicket);
     holder.append(button);
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.textContent = 'Save PDF';
+    saveButton.className = 'bg-blue-600 text-white font-bold py-2.5 px-4 rounded-xl';
+    saveButton.addEventListener('click', () => window.chauhanDownloadNamedTicketPDF());
+    holder.append(saveButton);
     modal.querySelectorAll('button').forEach(other => {
-      if (other === button) return;
+      if (other === button || other === saveButton) return;
       const description = other.textContent + ' ' + (other.getAttribute('onclick') || '');
       if (/print|pdf|download/i.test(description) && !/whatsapp/i.test(description)) {
         other.hidden = true;
@@ -6477,251 +6511,6 @@ function initialize(){
  render().catch(error=>status('Storage unavailable: '+error.message+'. Use normal JSON download; try localhost/HTTPS.',true));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize);else initialize();
-})();
-</script>
-
-
-<!-- Integrated Firebase Admin Setup: initialization only; no live sync. -->
-<script id="chauhan-firebase-initialization">
-/*
- * Chauhan portal Firebase initialization module.
- * Place immediately before </body> in the supplied portal.
- * Existing firebase-app-compat and firebase-database-compat imports are used.
- * No booking/PIN changes, database writes, automatic restore or live sync.
- * Paste Firebase web configuration locally in Admin Portal.
- */
-(function installChauhanFirebaseInitialization() {
-  'use strict';
-
-  const CONFIG_KEY = 'chauhan_firebase_web_config_v1';
-  const APP_NAME = 'chauhan-counter';
-  let initializedConfig = '';
-
-  function byId(id) {
-    return document.getElementById(id);
-  }
-
-  function reportStatus(message, ready) {
-    window.chauhanFirebaseStatus = {ready: Boolean(ready), message: message};
-    const output = byId('ctFirebaseInitStatus');
-    if (output) {
-      output.textContent = message;
-      output.style.color = ready ? '#166534' : '#92400e';
-    }
-  }
-
-  function requireAdminLogin() {
-    const overlay = byId('loginOverlay');
-    const role = typeof currentUserRole !== 'undefined' ? currentUserRole : '';
-    if (!overlay || !overlay.classList.contains('hidden') || role !== 'Admin') {
-      throw new Error('Pehle apne saved Admin PIN se portal login karein.');
-    }
-  }
-
-  function parseConfig(raw) {
-    let config;
-    try {
-      config = JSON.parse(String(raw || '').replace(/^\uFEFF/, '').trim());
-    } catch (_) {
-      throw new Error('Valid JSON config chahiye: property names aur values double quotes mein rakhein.');
-    }
-    if (!config || typeof config !== 'object' || Array.isArray(config)) {
-      throw new Error('Firebase configuration ek JSON object honi chahiye.');
-    }
-
-    const cleaned = {};
-    const allowed = [
-      'apiKey', 'authDomain', 'databaseURL', 'projectId',
-      'storageBucket', 'messagingSenderId', 'appId', 'measurementId'
-    ];
-    allowed.forEach(function (key) {
-      if (config[key] !== undefined) {
-        if (typeof config[key] !== 'string') {
-          throw new Error(key + ' ek text value honi chahiye.');
-        }
-        cleaned[key] = config[key].trim();
-      }
-    });
-
-    ['apiKey', 'projectId', 'appId', 'databaseURL'].forEach(function (key) {
-      if (!cleaned[key] || /YOUR_|REPLACE_|<|>/.test(cleaned[key])) {
-        throw new Error('Firebase Console ki actual ' + key + ' value bharein.');
-      }
-    });
-
-    let databaseURL;
-    try {
-      databaseURL = new URL(cleaned.databaseURL);
-    } catch (_) {
-      throw new Error('Realtime Database ka exact HTTPS URL bharein.');
-    }
-    if (databaseURL.protocol !== 'https:' ||
-        !/^[a-z0-9.-]+\.(firebaseio\.com|firebasedatabase\.app)$/i.test(databaseURL.hostname) ||
-        databaseURL.username || databaseURL.password ||
-        databaseURL.search || databaseURL.hash ||
-        !/^\/?$/.test(databaseURL.pathname)) {
-      throw new Error('Realtime Database root URL chahiye; node path/rules URL nahi.');
-    }
-    cleaned.databaseURL = databaseURL.origin;
-    return cleaned;
-  }
-
-  function initializeFirebase(config) {
-    const sdk = window.firebase;
-    if (!sdk || typeof sdk.initializeApp !== 'function' ||
-        typeof sdk.database !== 'function') {
-      throw new Error('Firebase compat SDK load nahi hua. Internet/CDN connection check karein.');
-    }
-
-    const serialized = JSON.stringify(config);
-    const existing = sdk.apps.find(function (app) {
-      return app.name === APP_NAME;
-    });
-    if (existing && (
-        existing.options.projectId !== config.projectId ||
-        String(existing.options.databaseURL || '').replace(/\/$/, '') !== config.databaseURL ||
-        existing.options.appId !== config.appId ||
-        existing.options.apiKey !== config.apiKey ||
-        (initializedConfig && initializedConfig !== serialized))) {
-      throw new Error('Is page par alag Firebase config pehle initialized hai. Page reload karke correct config use karein.');
-    }
-
-    const app = existing || sdk.initializeApp(config, APP_NAME);
-    const database = app.database();
-    window.chauhanFirebaseApp = app;
-    window.chauhanFirebaseDatabase = database;
-    initializedConfig = serialized;
-
-    reportStatus(
-      'Firebase initialized. Local bookings/PIN unchanged. Database permissions, authentication aur live sync abhi verify nahi hue. Koi data upload/download nahi hua.',
-      true
-    );
-    return {app: app, database: database};
-  }
-
-  function addPanel() {
-    const admin = byId('content-admin');
-    if (!admin || byId('ctFirebaseInitPanel')) return;
-
-    const panel = document.createElement('section');
-    panel.id = 'ctFirebaseInitPanel';
-    panel.setAttribute('aria-labelledby', 'ctFirebaseInitTitle');
-    panel.style.cssText =
-      'background:white;border:1px solid #cbd5e1;border-radius:16px;padding:20px;margin-top:24px;font:14px/1.6 Arial,sans-serif;color:#0f172a';
-
-    panel.innerHTML = `
-      <h2 id="ctFirebaseInitTitle" style="font-size:18px;margin:0 0 10px;font-weight:700">
-        Firebase Setup — local data safe
-      </h2>
-      <p>Firebase Console ki web-app configuration yahan locally JSON format mein bharein.
-      <code>databaseURL</code> mein Realtime Database ka exact root URL rakhein.
-      <code>measurementId</code> optional hai.</p>
-      <p><strong>Staff PIN Firebase authentication nahi hai.</strong>
-      Is module mein live sync nahi hai; Firebase security rules ko public na karein.</p>
-      <form id="ctFirebaseInitForm">
-        <label for="ctFirebaseConfigJSON" style="display:block;font-weight:700;margin-bottom:6px">
-          Firebase web configuration JSON
-        </label>
-        <textarea id="ctFirebaseConfigJSON" rows="11" spellcheck="false"
-          autocomplete="off" required
-          style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #94a3b8;border-radius:10px;font:14px/1.6 monospace"></textarea>
-        <div style="display:flex;gap:12px;align-items:flex-start;margin:12px 0">
-          <input id="ctFirebaseRememberConfig" type="checkbox" style="margin-top:5px">
-          <label for="ctFirebaseRememberConfig">
-            Config isi browser mein yaad rakhein (shared computer par unchecked rakhein).
-            Credentials, password ya service-account private key yahan na dalein.
-          </label>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px">
-          <button type="submit" style="background:#1d4ed8;color:white;border:0;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer">
-            Initialize Firebase
-          </button>
-          <button id="ctFirebaseForgetConfig" type="button"
-            style="background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;border-radius:10px;padding:12px 18px;font-size:14px;cursor:pointer">
-            Forget saved config
-          </button>
-        </div>
-      </form>
-      <p id="ctFirebaseInitStatus" role="status" aria-live="polite"
-        style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:0">
-        Firebase initialize nahi hua. Portal local mode mein hai.
-      </p>`;
-
-    admin.appendChild(panel);
-
-    const input = byId('ctFirebaseConfigJSON');
-    input.value = JSON.stringify({
-
-  apiKey: "AIzaSyDoK7Eao0-pdoCHj10-8RQZwlePFx1cl6w",
-  authDomain: "chauhan-travels-db.firebaseapp.com",
-  databaseURL: "https://chauhan-travels-db-default-rtdb.firebaseio.com",
-  projectId: "chauhan-travels-db",
-  storageBucket: "chauhan-travels-db.firebasestorage.app",
-  messagingSenderId: "353902467855",
-  appId: "1:353902467855:web:1f4f9bd3929ca38be9fc7a",
-  measurementId: "G-RYBDQB65J0"
-
-  }, null, 2);
-
-    if (window.chauhanFirebaseStatus && window.chauhanFirebaseStatus.message) {
-      reportStatus(window.chauhanFirebaseStatus.message, window.chauhanFirebaseStatus.ready);
-    }
-
-    try {
-      const saved = localStorage.getItem(CONFIG_KEY);
-      if (saved) {
-        input.value = JSON.stringify(parseConfig(saved), null, 2);
-        byId('ctFirebaseRememberConfig').checked = true;
-        reportStatus('Saved config loaded. Admin login ke baad Initialize Firebase dabayein; auto connection nahi hua.', false);
-      }
-    } catch (error) {
-      reportStatus('Saved config read nahi hua: ' + error.message + ' Bookings unchanged.', false);
-    }
-
-    byId('ctFirebaseInitForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      try {
-        requireAdminLogin();
-        const config = parseConfig(input.value);
-        initializeFirebase(config);
-        try {
-          if (byId('ctFirebaseRememberConfig').checked) {
-            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-          } else {
-            localStorage.removeItem(CONFIG_KEY);
-          }
-        } catch (_) {
-          reportStatus('Firebase initialized, lekin browser config preference save nahi hui. Database access/sync unverified; bookings unchanged.', true);
-        }
-      } catch (error) {
-        reportStatus('Initialization stopped: ' + error.message + ' Local data unchanged.', false);
-      }
-    });
-
-    byId('ctFirebaseForgetConfig').addEventListener('click', function () {
-      try {
-        requireAdminLogin();
-        localStorage.removeItem(CONFIG_KEY);
-        byId('ctFirebaseRememberConfig').checked = false;
-        reportStatus('Saved config removed; bookings/PIN unchanged. Existing initialized app remove nahi hua—fresh local session ke liye page reload karein.', false);
-      } catch (error) {
-        reportStatus(error.message, false);
-      }
-    });
-  }
-
-  window.chauhanInitializeFirebase = function (rawConfig) {
-    requireAdminLogin();
-    return initializeFirebase(parseConfig(
-      typeof rawConfig === 'string' ? rawConfig : JSON.stringify(rawConfig)
-    ));
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addPanel);
-  } else {
-    addPanel();
-  }
 })();
 </script>
 
